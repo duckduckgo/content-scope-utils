@@ -1,7 +1,7 @@
 {
   "entryPoints": [
     "lib/index.js",
-    "lib/messaging.js"
+    "lib/messaging/messaging.js"
   ],
   "excludeExternals": true,
   "readme": "DOCS.md",
