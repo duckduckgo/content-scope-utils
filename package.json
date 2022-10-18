@@ -11,7 +11,6 @@
     "lib"
   ],
   "scripts": {
-    "postinstall": "cd examples/bundled-esbuild; npm install",
     "docs": "typedoc lib/index.js lib/messaging.js",
     "lint": "eslint .",
     "lint:check": "npm run lint",
