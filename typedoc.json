@@ -1,0 +1,10 @@
+{
+  "entryPoints": [
+    "lib/index.js",
+    "lib/messaging.js"
+  ],
+  "excludeExternals": true,
+  "readme": "DOCS.md",
+  "treatWarningsAsErrors": true,
+  "searchInComments": true
+}
