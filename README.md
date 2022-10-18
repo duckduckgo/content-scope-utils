@@ -3,7 +3,7 @@
 DuckDuckGo Content Scope Utils is distributed under the Apache 2.0
 [License](LICENSE.md).
 
-A library of JavaScript modules used by DuckDuckGo's apps and extensions. To learn more about our Web Tracking Protections, and how they work together in our browser extensions and apps to provide overlapping protection, visit our [Web Tracking Protections](https://help.duckduckgo.com/duckduckgo-help-pages/privacy/web-tracking-protections/) page.
+This is a library of JavaScript modules that are used by DuckDuckGo's apps and extensions. 
 
 [![Build Status](https://github.com/duckduckgo/content-scope-utils/actions/workflows/tests.yml/badge.svg)](https://github.com/duckduckgo/content-scope-utils/actions/workflows/tests.yml)
 
