@@ -57,7 +57,7 @@ jobs:
         id: build-output
         uses: actions/cache@v3
         with:
-          path: build/example
+          path: docs
           key: build-output-${{ github.run_id }}
       - name: Build docs
         run: npm run docs
@@ -78,7 +78,7 @@ jobs:
         id: build-output
         uses: actions/cache@v3
         with:
-          path: build/example
+          path: docs
           key: build-output-${{ github.run_id }}
       - name: Setup Github Pages
         uses: actions/configure-pages@v2
