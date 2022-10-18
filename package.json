@@ -1,0 +1,54 @@
+{
+  "name": "@duckduckgo/content-scope-utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "postinstall": "cd examples/bundled-esbuild; npm install",
+    "docs": "typedoc lib/index.js lib/messaging.js",
+    "lint": "eslint .",
+    "lint:check": "npm run lint",
+    "lint:write": "npm run lint -- --fix",
+    "prettier": "prettier 'lib/**/*.js' 'examples/**/*.js' '*.{cjs,js}'",
+    "prettier:check": "npm run prettier -- --check",
+    "prettier:write": "npm run prettier -- --write",
+    "test": "npm run test:unit",
+    "test:unit": "web-test-runner \"lib/**/*.test.js\" --node-resolve",
+    "test:unit:watch": "npm run test:unit -- --watch",
+    "tsc": "tsc",
+    "tsc:watch": "tsc --watch",
+    "verify:local": "npm run docs; npm run lint; npm run prettier:check; npm run test:unit"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/duckduckgo/content-scope-utils.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/duckduckgo/content-scope-utils/issues"
+  },
+  "homepage": "https://github.com/duckduckgo/content-scope-utils#readme",
+  "devDependencies": {
+    "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@typescript-eslint/eslint-plugin": "^5.40.1",
+    "@typescript-eslint/parser": "^5.40.1",
+    "@web/test-runner": "^0.14.0",
+    "typedoc": "^0.23.17",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "eslint": "^8.25.0",
+    "prettier": "^2.7.1"
+  },
+  "prettier": {}
+}
