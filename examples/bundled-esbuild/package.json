@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run build",
-    "build": "esbuild --bundle src/messaging-consumer.js --outfile=dist/messaging-consumer.dist.js"
+    "build": "esbuild --bundle src/messaging-consumer.js --outfile=dist/messaging-consumer.dist.js --sourcemap=inline",
+    "build.watch": "npm run build -- --watch"
   },
   "keywords": [],
   "author": "",
