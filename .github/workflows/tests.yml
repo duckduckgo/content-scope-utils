@@ -28,6 +28,8 @@ jobs:
             ${{ runner.os }}-
       - name: Install dependencies
         run: npm install
+      - name: Install examples dependencies
+        run: npm run install-all
       - name: Run tsc
         run: npm run tsc
       - name: Run lint
