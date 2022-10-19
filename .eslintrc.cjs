@@ -6,4 +6,7 @@ module.exports = {
   globals: {
     it: true,
   },
+  env: {
+    browser: true,
+  },
 };

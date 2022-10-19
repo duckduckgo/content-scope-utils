@@ -1,3 +1,10 @@
 interface Window {
-  webkit: any;
+  webkit: {
+    messageHandlers: Record<
+      string,
+      {
+        postMessage?: (...args: unknown[]) => void;
+      }
+    >;
+  };
 }
