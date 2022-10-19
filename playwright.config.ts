@@ -62,7 +62,7 @@ const config: PlaywrightTestConfig = {
     port: 5012,
     reuseExistingServer: true,
     ignoreHTTPSErrors: true,
-    env: process.env as { [index: string]: unknown },
+    env: process.env as { [index: string]: string },
   },
 };
 

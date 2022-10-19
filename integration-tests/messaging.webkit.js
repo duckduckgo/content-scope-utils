@@ -65,7 +65,7 @@ test.describe("webkit encrypted messaging", () => {
 });
 
 /**
- * This represents "examples/bundled-esbuild/index.html"
+ * This represents "examples/bundled/index.html"
  */
 class BundledPage {
   /**
