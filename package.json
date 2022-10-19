@@ -11,7 +11,7 @@
     "lib"
   ],
   "scripts": {
-    "postinstall": "cd examples/bundled; npm i",
+    "postinstall": "cd examples/bundled && npm i",
     "docs": "typedoc",
     "docs.watch": "npm run docs -- --watch",
     "lint": "eslint .",
@@ -23,7 +23,7 @@
     "test": "npm run test.unit",
     "test.unit": "web-test-runner \"lib/**/*.test.js\" --node-resolve",
     "test.unit.watch": "npm run test.unit -- --watch",
-    "test.integration": "cd examples/bundled; npm run build; cd -; playwright test --headed",
+    "test.integration": "cd examples/bundled && npm run build && cd - && playwright test --headed",
     "tsc": "tsc",
     "tsc.watch": "tsc --watch",
     "verify.local": "npm run docs; npm run lint; npm run prettier.write; npm run test.unit"
