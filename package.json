@@ -21,7 +21,7 @@
     "prettier.write": "npm run prettier -- --write",
     "serve.example": "serve examples/bundled -p 5012",
     "test": "npm run test.unit",
-    "test.unit": "web-test-runner \"lib/**/*.test.js\" --node-resolve",
+    "test.unit": "web-test-runner \"unit-tests/**/*.test.js\" --node-resolve",
     "test.unit.watch": "npm run test.unit -- --watch",
     "test.integration": "cd examples/bundled && npm run build && cd - && playwright test",
     "tsc": "tsc",
