@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { forwardConsole, withMockedWebkitHandlers } from "../lib/test-helpers/webkit.js";
+import { forwardConsole, withMockedWebkitHandlers } from "./test-helpers/webkit.js";
 
 test.describe("webkit modern messaging", () => {
   test("runs when config provided", async ({ page }) => {
