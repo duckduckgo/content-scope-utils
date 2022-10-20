@@ -1,4 +1,4 @@
-import { fromConfig, WebkitMessagingConfig } from "@duckduckgo/content-scope-utils/lib/messaging.js";
+import { Messaging, WebkitMessagingConfig } from "@duckduckgo/content-scope-utils/lib/messaging.js";
 
 // Create the webkit options
 const obj = new URLSearchParams(window.location.search);
@@ -7,9 +7,9 @@ const injected = obj.get("injected");
 let opts;
 if (injected) {
   const json = JSON.parse(injected);
-  opts = WebkitMessagingConfig.from(json);
+  opts = new WebkitMessagingConfig(json);
 } else {
-  opts = WebkitMessagingConfig.from({
+  opts = new WebkitMessagingConfig({
     secret: "hello-world",
     webkitMessageHandlerNames: ["foo", ""],
     hasModernWebkitAPI: false,
@@ -17,7 +17,7 @@ if (injected) {
 }
 
 console.log("running with ▶️", JSON.stringify(opts, null, 2));
-const messaging = fromConfig(opts);
+const messaging = new Messaging(opts);
 
 try {
   messaging.notify("foo", { bar: "baz" });
