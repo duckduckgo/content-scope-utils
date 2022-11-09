@@ -12,7 +12,8 @@
     "strict": true,
     "strictNullChecks": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false
   },
-  "include": ["lib"]
+  "include": ["lib", "integration-tests"]
 }

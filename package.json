@@ -11,20 +11,22 @@
     "lib"
   ],
   "scripts": {
+    "install-all": "cd examples/bundled && npm i",
     "docs": "typedoc",
-    "docs:watch": "npm run docs -- --watch",
+    "docs.watch": "npm run docs -- --watch",
     "lint": "eslint .",
-    "lint:check": "npm run lint",
-    "lint:write": "npm run lint -- --fix",
+    "lint.write": "npm run lint -- --fix",
     "prettier": "prettier 'lib/**/*.js' 'examples/**/*.js' '*.{cjs,js}'",
-    "prettier:check": "npm run prettier -- --check",
-    "prettier:write": "npm run prettier -- --write",
-    "test": "npm run test:unit",
-    "test:unit": "web-test-runner \"lib/**/*.test.js\" --node-resolve",
-    "test:unit:watch": "npm run test:unit -- --watch",
+    "prettier.check": "npm run prettier -- --check",
+    "prettier.write": "npm run prettier -- --write",
+    "serve.example": "serve examples/bundled -p 5012",
+    "test": "npm run test.unit",
+    "test.unit": "web-test-runner \"unit-tests/**/*.test.js\" --node-resolve",
+    "test.unit.watch": "npm run test.unit -- --watch",
+    "test.integration": "cd examples/bundled && npm run build && cd - && playwright test",
     "tsc": "tsc",
-    "tsc:watch": "tsc --watch",
-    "verify:local": "npm run docs; npm run lint; npm run prettier:check; npm run test:unit"
+    "tsc.watch": "tsc --watch",
+    "verify.local": "npm run docs; npm run lint.write; npm run prettier.write; npm run test.unit"
   },
   "type": "module",
   "repository": {
@@ -46,9 +48,15 @@
     "typedoc": "^0.23.17",
     "typescript": "^4.8.4",
     "eslint": "^8.25.0",
-    "prettier": "^2.7.1"
+    "prettier": "^2.7.1",
+    "serve": "^14.0.1",
+    "@playwright/test": "^1.27.1"
   },
   "dependencies": {
   },
-  "prettier": {}
+  "prettier": {
+    "printWidth": 120,
+    "singleQuote": true,
+    "semi": false
+  }
 }
