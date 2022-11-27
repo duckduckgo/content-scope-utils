@@ -6,10 +6,6 @@ DuckDuckGo Content Scope Utils is distributed under the Apache 2.0
 This is a library of JavaScript modules that are used by DuckDuckGo's apps and extensions.
 
 We currently support the following:
+
 - [Messaging](modules/Messaging)
-    
---- 
-
-## Development 
-
-
+  - [Webkit Messaging](modules/Webkit_Messaging)

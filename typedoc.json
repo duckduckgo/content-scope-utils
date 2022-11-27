@@ -1,9 +1,5 @@
 {
-  "entryPoints": [
-    "lib/index.js",
-    "lib/messaging.js",
-    "lib/messaging/webkit.js"
-  ],
+  "entryPoints": ["lib/index.js", "lib/messaging.js", "lib/messaging/webkit.js"],
   "excludeExternals": true,
   "readme": "DOCS.md",
   "treatWarningsAsErrors": true,
