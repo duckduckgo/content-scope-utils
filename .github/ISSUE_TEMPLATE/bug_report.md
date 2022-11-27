@@ -10,16 +10,21 @@ This form is for reporting bugs or issues with content-scope-utils
 -->
 
 ## Description
+
 <!-- Description of the issue -->
 
 ## Steps to Reproduce
+
 <!-- How can we reproduce the bug ourselves -->
+
 1. step 1
 2. step 2
 3. ...
 
 **Expected behavior:**
+
 <!-- What you expect to happen -->
 
 **Actual behavior:**
+
 <!-- What actually happens -->

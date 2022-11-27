@@ -16,7 +16,7 @@
     "docs.watch": "npm run docs -- --watch",
     "lint": "eslint .",
     "lint.write": "npm run lint -- --fix",
-    "prettier": "prettier 'lib/**/*.js' 'examples/**/*.js' '*.{cjs,js}'",
+    "prettier": "prettier .",
     "prettier.check": "npm run prettier -- --check",
     "prettier.write": "npm run prettier -- --write",
     "serve.example": "serve examples/bundled -p 5012",
@@ -26,7 +26,7 @@
     "test.integration": "cd examples/bundled && npm run build && cd - && playwright test",
     "tsc": "tsc",
     "tsc.watch": "tsc --watch",
-    "verify.local": "npm run docs; npm run lint.write; npm run prettier.write; npm run test.unit"
+    "verify.local": "npm run docs; npm run lint.write; npm run prettier.write; npm run tsc; npm run test.unit; npm run test.integration"
   },
   "type": "module",
   "repository": {

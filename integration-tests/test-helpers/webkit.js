@@ -5,32 +5,32 @@
  */
 export async function withMockedWebkitHandlers(page, mocks) {
   await page.addInitScript((mocks) => {
-    window.__playwright = [];
+    window.__playwright = []
     window.webkit = {
       messageHandlers: {},
-    };
+    }
     for (let [msgName, response] of Object.entries(mocks)) {
       window.webkit.messageHandlers[msgName] = {
         /**
          * @param {any} data
          */
         postMessage: async (data) => {
-          const call = [msgName, data, response];
-          window.__playwright.push(JSON.parse(JSON.stringify(call)));
+          const call = [msgName, data, response]
+          window.__playwright.push(JSON.parse(JSON.stringify(call)))
 
           // If `data.messageHandling.methodName` exists, this means we're trying to use encryption
           // therefor we mimic what happens on the native side by calling the relevant window method
           // with the encrypted data
-          const fn = window[data.messageHandling.methodName];
-          if (typeof fn === "function") {
+          const fn = window[data.messageHandling.methodName]
+          if (typeof fn === 'function') {
             // @ts-ignore
-            fn(encryptResponse(data, response));
-            return;
+            fn(encryptResponse(data, response))
+            return
           }
 
-          return JSON.stringify(response);
+          return JSON.stringify(response)
         },
-      };
+      }
     }
 
     /**
@@ -52,30 +52,30 @@ export async function withMockedWebkitHandlers(page, mocks) {
        * @type {CryptoKey}
        */
       const keyEncoded = await crypto.subtle.importKey(
-        "raw",
+        'raw',
         new Uint8Array(message.messageHandling.key),
-        "AES-GCM",
+        'AES-GCM',
         false,
-        ["encrypt", "decrypt"]
-      );
+        ['encrypt', 'decrypt']
+      )
 
       /**
        * Encode the response JSON
        */
-      const enc = new TextEncoder();
-      const encodedJson = enc.encode(JSON.stringify(response));
+      const enc = new TextEncoder()
+      const encodedJson = enc.encode(JSON.stringify(response))
 
       /**
        * Encrypt the JSON string
        */
       const encryptedContent = await window.crypto.subtle.encrypt(
         {
-          name: "AES-GCM",
+          name: 'AES-GCM',
           iv: new Uint8Array(message.messageHandling.iv),
         },
         keyEncoded,
         encodedJson
-      );
+      )
 
       /**
        * Now return the encrypted data in the same shape that the native side would
@@ -83,16 +83,16 @@ export async function withMockedWebkitHandlers(page, mocks) {
       return {
         ciphertext: [...new Uint8Array(encryptedContent)],
         tag: [],
-      };
+      }
     }
-  }, mocks);
+  }, mocks)
 }
 
 /**
  * @param {import('@playwright/test').Page} page
  */
 export function forwardConsole(page) {
-  page.on("console", (msg) => {
-    console.log("->", msg.type(), msg.text());
-  });
+  page.on('console', (msg) => {
+    console.log('->', msg.type(), msg.text())
+  })
 }
