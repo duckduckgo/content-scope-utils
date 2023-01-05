@@ -1,13 +1,19 @@
+interface UnstableWebkit {
+  messageHandlers: Record<
+    string,
+    {
+      postMessage?: (...args: unknown[]) => void
+    }
+  >
+}
+
 interface Window {
   __playwright: MockCall[]
-  webkit: {
-    messageHandlers: Record<
-      string,
-      {
-        postMessage?: (...args: unknown[]) => void
-      }
-    >
-  }
+  webkit: UnstableWebkit
 }
 
 type MockCall = [name: string, data: Record<string, unknown>, response: Record<string, unknown>]
+
+declare let windowsInteropPostMessage: any
+declare let windowsInteropAddEventListener: any
+declare let windowsInteropRemoveEventListener: any

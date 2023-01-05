@@ -4,7 +4,7 @@ import { BundledExamplePage } from './test-helpers/BundledExamplePage.js'
 test.describe('webkit modern messaging', () => {
   test('runs when config provided', async ({ page }) => {
     const bundled = new BundledExamplePage(page)
-    await bundled.withMocks({
+    await bundled.withMocks('webkit', {
       getData: { id: '01' },
       foo: null,
     })
@@ -20,7 +20,7 @@ test.describe('webkit modern messaging', () => {
 test.describe('webkit encrypted messaging', () => {
   test('runs when config provided', async ({ page }) => {
     const bundled = new BundledExamplePage(page)
-    await bundled.withMocks({
+    await bundled.withMocks('webkit', {
       getData: { id: '01' },
       foo: null,
     })
@@ -34,7 +34,7 @@ test.describe('webkit encrypted messaging', () => {
   })
   test('fails when message handlers are absent (ie: missed/not added by native side)', async ({ page }) => {
     const bundled = new BundledExamplePage(page)
-    await bundled.withMocks({
+    await bundled.withMocks('webkit', {
       // empty mocks to simulate the message handlers not being available
     })
     await bundled.withInjectedConfig({
@@ -50,7 +50,7 @@ test.describe('webkit encrypted messaging', () => {
   })
   test('fails when message handler names are absent', async ({ page }) => {
     const bundled = new BundledExamplePage(page)
-    await bundled.withMocks({
+    await bundled.withMocks('webkit', {
       getData: { id: '01' },
       foo: null,
     })

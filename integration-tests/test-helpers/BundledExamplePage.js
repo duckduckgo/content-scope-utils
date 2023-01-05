@@ -13,7 +13,7 @@ export class BundledExamplePage {
   }
 
   /**
-   * @param {import("../../lib/messaging/webkit.js").WebkitMessagingConfig} config
+   * @param {import("../../lib/messaging/webkit.js").WebkitMessagingConfig | import("../../lib/messaging/windows").WindowsMessagingConfig} config
    */
   async withInjectedConfig(config) {
     const params = new URLSearchParams()
@@ -22,11 +22,19 @@ export class BundledExamplePage {
   }
 
   /**
+   * @param {"webkit" | "windows"} kind
    * @param {Record<string, any>} mocks
    * @returns {Promise<void>}
    */
-  async withMocks(mocks) {
-    await withMockedWebkitHandlers(this.page, mocks)
+  async withMocks(kind, mocks) {
+    switch (kind) {
+      case 'webkit':
+        await withMockedWebkitHandlers(this.page, mocks)
+        break
+      case 'windows':
+        throw new Error('unreacble')
+        break
+    }
   }
 
   /**
