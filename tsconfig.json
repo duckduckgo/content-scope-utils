@@ -17,5 +17,5 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["lib", "integration-tests"]
+  "include": ["lib", "integration-tests", "unit-tests"]
 }

@@ -13,7 +13,7 @@ export class BundledExamplePage {
   }
 
   /**
-   * @param {import("../../lib/messaging/webkit.js").WebkitMessagingConfig | import("../../lib/messaging/windows").WindowsMessagingConfig} config
+   * @param {Record<string, any>} config
    */
   async withInjectedConfig(config) {
     const params = new URLSearchParams()
@@ -32,8 +32,7 @@ export class BundledExamplePage {
         await withMockedWebkitHandlers(this.page, mocks)
         break
       case 'windows':
-        throw new Error('unreacble')
-        break
+        throw new Error('unreachable, windows mocks not added yet.')
     }
   }
 
@@ -44,6 +43,7 @@ export class BundledExamplePage {
     return await this.page.evaluate(() => {
       const outputs = []
       const elements = document.querySelectorAll('code')
+      console.log('👋 code elements found:', elements.length)
       for (let element of elements) {
         const json = JSON.parse(element?.textContent || '{}')
         outputs.push(json)

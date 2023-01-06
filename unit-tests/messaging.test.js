@@ -17,6 +17,17 @@ it('can construct webkit messaging', async () => {
 it('can construct windows messaging', async () => {
   const config = new WindowsMessagingConfig({
     featureName: 'DuckPlayer',
+    methods: {
+      addEventListener() {
+        console.log('addEventListener')
+      },
+      postMessage() {
+        console.log('postMessage')
+      },
+      removeEventListener() {
+        console.log('removeEventListener')
+      },
+    },
   })
   const messaging = new Messaging(config)
   expect(messaging).to.be.instanceOf(Messaging)

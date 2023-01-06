@@ -10,6 +10,7 @@ interface UnstableWebkit {
 interface Window {
   __playwright: MockCall[]
   webkit: UnstableWebkit
+  chrome: any
 }
 
 type MockCall = [name: string, data: Record<string, unknown>, response: Record<string, unknown>]
