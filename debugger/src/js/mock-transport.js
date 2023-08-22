@@ -1,5 +1,5 @@
 /**
- * @typedef{ import('../../../../../messaging/index.js').MessagingTransport} MessagingTransport
+ * @typedef{ import('@duckduckgo/content-scope-scripts/packages/messaging/index.js').MessagingTransport} MessagingTransport
  * @typedef{ import('../../schema/__generated__/schema.types').GetFeaturesResponse} GetFeaturesResponse
  */
 import { updateResourceParamsSchema } from '../../schema/__generated__/schema.parsers.mjs'
@@ -23,16 +23,16 @@ export class MockImpl {
   }
 
   /**
-   * @param {import('../../../../../messaging/index.js').RequestMessage} msg
+   * @param {import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").RequestMessage} msg
    */
   async request(msg) {
     const now = new Date()
     const formattedDate = now.toISOString()
     switch (msg.method) {
       case 'getFeatures': {
-        const remote = await fetch('macos-config.json').then((x) => x.text())
+        const remote = await fetch('fixtures/macos-config.json').then((x) => x.text())
 
-        const remote2 = await fetch('minimal-config.json').then((x) => x.text())
+        const remote2 = await fetch('fixtures/minimal-config.json').then((x) => x.text())
 
         /** @type {GetFeaturesResponse} */
         const response = {

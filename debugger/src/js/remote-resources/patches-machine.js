@@ -302,7 +302,7 @@ export const patchesMachine = createMachine(
         return []
       },
     },
-  }
+  },
 )
 
 const ops = z.discriminatedUnion('op', [
@@ -350,8 +350,8 @@ export const ResourcePatches = z.record(
         kind: z.literal('json-fast-patch'),
         patches: z.array(ops),
       }),
-    ])
-  )
+    ]),
+  ),
 )
 
 /**

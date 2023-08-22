@@ -8,7 +8,7 @@ import { useEffect } from 'react'
 import { CurrentResource } from '../remote-resources.machine'
 
 /**
- * @typedef{ import('@duckduckgo/messaging').MessagingTransport} MessagingTransport
+ * @typedef{ import('@duckduckgo/content-scope-scripts/packages/messaging/index.js').MessagingTransport} MessagingTransport
  * @typedef{ import('../../../../schema/__generated__/schema.types').GetFeaturesResponse} GetFeaturesResponse
  * @typedef{ import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
  * @typedef{ import('../../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams

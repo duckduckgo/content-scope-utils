@@ -96,6 +96,7 @@ export function unprotectedFromJsonString(jsonString) {
       },
     }
   } catch (e) {
+    // @ts-ignore
     if (!window.__playwright_01) {
       console.trace('itemListFromJsonString: ', e)
     } else {

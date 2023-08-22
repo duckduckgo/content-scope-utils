@@ -18,11 +18,13 @@ import { cpSync, rmSync } from 'node:fs'
 
 const CWD = cwd(import.meta.url)
 const ROOT = join(CWD, '..')
-const BUILD = join(ROOT, 'docs/debugger')
+const BUILD = join(CWD, 'dist')
 const args = parseArgs(process.argv.slice(2), [])
 const NODE_ENV = args.env || 'production'
 const DEBUG = Boolean(args.debug)
 const DRY_RUN = args.dryrun ?? false
+
+console.log('NODE_ENV', NODE_ENV)
 
 /** @type {{src: string, dest: string}[]} */
 const copyJobs = [
@@ -34,21 +36,12 @@ const copyJobs = [
     src: join(CWD, 'src/assets'),
     dest: join(BUILD, '/assets'),
   },
+  {
+    src: join(CWD, 'schema/__fixtures__'),
+    dest: join(BUILD, '/fixtures'),
+  },
 ]
 
-for (const copyJob of copyJobs) {
-  if (DEBUG) console.log('COPY:', relative(CWD, copyJob.src), relative(CWD, copyJob.dest))
-  if (!DRY_RUN) {
-    rmSync(copyJob.dest, {
-      force: true,
-      recursive: true,
-    })
-    cpSync(copyJob.src, copyJob.dest, {
-      force: true,
-      recursive: true,
-    })
-  }
-}
 const buildJob = {
   src: join(CWD, 'src/js/index.js'),
   dest: join(BUILD, 'js/index.js'),
@@ -60,6 +53,7 @@ buildSync({
   bundle: true,
   format: 'iife',
   outdir: join(BUILD, 'js/editor'),
+  minify: NODE_ENV === 'production',
 })
 buildSync({
   entryPoints: [buildJob.src],
@@ -75,4 +69,19 @@ buildSync({
   define: {
     'import.meta.env': JSON.stringify(NODE_ENV),
   },
+  minify: NODE_ENV === 'production',
 })
+
+for (const copyJob of copyJobs) {
+  if (DEBUG) console.log('COPY:', relative(CWD, copyJob.src), relative(CWD, copyJob.dest))
+  if (!DRY_RUN) {
+    rmSync(copyJob.dest, {
+      force: true,
+      recursive: true,
+    })
+    cpSync(copyJob.src, copyJob.dest, {
+      force: true,
+      recursive: true,
+    })
+  }
+}

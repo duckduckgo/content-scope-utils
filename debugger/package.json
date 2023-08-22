@@ -17,14 +17,16 @@
     "test-int-x": "npm run test",
     "test-int": "npm run test",
     "serve": "http-server -c-1 --port 3210 ../../",
-    "schema": "node schema.mjs"
+    "schema": "node schema.mjs",
+    "watch": "chokidar 'src' 'schema' 'editor' -i schema/__generated__ -c 'NODE_ENV=development npm run build.dev' --initial",
+    "browser-sync": "browser-sync ../"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@duckduckgo/content-scope-scripts": "github:duckduckgo/content-scope-scripts#main",
-    "@playwright/test": "^1.36.2",
+    "@playwright/test": "^1.37.1",
     "@types/react": "^18.2.14",
     "@xstate/inspect": "^0.8.0",
     "@xstate/react": "^3.2.2",
@@ -43,6 +45,7 @@
     "urlpattern-polyfill": "^9.0.0",
     "web-resource-inliner": "^6.0.1",
     "xstate": "^4.38.0",
-    "zod": "^3.6.0"
+    "zod": "^3.6.0",
+    "chokidar-cli": "^3.0.0"
   }
 }

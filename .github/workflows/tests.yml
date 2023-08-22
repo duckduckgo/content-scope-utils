@@ -77,6 +77,8 @@ jobs:
         run: npm run docs
       - name: Build debugger
         run: npm run build
+      - name: copy-to-docs
+        run: cp -r debugger/dist/ docs/debugger
   deploy:
     runs-on: ubuntu-20.04
     needs: build

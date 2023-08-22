@@ -56,7 +56,7 @@ export async function withMockedWebkitHandlers(page, mocks) {
         new Uint8Array(message.messageHandling.key),
         'AES-GCM',
         false,
-        ['encrypt', 'decrypt']
+        ['encrypt', 'decrypt'],
       )
 
       /**
@@ -74,7 +74,7 @@ export async function withMockedWebkitHandlers(page, mocks) {
           iv: new Uint8Array(message.messageHandling.iv),
         },
         keyEncoded,
-        encodedJson
+        encodedJson,
       )
 
       /**

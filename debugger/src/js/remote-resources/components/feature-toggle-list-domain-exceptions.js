@@ -9,6 +9,7 @@ import { DomainForm } from './domain-form'
  * @param {object} props
  * @param {ITextModel} props.model
  */
+// @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function FeatureToggleListDomainExceptions(props) {
   // xstate stuff

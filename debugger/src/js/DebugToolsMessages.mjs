@@ -1,3 +1,12 @@
+/**
+ * @module Debug Tools Messaging
+ *
+ * @description
+ *
+ * This class describes the messages that native platforms are expected to
+ * receive and respond to
+ */
+
 import {
   getFeaturesResponseSchema,
   getTabsResponseSchema,
@@ -16,7 +25,7 @@ import { createContext } from 'react'
  */
 export class DebugToolsMessages {
   /**
-   * @param {import("@duckduckgo/messaging").Messaging} messaging
+   * @param {import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").Messaging} messaging
    * @internal
    */
   constructor(messaging) {
@@ -27,6 +36,9 @@ export class DebugToolsMessages {
   }
 
   /**
+   * The initial handshake - this is the first thing called to determine
+   * the feature set supported by the native platform in question
+   *
    * @return {Promise<import("../../schema/__generated__/schema.types").GetFeaturesResponse>}
    */
   async getFeatures() {
@@ -36,14 +48,12 @@ export class DebugToolsMessages {
     parsed.features.remoteResources.resources = resources.map(formatResource)
     return parsed
   }
-  attempts = 0
+
   /**
    * @param {import("../../schema/__generated__/schema.types").UpdateResourceParams} params
    * @return {Promise<import("../../schema/__generated__/schema.types").RemoteResource>}
    */
   async updateResource(params) {
-    // this.attempts = this.attempts += 1;
-    // if (this.attempts % 2 === 0) throw new Error('todo: error handling');
     const outgoing = updateResourceParamsSchema.parse(params)
     const response = await this.messaging.request('updateResource', outgoing)
     const featuresResponse = remoteResourceSchema.safeParse(response)
@@ -56,6 +66,11 @@ export class DebugToolsMessages {
   }
 
   /**
+   * Get the currently open tabs. This is used to target certain
+   * modifications to a particular domain if possible.
+   *
+   * For example, applying a domain exception for a particular feature
+   *
    * @return {Promise<import("../../schema/__generated__/schema.types").GetTabsResponse>}
    */
   async getTabs() {
@@ -69,6 +84,7 @@ export class DebugToolsMessages {
   }
 
   /**
+   * A reall subscription for receiving new lists of tabs - it's the push version of {@link DebugToolsMessages.getTabs}
    * @param {(data: GetTabsResponse) => void} callback
    */
   onTabsUpdated(callback) {

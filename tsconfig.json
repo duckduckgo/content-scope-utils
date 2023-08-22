@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "es2021",
     "moduleResolution": "node",
+    "module": "ESNext",
     "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "alwaysStrict": true,
     "allowJs": true,
@@ -13,10 +14,11 @@
     "strictNullChecks": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "jsx": "react-jsx"
   },
-  "include": ["lib", "integration-tests"]
+  "include": ["lib", "integration-tests", "debugger", "types.d.ts"],
+  "exclude": ["debugger/dist"]
 }

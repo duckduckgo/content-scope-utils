@@ -2,26 +2,30 @@ import { describe, it } from 'node:test'
 import { readFileSync } from 'node:fs'
 import { deepEqual } from 'node:assert'
 import { join } from 'path'
-import { cwd } from '../../../../../scripts/script-utils.js'
+import { cwd } from '@duckduckgo/content-scope-scripts/scripts/script-utils.js'
 import {
   getFeaturesResponseSchema,
   getTabsResponseSchema,
   updateResourceParamsSchema,
 } from './__generated__/schema.parsers.mjs'
 import { DebugToolsMessages } from '../src/js/DebugToolsMessages.mjs'
-import { Messaging, MessagingContext, TestTransportConfig } from '@duckduckgo/messaging'
+import {
+  Messaging,
+  MessagingContext,
+  TestTransportConfig,
+} from '@duckduckgo/content-scope-scripts/packages/messaging/index.js'
 const CWD = cwd(import.meta.url)
 
 const getFeaturesJSON = JSON.parse(readFileSync(join(CWD, '__fixtures__/__getFeatures__.json'), 'utf8'))
 const getFeatures = getFeaturesResponseSchema.parse(getFeaturesJSON)
 
 const updateResourceDebugToolsJSON = JSON.parse(
-  readFileSync(join(CWD, '__fixtures__/__updateResourceDebugTools__.json'), 'utf8')
+  readFileSync(join(CWD, '__fixtures__/__updateResourceDebugTools__.json'), 'utf8'),
 )
 const updateResourceDebugTools = updateResourceParamsSchema.parse(updateResourceDebugToolsJSON)
 
 const updateResourceRemoteJSON = JSON.parse(
-  readFileSync(join(CWD, '__fixtures__/__updateResourceRemote__.json'), 'utf8')
+  readFileSync(join(CWD, '__fixtures__/__updateResourceRemote__.json'), 'utf8'),
 )
 const _ = updateResourceParamsSchema.parse(updateResourceRemoteJSON)
 

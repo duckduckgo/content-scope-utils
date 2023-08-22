@@ -1,8 +1,17 @@
 {
-  "entryPoints": ["lib/index.js", "lib/messaging.js", "lib/messaging/webkit.js"],
+  "entryPoints": [
+    "lib/index.js",
+    "lib/messaging.js",
+    "lib/messaging/webkit.js",
+    "debugger/schema/__generated__/schema.types.ts",
+    "debugger/src/js/DebugToolsMessages.mjs"
+  ],
   "excludeExternals": true,
   "readme": "DOCS.md",
   "treatWarningsAsErrors": true,
   "searchInComments": true,
-  "titleLink": "/"
+  "titleLink": "/",
+  "out": "docs",
+  "excludeInternal": true,
+  "includes": "."
 }

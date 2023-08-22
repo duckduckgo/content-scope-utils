@@ -11,7 +11,7 @@ import {
  * @param {ImportMeta["env"]} opts.env
  * @param {ImportMeta["injectName"]} opts.injectName
  * @param {string} opts.featureName
- * @param {() => import("../../messaging/index.js").MessagingTransport} [opts.mockImpl]
+ * @param {() => import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").MessagingTransport} [opts.mockImpl]
  */
 export function createSpecialPagesMessaging(opts) {
   const messageContext = new MessagingContext({

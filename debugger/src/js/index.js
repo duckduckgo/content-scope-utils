@@ -31,11 +31,12 @@ if (!params.has('platform')) {
   console.warn('platform missing from URL Search Params', 'defaulting to apple')
 }
 
-const injectName = params.get('platform') || 'apple'
+const injectName = /** @type {any} */ (params.get('platform') || 'apple')
 
 /**
  * Global Setup for Monaco
  */
+// @ts-ignore
 // eslint-disable-next-line no-undef
 globalThis.MonacoEnvironment = {
   getWorkerUrl: function (moduleId, label) {
@@ -109,7 +110,7 @@ root.render(
     <AppMachineContext.Provider machine={() => withContext}>
       <App />
     </AppMachineContext.Provider>
-  </GlobalContext.Provider>
+  </GlobalContext.Provider>,
 )
 
 export { DebugToolsMessages }
