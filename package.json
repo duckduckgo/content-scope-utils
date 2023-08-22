@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "install-all": "cd examples/bundled && npm i",
+    "build": "npm run build --workspaces --if-present",
     "docs": "typedoc",
     "docs.watch": "npm run docs -- --watch",
     "lint": "eslint .",
@@ -26,7 +27,7 @@
     "test.integration": "cd examples/bundled && npm run build && cd - && playwright test",
     "tsc": "tsc",
     "tsc.watch": "tsc --watch",
-    "verify.local": "npm run docs; npm run lint.write; npm run prettier.write; npm run tsc; npm run test.unit; npm run test.integration"
+    "verify.local": "npm run docs && npm run build && npm run lint.write && npm run prettier.write && npm run tsc && npm run test.unit && npm run test.integration"
   },
   "type": "module",
   "repository": {
@@ -57,5 +58,8 @@
     "printWidth": 120,
     "singleQuote": true,
     "semi": false
-  }
+  },
+  "workspaces": [
+    "debugger"
+  ]
 }

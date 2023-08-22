@@ -1,0 +1,16 @@
+.inline-select {
+  line-height: 1;
+}
+.inline-select__label {
+  margin-right: 0.5em;
+  font-size: 0.6rem;
+  width: 100%;
+  display: block;
+}
+.inline-select__select {
+  width: 100%;
+  margin-top: 0.2rem;
+  display: block;
+  font-size: 0.7rem;
+  padding: 0.2rem;
+}
