@@ -8,6 +8,8 @@ module.exports = {
   },
   env: {
     browser: true,
+    webextensions: true,
+    node: true,
   },
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',

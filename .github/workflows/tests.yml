@@ -71,8 +71,12 @@ jobs:
         with:
           path: docs
           key: build-output-${{ github.run_id }}
+      - name: Install dependencies
+        run: npm install
       - name: Build docs
         run: npm run docs
+      - name: Build debugger
+        run: npm run build
   deploy:
     runs-on: ubuntu-20.04
     needs: build
