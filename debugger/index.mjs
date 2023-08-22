@@ -20,7 +20,7 @@ const args = parseArgs(process.argv.slice(2), [])
 const CWD = cwd(import.meta.url)
 const ROOT = join(CWD, '..')
 const VERSION = args.version ?? 'v1'
-const BUILD = join(CWD, 'dist', VERSION)
+const BUILD = join(CWD, 'dist')
 const NODE_ENV = args.env || 'production'
 const DEBUG = Boolean(args.debug)
 const DRY_RUN = args.dryrun ?? false
@@ -40,6 +40,10 @@ const copyJobs = [
   {
     src: join(CWD, 'schema/__fixtures__'),
     dest: join(BUILD, '/fixtures'),
+  },
+  {
+    src: BUILD,
+    dest: join(ROOT, 'docs/debugger', VERSION),
   },
 ]
 
