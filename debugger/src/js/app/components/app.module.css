@@ -31,8 +31,14 @@
   width: 100%;
 
   display: grid;
+
+  grid-template-areas:
+    "main-header main-header"
+    "main-sidebar main-content";
+
   grid-template-rows: auto 1fr;
-  grid-template-areas: 'main-header' 'main-content';
+  grid-template-columns: 50px 1fr;
+
 
   padding-left: var(--ddg-ui-gutter);
   padding-right: var(--ddg-ui-gutter);
@@ -66,4 +72,13 @@
   margin-top: var(--ddg-ui-gutter);
   padding-bottom: var(--ddg-ui-gutter);
   overflow: auto;
+}
+
+.sidebar {
+  grid-area: main-sidebar;
+  border: 2px dotted red;
+}
+
+.inner {
+  position: sticky;
 }

@@ -18,6 +18,8 @@ import { createContext } from 'react'
 /**
  * @typedef {import("../../schema/__generated__/schema.types").RemoteResource} RemoteResource
  * @typedef {import("../../schema/__generated__/schema.types").GetTabsResponse} GetTabsResponse
+ * @typedef {import("../../schema/__generated__/schema.types").GetFeaturesResponse} GetFeaturesResponse
+ * @typedef {import("../../schema/__generated__/schema.types").UpdateResourceParams} UpdateResourceParams
  */
 
 /**
@@ -39,7 +41,7 @@ export class DebugToolsMessages {
    * The initial handshake - this is the first thing called to determine
    * the feature set supported by the native platform in question
    *
-   * @return {Promise<import("../../schema/__generated__/schema.types").GetFeaturesResponse>}
+   * @return {Promise<GetFeaturesResponse>}
    */
   async getFeatures() {
     const response = await this.messaging.request('getFeatures')
@@ -50,8 +52,8 @@ export class DebugToolsMessages {
   }
 
   /**
-   * @param {import("../../schema/__generated__/schema.types").UpdateResourceParams} params
-   * @return {Promise<import("../../schema/__generated__/schema.types").RemoteResource>}
+   * @param {UpdateResourceParams} params
+   * @return {Promise<RemoteResource>}
    */
   async updateResource(params) {
     const outgoing = updateResourceParamsSchema.parse(params)
@@ -71,7 +73,7 @@ export class DebugToolsMessages {
    *
    * For example, applying a domain exception for a particular feature
    *
-   * @return {Promise<import("../../schema/__generated__/schema.types").GetTabsResponse>}
+   * @return {Promise<GetTabsResponse>}
    */
   async getTabs() {
     const response = await this.messaging.request('getTabs', {})
@@ -84,7 +86,7 @@ export class DebugToolsMessages {
   }
 
   /**
-   * A reall subscription for receiving new lists of tabs - it's the push version of {@link DebugToolsMessages.getTabs}
+   * A subscription for receiving new lists of tabs - it's the push version of {@link DebugToolsMessages.getTabs}
    * @param {(data: GetTabsResponse) => void} callback
    */
   onTabsUpdated(callback) {
