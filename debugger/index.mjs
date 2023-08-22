@@ -16,10 +16,11 @@ import { cwd, parseArgs } from '@duckduckgo/content-scope-scripts/scripts/script
 import { join, relative } from 'node:path'
 import { cpSync, rmSync } from 'node:fs'
 
+const args = parseArgs(process.argv.slice(2), [])
 const CWD = cwd(import.meta.url)
 const ROOT = join(CWD, '..')
-const BUILD = join(CWD, 'dist')
-const args = parseArgs(process.argv.slice(2), [])
+const VERSION = args.version ?? 'v1'
+const BUILD = join(CWD, 'dist', VERSION)
 const NODE_ENV = args.env || 'production'
 const DEBUG = Boolean(args.debug)
 const DRY_RUN = args.dryrun ?? false
