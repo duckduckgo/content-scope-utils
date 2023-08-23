@@ -5,6 +5,10 @@ import { DebugToolsMessages } from '../DebugToolsMessages.mjs'
 import { patchesMachine } from './patches-machine'
 import invariant from 'tiny-invariant'
 
+/**
+ * @typedef {import("./remote-resources.machine.types").RemoteResourcesBroadcastEvents} RemoteResourcesBroadcastEvents
+ */
+
 /** @type {Record<string, {editorKinds: EditorKind[], toggleKinds: ToggleKind[]}>} */
 const editorKindsMapping = {
   'privacy-configuration': {
@@ -20,7 +24,7 @@ const editorKindsMapping = {
 const _remoteResourcesMachine = createMachine({
   id: 'remote resources machine',
   initial: 'loading resource',
-  context: /** @type {import("../types").RemoteResourcesCtx} */ ({}),
+  context: /** @type {import("./remote-resources.machine.types").RemoteResourcesCtx} */ ({}),
   entry: ['spawn-children'], // some features are just child actors
   states: {
     'loading resource': {
@@ -198,7 +202,7 @@ const _remoteResourcesMachine = createMachine({
     'invalid resource': {},
   },
   schema: {
-    events: /** @type {import("../types").RemoteResourcesEvents} */ ({}),
+    events: /** @type {import("./remote-resources.machine.types").RemoteResourcesEvents} */ ({}),
   },
   predictableActionArguments: true,
   preserveActionOrder: true,
@@ -398,7 +402,7 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
     broadcastResourceSelected: pure((ctx) => {
       return (ctx.children || []).map((child) => {
         invariant(ctx.currentResource, 'ctx.currentResource absent')
-        /** @type {import('../types').RemoteResourcesBroadcastEvents} */
+        /** @type {RemoteResourcesBroadcastEvents} */
         const event = {
           type: 'broadcastResourceSelected',
           payload: {
@@ -413,7 +417,7 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         invariant(ctx.currentResource, 'ctx.currentResource absent')
         const resource = ctx.resources?.find((r) => r.id === ctx.currentResource?.id)
         if (!resource) throw new Error('unreachable')
-        /** @type {import('../types').RemoteResourcesBroadcastEvents} */
+        /** @type {RemoteResourcesBroadcastEvents} */
         const evt = {
           type: 'broadcastPreResourceUpdated',
           payload: {
@@ -431,7 +435,7 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         invariant(ctx.currentResource, 'ctx.currentResource absent')
         const resource = ctx.resources?.find((r) => r.id === ctx.currentResource?.id)
         if (!resource) throw new Error('unreachable')
-        /** @type {import('../types').RemoteResourcesBroadcastEvents} */
+        /** @type {RemoteResourcesBroadcastEvents} */
         const evt = {
           type: 'broadcastPostResourceUpdated',
           payload: {

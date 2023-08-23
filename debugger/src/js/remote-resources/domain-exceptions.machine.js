@@ -116,7 +116,7 @@ export const domainMachine = createMachine({
     },
   },
   schema: {
-    events: /** @type {import('../types').DomainExceptionEvents} */ ({}),
+    events: /** @type {import('./domain-exceptions.machine.types').DomainExceptionEvents} */ ({}),
   },
   predictableActionArguments: true,
   preserveActionOrder: true,

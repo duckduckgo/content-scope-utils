@@ -181,7 +181,8 @@ export const patchesMachine = createMachine(
       },
     },
     schema: {
-      events: /** @type {import('../types').RemoteResourcesBroadcastEvents | import('../types').PatchesEvents} */ ({}),
+      events:
+        /** @type {import('./remote-resources.machine.types').RemoteResourcesBroadcastEvents | import('../types').PatchesEvents} */ ({}),
     },
     predictableActionArguments: true,
     preserveActionOrder: true,

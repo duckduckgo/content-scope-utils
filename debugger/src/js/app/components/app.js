@@ -1,12 +1,11 @@
-import { getMachine } from '../app.machine'
+import { appMachine } from '../app.machine'
 import { createActorContext } from '@xstate/react'
 import { Suspense } from 'react'
 import * as z from 'zod'
 import styles from './app.module.css'
 import { FeatureNav } from './feature-nav'
 
-export const baseMachine = getMachine
-export const AppMachineContext = createActorContext(baseMachine, { devTools: true })
+export const AppMachineContext = createActorContext(appMachine, { devTools: true })
 
 export function App() {
   const [state] = AppMachineContext.useActor()
