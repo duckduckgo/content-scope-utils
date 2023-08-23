@@ -66,6 +66,7 @@ export function ToggleList(props) {
                   onChange={onClick}
                   id={item.id}
                   disabled={item.globalState === 'disabled'}
+                  label={`toggle ${item.id} globally`}
                 >
                   {item.title}
                 </Switch>
@@ -81,6 +82,7 @@ export function ToggleList(props) {
                       }}
                       id={item.id}
                       disabled={item.domainState === 'disabled'}
+                      label={`toggle ${item.id} for ${item.targetDomain}`}
                     >
                       {item.title}
                     </Switch>

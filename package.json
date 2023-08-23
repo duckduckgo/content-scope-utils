@@ -43,6 +43,7 @@
   },
   "homepage": "https://github.com/duckduckgo/content-scope-utils#readme",
   "devDependencies": {
+    "@duckduckgo/content-scope-scripts": "github:duckduckgo/content-scope-scripts#main",
     "@esm-bundle/chai": "^4.3.4-fix.0",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
     "@typescript-eslint/parser": "^6.4.1",
