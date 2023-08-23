@@ -4,6 +4,8 @@ import useConstant from '@xstate/react/es/useConstant'
 import { DD, DT, InlineDL } from './definition-list'
 import { MicroButton } from './buttons'
 import { useEffect } from 'react'
+import { MonacoEditorRaw } from './monaco-editor'
+import styles from './toggles-editor.module.css'
 
 /**
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -79,34 +81,35 @@ export function PatchesEditor(props) {
   }
 
   return (
-    <div data-testid="PatchesEditor">
-      <div className="card">
-        <InlineDL>
-          <DT>GENERATE</DT>
-          <DD>
-            <MicroButton className="ml-3.5" onClick={generateFromDiff}>
-              from diff 🔀
-            </MicroButton>
-          </DD>
-        </InlineDL>
-        <InlineDL>
-          <DT>STORAGE</DT>
-          <DD>
-            <MicroButton className="ml-3.5" onClick={storeLocally}>
-              store patch locally 💿
-            </MicroButton>
-            <MicroButton className="ml-3.5" onClick={restoreFromLocal}>
-              restore local ↪️
-            </MicroButton>
-            <MicroButton className="ml-3.5" onClick={applyPatch}>
-              apply patch ✅
-            </MicroButton>
-          </DD>
-        </InlineDL>
+    <div data-testid="PatchesEditor" className={styles.patchesGrid}>
+      <div className={styles.patchesGridHeader}>
+        <div className="card">
+          <InlineDL>
+            <DT>GENERATE</DT>
+            <DD>
+              <MicroButton className="ml-3.5" onClick={generateFromDiff}>
+                from diff 🔀
+              </MicroButton>
+            </DD>
+          </InlineDL>
+          <InlineDL>
+            <DT>STORAGE</DT>
+            <DD>
+              <MicroButton className="ml-3.5" onClick={storeLocally}>
+                store patch locally 💿
+              </MicroButton>
+              <MicroButton className="ml-3.5" onClick={restoreFromLocal}>
+                restore local ↪️
+              </MicroButton>
+              <MicroButton className="ml-3.5" onClick={applyPatch}>
+                apply patch ✅
+              </MicroButton>
+            </DD>
+          </InlineDL>
+        </div>
       </div>
-      <div className="row">
-        TODO: make this layout work
-        {/*<MonacoEditorRaw model={patchModel} />*/}
+      <div className={styles.patchesGridBody}>
+        <MonacoEditorRaw model={patchModel} />
       </div>
     </div>
   )
