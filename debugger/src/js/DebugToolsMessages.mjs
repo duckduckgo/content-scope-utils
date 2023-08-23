@@ -3,8 +3,16 @@
  *
  * @description
  *
- * This class describes the messages that native platforms are expected to
- * receive and respond to
+ * This describes the messages that need to be implemented. In order, you should implement the following:
+ *
+ *   - {@link DebugToolsMessages.getFeatures} - this occurs immediately to determine which feature set the platform supports
+ *   - {@link DebugToolsMessages.getRemoteResource} - read an individual resource
+ *   - {@link DebugToolsMessages.updateResource} - used to update/override a resource
+ *   - {@link DebugToolsMessages.getTabs} - a way for the application to query for open tabs
+ *   - {@link DebugToolsMessages.onTabsUpdated} - a subscription to allow
+ *
+ * **To ensure you can communicate with the application, refer to our [Standardized Messaging Format](https://duckduckgo.github.io/content-scope-scripts/modules/Messaging_Implementation_Guide.html)**
+ *
  */
 
 import {
@@ -43,6 +51,9 @@ export class DebugToolsMessages {
    * The initial handshake - this is the first thing called to determine
    * the feature set supported by the native platform in question
    *
+   * ```json
+   * [[include:debugger/schema/__fixtures__/__getFeatures__.json]]```
+   *
    * @return {Promise<GetFeaturesResponse>}
    */
   async getFeatures() {
@@ -53,7 +64,13 @@ export class DebugToolsMessages {
   }
 
   /**
-   * Retrieve a single Remote Resource
+   * Retrieve a single Remote Resource.
+   *
+   * In this example `current` represents what the platform has currently applied.
+   * See {@link RemoteResource} for the other variants (for example, a debug-tools override)
+   *
+   * ```json
+   * [[include:debugger/schema/__fixtures__/__remoteResource__.json]]```
    *
    * @param {GetRemoteResourceParams} params
    * @return {Promise<RemoteResource>}
@@ -71,6 +88,41 @@ export class DebugToolsMessages {
   }
 
   /**
+   * Updating a resource is used in all cases where we want to make a change, for example
+   *
+   * - refreshing the currently applied file
+   * - overriding the current resource with a new URL
+   * - overriding the current resource with a string from the debug panel
+   *
+   * For native implementors, you should assume any message received here is an indication to
+   * reload any rules/resources related to it. It's a fresh start for the resource in question.
+   *
+   * ### Example: updating to a new remote resource
+   *
+   * This occurs when we want to fetch a resource fresh and apply it.
+   * **Note** this URL might match what's already applied - and that's fine, you should ALWAYS re-fetch it.
+   *
+   * **params:**
+   * ```json
+   * [[include:debugger/schema/__fixtures__/__updateResourceRemote__.json]]```
+   *
+   * **returns: {@link RemoteResource}**
+   *
+   * <br>
+   *
+   * ### Example: applying local edits
+   *
+   * This occurs when a resource was edited in the panel.
+   *
+   * **Note** You should accept the string verbatim, just as you would from a remote. And then re-apply any relevant rules
+   *
+   * ```json
+   * [[include:debugger/schema/__fixtures__/__updateResourceDebugTools__.json]]```
+   *
+   *
+   * **returns: {@link RemoteResource}**
+   *
+   *
    * @param {UpdateResourceParams} params
    * @return {Promise<RemoteResource>}
    */
@@ -91,6 +143,9 @@ export class DebugToolsMessages {
    * modifications to a particular domain if possible.
    *
    * For example, applying a domain exception for a particular feature
+   *
+   * ```json
+   * [[include:debugger/schema/__fixtures__/__getTabs__.json]]```
    *
    * @return {Promise<GetTabsResponse>}
    */
@@ -134,6 +189,9 @@ function formatResource(input) {
   }
 }
 
+/**
+ * @internal
+ */
 export const GlobalContext = createContext({
   /** @type {DebugToolsMessages | null} */
   messages: null,
