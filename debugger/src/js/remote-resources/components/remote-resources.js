@@ -15,7 +15,7 @@ import { CurrentResource } from '../remote-resources.machine'
  */
 
 export function RemoteResources() {
-  const actor = RemoteResourcesContext.useActorRef()
+  const [state, send] = RemoteResourcesContext.useActor()
   const { resource, resourceKey, nav } = RemoteResourcesContext.useSelector((state) => {
     const schema = z.object({
       currentResource: CurrentResource,
@@ -70,9 +70,9 @@ export function RemoteResources() {
       const markers = monaco.editor.getModelMarkers({ resource: uriList[0] })
       const errors = markers.filter((m) => m.severity === monaco.MarkerSeverity.Error)
       if (errors.length > 0) {
-        actor.send({ type: 'content is invalid', markers })
+        send({ type: 'content is invalid', markers })
       } else {
-        actor.send({ type: 'content is valid' })
+        send({ type: 'content is valid' })
       }
     })
 
@@ -80,13 +80,15 @@ export function RemoteResources() {
     // on every key stroke
     const sub = sharedTextModel.onDidChangeContent(() => {
       if (sharedTextModel.getValue() !== originalTextContent) {
-        actor.send({ type: 'content was edited' })
+        send({ type: 'content was edited' })
       } else {
-        actor.send({ type: 'content was reverted' })
+        send({ type: 'content was reverted' })
       }
     })
     return () => sub.dispose()
-  }, [sharedTextModel, originalTextContent, actor])
+  }, [sharedTextModel, originalTextContent, send])
+
+  if (!state.matches(['showing editor', 'editing'])) return null
 
   return <RemoteResourceEditor key={resourceKey} resource={resource} model={sharedTextModel} nav={nav} />
 }

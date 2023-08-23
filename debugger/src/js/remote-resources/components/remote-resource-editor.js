@@ -24,130 +24,29 @@ import { Button } from '../../components/buttons'
  * @param {SubNavItem[]} props.nav
  */
 export function RemoteResourceEditor(props) {
-  const [state, send] = RemoteResourcesContext.useActor()
-  const originalContents = props.resource.current.contents
+  const actor = RemoteResourcesContext.useActorRef()
 
-  /** @type {(resp: UpdateResourceParams) => void} */
-  const saveNewRemote = (resp) => send({ type: 'save new remote', payload: resp })
   /** @type {(kind: EditorKind) => void} */
-  const setEditorKind = (kind) => send({ type: 'set editor kind', payload: kind })
-  const showOverrideForm = () => send({ type: 'show url editor' })
-  const copyPatch = () => {
-    state.children.patches?.send({ type: 'COPY_TO_CLIPBOARD' })
-  }
-  const hideOverrideForm = () => send({ type: 'hide url editor' })
-  const revertEdited = () => props.model.setValue(originalContents)
+  const revertEdited = () => props.model.setValue(props.resource.current.contents)
 
-  function saveDebugContent() {
-    /** @type {UpdateResourceParams} */
-    const payload = {
-      id: props.resource.id,
-      source: {
-        debugTools: {
-          content: props.model.getValue(),
-        },
-      },
-    }
-
-    send({ type: 'save edited', payload })
-  }
-
-  /** @type {(url: string) => void} */
-  function setUrl(url) {
-    /** @type {UpdateResourceParams} */
-    const payload = {
-      id: props.resource.id,
-      source: {
-        remote: {
-          url,
-        },
-      },
-    }
-    saveNewRemote(payload)
-  }
-
-  /**
-   * @param {'save' | 'revert' | 'show-diff'} action
-   */
-  function localAction(action) {
-    switch (action) {
-      case 'revert': {
-        revertEdited()
-        break
-      }
-      case 'save': {
-        saveDebugContent()
-        break
-      }
-      case 'show-diff': {
-        setEditorKind('diff')
-        break
-      }
-    }
-  }
-
-  const savingRemote = state.matches(['showing editor', 'editing', 'saving new remote'])
-  const savingChanges = state.matches(['showing editor', 'editing', 'saving edited'])
-  const showingUrlEditor = state.matches(['showing editor', 'urlEditor', 'open'])
-  const hasEdits = state.matches(['showing editor', 'editing', 'editor has edited content'])
-  const contentIsInvalid = state.matches(['showing editor', 'contentErrors', 'some'])
-
-  /** @type {string[]} */
-  const validKinds = state.context.currentResource?.editorKinds || []
-  const nextKind = state.context.editorKind || 'inline'
-  const editorKind = validKinds.includes(nextKind) ? nextKind : 'inline'
-
-  const switcherKinds =
-    validKinds.map((v) => {
-      return {
-        value: v,
-        label: v[0].toUpperCase() + v.slice(1),
-      }
-    }) || []
-
-  const editorState = contentIsInvalid ? 'not-allowed' : 'enabled'
-
-  // Buttons above the editor
-  const buttons = (
-    <>
-      <Button onClick={() => localAction('revert')} disabled={!hasEdits}>
-        ↩️ Revert
-      </Button>
-      <Button onClick={() => localAction('save')} disabled={!hasEdits} data-state={editorState}>
-        {savingChanges ? 'saving...' : '💾 Save + Apply'}
-      </Button>
-    </>
-  )
-
-  const other = useRef(null)
-
-  if (!state.matches(['showing editor', 'editing'])) return null
+  /** this is used to allow editors to participate in the footer (eg: adding extra buttons) */
+  const additionalButtons = useRef(null)
 
   return (
     <>
       <main className={styles.appMain}>
-        <InvalidEditorErrors revert={() => localAction('revert')} />
-        <SavingErrors dismiss={() => send({ type: 'clearErrors' })} />
+        <InvalidEditorErrors revert={revertEdited} />
+        <SavingErrors dismiss={() => actor.send({ type: 'clearErrors' })} />
 
         <div className={styles.mainHeader}>
+          {/** Additional nav when there's more than 1 resource */}
           {props.nav.length > 1 ? (
             <div className="row">
               <SubNav items={props.nav} prefix={'/remoteResources/'} />
             </div>
           ) : null}
-          <RemoteResourceState
-            resource={props.resource}
-            pending={savingRemote}
-            edited={hasEdits}
-            showingUrlEditor={showingUrlEditor}
-            setUrl={setUrl}
-            editorKind={editorKind}
-            showOverrideForm={showOverrideForm}
-            hideOverrideForm={hideOverrideForm}
-            copyPatch={copyPatch}
-            model={props.model}
-            localAction={localAction}
-          />
+
+          <RemoteResourceState resource={props.resource} model={props.model} />
         </div>
 
         {/*<div className={styles.sidebar}>*/}
@@ -157,57 +56,151 @@ export function RemoteResourceEditor(props) {
         {/*</div>*/}
 
         <div className={styles.mainContent}>
-          {editorKind === 'diff' && (
-            <MonacoDiffEditor
-              model={props.model}
-              original={originalContents}
-              edited={hasEdits}
-              invalid={contentIsInvalid}
-              pending={savingChanges}
-              id={props.resource.id}
-              other={other.current}
-            />
-          )}
-          {editorKind === 'inline' && (
-            <MonacoEditor
-              model={props.model}
-              invalid={contentIsInvalid}
-              edited={hasEdits}
-              pending={savingChanges}
-              id={props.resource.id}
-            />
-          )}
-          {editorKind === 'toggles' && (
-            <TogglesEditor
-              model={props.model}
-              invalid={contentIsInvalid}
-              edited={hasEdits}
-              pending={savingChanges}
-              resource={props.resource}
-            />
-          )}
-          {editorKind === 'patches' && (
-            <PatchesEditor
-              model={props.model}
-              pending={savingChanges}
-              edited={hasEdits}
-              invalid={contentIsInvalid}
-              resource={props.resource}
-            />
-          )}
+          <EditorSelection
+            model={props.model}
+            resource={props.resource}
+            additionalButtons={additionalButtons.current}
+          />
         </div>
       </main>
       <footer className={styles.appFooter}>
-        <div className="flex column-gap">
-          <div className="flex column-gap">
-            <Switcher kind={editorKind} toggleKind={setEditorKind} values={switcherKinds} />
-          </div>
-          <div className="flex column-gap" ref={other} />
-          <div className="flex column-gap ml-auto">{buttons}</div>
-        </div>
+        <Footer additionalButtons={additionalButtons} resource={props.resource} model={props.model} />
       </footer>
     </>
   )
+}
+
+/**
+ * @param {object} props
+ * @param {RemoteResource} props.resource
+ * @param {any} props.additionalButtons
+ * @param {import("monaco-editor").editor.ITextModel} props.model
+ */
+function Footer(props) {
+  const [state, send] = RemoteResourcesContext.useActor()
+
+  /** @type {(kind: EditorKind) => void} */
+  const setEditorKind = (kind) => send({ type: 'set editor kind', payload: kind })
+  const revertEdited = () => props.model.setValue(props.resource.current.contents)
+
+  // get the current editor kind + all available ones
+  const { editorKind, values } = useEditorKinds()
+
+  function saveDebugContent() {
+    send({
+      type: 'save edited',
+      payload: {
+        id: props.resource.id,
+        source: { debugTools: { content: props.model.getValue() } },
+      },
+    })
+  }
+
+  const savingChanges = state.matches(['showing editor', 'editing', 'saving edited'])
+  const hasEdits = state.matches(['showing editor', 'editing', 'editor has edited content'])
+  const contentIsInvalid = state.matches(['showing editor', 'contentErrors', 'some'])
+
+  const editorState = contentIsInvalid ? 'not-allowed' : 'enabled'
+
+  // Buttons common to all editors
+  const buttons = (
+    <>
+      <Button onClick={() => revertEdited()} disabled={!hasEdits}>
+        ↩️ Revert
+      </Button>
+      <Button onClick={() => saveDebugContent()} disabled={!hasEdits} data-state={editorState}>
+        {savingChanges ? 'saving...' : '💾 Save + Apply'}
+      </Button>
+    </>
+  )
+  return (
+    <div className="flex column-gap">
+      <div className="flex column-gap">
+        <Switcher kind={editorKind} toggleKind={setEditorKind} values={values} />
+      </div>
+      <div className="flex column-gap" ref={props.additionalButtons} />
+      <div className="flex column-gap ml-auto">{buttons}</div>
+    </div>
+  )
+}
+
+/**
+ * @return {{editorKind: EditorKind, values: {label: string, value: string}[]}}
+ */
+export function useEditorKinds() {
+  return RemoteResourcesContext.useSelector((state) => {
+    const validKinds = state.context.currentResource?.editorKinds || []
+    const nextKind = state.context.editorKind || 'inline'
+    const editorKind = validKinds.includes(nextKind) ? nextKind : 'inline'
+
+    const switcherKinds =
+      validKinds.map((v) => {
+        return {
+          value: v,
+          label: v[0].toUpperCase() + v.slice(1),
+        }
+      }) || []
+
+    return { editorKind: editorKind, values: switcherKinds }
+  })
+}
+
+/**
+ * @param {object} props
+ * @param {RemoteResource} props.resource
+ * @param {any} props.additionalButtons
+ * @param {import("monaco-editor").editor.ITextModel} props.model
+ */
+function EditorSelection(props) {
+  const [state] = RemoteResourcesContext.useActor()
+  const { editorKind } = useEditorKinds()
+  const originalContents = props.resource.current.contents
+
+  const savingChanges = state.matches(['showing editor', 'editing', 'saving edited'])
+  const hasEdits = state.matches(['showing editor', 'editing', 'editor has edited content'])
+  const contentIsInvalid = state.matches(['showing editor', 'contentErrors', 'some'])
+
+  const editors = {
+    diff: (
+      <MonacoDiffEditor
+        model={props.model}
+        original={originalContents}
+        edited={hasEdits}
+        invalid={contentIsInvalid}
+        pending={savingChanges}
+        id={props.resource.id}
+        additionalButtons={props.additionalButtons}
+      />
+    ),
+    inline: (
+      <MonacoEditor
+        model={props.model}
+        invalid={contentIsInvalid}
+        edited={hasEdits}
+        pending={savingChanges}
+        id={props.resource.id}
+      />
+    ),
+    toggles: (
+      <TogglesEditor
+        model={props.model}
+        invalid={contentIsInvalid}
+        edited={hasEdits}
+        pending={savingChanges}
+        resource={props.resource}
+      />
+    ),
+    patches: (
+      <PatchesEditor
+        model={props.model}
+        pending={savingChanges}
+        edited={hasEdits}
+        invalid={contentIsInvalid}
+        resource={props.resource}
+      />
+    ),
+  }
+  return editors[editorKind]
 }
 
 /**

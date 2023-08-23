@@ -15,7 +15,7 @@ import { Button } from './buttons'
  * @param {boolean} props.edited
  * @param {boolean} props.invalid
  * @param {string} props.id
- * @param {any} props.other
+ * @param {any} props.additionalButtons
  */
 export function MonacoDiffEditor(props) {
   const ref = useRef(null)
@@ -82,7 +82,7 @@ export function MonacoDiffEditor(props) {
 
   return (
     <>
-      {props.other ? createPortal(portal, props.other) : null}
+      {props.additionalButtons ? createPortal(portal, props.additionalButtons) : null}
       <div ref={ref} style={{ height: '100%', width: '100%' }}></div>
     </>
   )
