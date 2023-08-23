@@ -156,11 +156,11 @@ export function RemoteResourceEditor(props) {
           />
         </div>
 
-        <div className={styles.sidebar}>
-          <div className={styles.inner}>
-            <button>click</button>
-          </div>
-        </div>
+        {/*<div className={styles.sidebar}>*/}
+        {/*  <div className={styles.inner}>*/}
+        {/*    <button>click</button>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
 
         <div className={styles.mainContent}>
           {editorKind === 'diff' && (

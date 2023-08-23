@@ -1,6 +1,5 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 import { DebugToolsPage } from './page-objects/debug-tools.js'
-console.log(DebugToolsPage)
 
 test.describe('debug tools', () => {
   test.describe('navigation', () => {
