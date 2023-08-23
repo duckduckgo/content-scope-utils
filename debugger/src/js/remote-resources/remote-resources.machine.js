@@ -231,7 +231,10 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
     // eslint-disable-next-line require-await
     loadResources: async (ctx) => {
       const parsed = z.object({ messages: z.instanceof(DebugToolsMessages) }).parse(ctx)
-      return (await parsed.messages.getFeatures()).features.remoteResources.resources
+      const resources = (await parsed.messages.getFeatures()).features.remoteResources.resources
+      const jobs = resources.map((r) => parsed.messages.getRemoteResource({ id: r.id }))
+      const values = await Promise.all(jobs)
+      return values
     },
     // eslint-disable-next-line require-await
     saveNewRemote: async (ctx, evt) => {

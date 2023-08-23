@@ -1,0 +1,15 @@
+{
+  "id": "privacy-configuration",
+  "url": "https://staticcdn.duckduckgo.com/trackerblocking/config/v2/macos-config.json",
+  "name": "Privacy Config",
+  "current": {
+    "source": {
+      "remote": {
+        "url": "https://staticcdn.duckduckgo.com/trackerblocking/config/v2/macos-config.json",
+        "fetchedAt": "2023-07-05T12:34:56Z"
+      }
+    },
+    "contents": "{\n    \"foo\": \"bar\"\n}",
+    "contentType": "application/json"
+  }
+}

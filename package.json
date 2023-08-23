@@ -26,6 +26,7 @@
     "test.unit": "web-test-runner \"unit-tests/**/*.test.js\" --node-resolve",
     "test.unit.watch": "npm run test.unit -- --watch",
     "test.integration": "cd examples/bundled && npm run build && cd - && playwright test",
+    "_posttest.integration": "npm run test.integration --workspaces --if-present",
     "tsc": "tsc",
     "tsc.watch": "tsc --watch",
     "verify.local": "npm run docs && npm run build && npm run lint.write && npm run prettier.write && npm run tsc && npm run test.unit && npm run test.integration"
@@ -43,18 +44,18 @@
   },
   "homepage": "https://github.com/duckduckgo/content-scope-utils#readme",
   "devDependencies": {
+    "@duckduckgo/content-scope-scripts": "github:duckduckgo/content-scope-scripts#08-23-test_support_error_responses",
     "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@playwright/test": "^1.37.1",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
     "@typescript-eslint/parser": "^6.4.1",
     "@web/test-runner": "^0.17.0",
-    "typedoc": "^0.24.8",
-    "typescript": "^5.1.6",
     "eslint": "^8.28.0",
     "prettier": "^3.0.2",
     "serve": "^14.2.1",
-    "@playwright/test": "^1.37.1"
+    "typedoc": "^0.24.8",
+    "typescript": "^5.1.6"
   },
-  "dependencies": {},
   "prettier": {
     "printWidth": 120,
     "singleQuote": true,
@@ -62,5 +63,6 @@
   },
   "workspaces": [
     "debugger"
-  ]
+  ],
+  "dependencies": {}
 }

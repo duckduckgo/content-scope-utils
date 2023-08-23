@@ -15,7 +15,7 @@
             "resources": {
               "type": "array",
               "items": {
-                "$ref": "remote-resource.json"
+                "$ref": "remote-resource-ref.json"
               }
             }
           },

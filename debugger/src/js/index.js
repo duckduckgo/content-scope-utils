@@ -1,10 +1,14 @@
 /**
  * @module Debug Tools
- * @category Special Pages
  *
  * @description
  *
  * A JavaScript application that provides common debugging utilities for DuckDuckGo Browsers
+ *
+ * To get started, check the required messages that need implementing:
+ *
+ * - {@link "Debug Tools Messaging"}
+ *
  */
 import 'urlpattern-polyfill'
 import { DebugToolsMessages, GlobalContext } from './DebugToolsMessages.mjs'
@@ -112,5 +116,3 @@ root.render(
     </AppMachineContext.Provider>
   </GlobalContext.Provider>,
 )
-
-export { DebugToolsMessages }

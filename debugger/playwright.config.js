@@ -9,7 +9,8 @@ export default defineConfig({
     // },
     {
       name: 'apple',
-      testMatch: ['debug-tools.spec.js', 'debug-tools-patches.spec.js'],
+      testMatch: ['*.spec.js'],
+      testDir: 'integration-tests',
       use: { injectName: 'apple', platform: 'macos' },
     },
   ],

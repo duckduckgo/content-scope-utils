@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
     "target": "es2021",
-    "moduleResolution": "node",
     "module": "ESNext",
-    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    "moduleResolution": "node",
     "alwaysStrict": true,
     "allowJs": true,
     "checkJs": true,

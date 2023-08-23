@@ -5,11 +5,12 @@ import styles from './switch.module.css'
  * @param {string} props.id
  * @param {(checked: import('react').ChangeEvent<HTMLInputElement>) => void} props.onChange
  * @param {boolean} props.disabled
+ * @param {string} props.label
  * @param {import("react").ReactNode} props.children
  */
 export function Switch(props) {
   return (
-    <label className={styles.switch}>
+    <label className={styles.switch} aria-label={props.label}>
       <input
         type="checkbox"
         name="toggle"

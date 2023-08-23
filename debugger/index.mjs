@@ -41,11 +41,13 @@ const copyJobs = [
     src: join(CWD, 'schema/__fixtures__'),
     dest: join(BUILD, '/fixtures'),
   },
-  {
+]
+if (NODE_ENV === 'production') {
+  copyJobs.push({
     src: BUILD,
     dest: join(ROOT, 'docs/debugger', VERSION),
-  },
-]
+  })
+}
 
 const buildJob = {
   src: join(CWD, 'src/js/index.js'),
