@@ -9,6 +9,7 @@
 
 import {
   getFeaturesResponseSchema,
+  getRemoteResourceParamsSchema,
   getTabsResponseSchema,
   remoteResourceSchema,
   updateResourceParamsSchema,
@@ -20,6 +21,7 @@ import { createContext } from 'react'
  * @typedef {import("../../schema/__generated__/schema.types").GetTabsResponse} GetTabsResponse
  * @typedef {import("../../schema/__generated__/schema.types").GetFeaturesResponse} GetFeaturesResponse
  * @typedef {import("../../schema/__generated__/schema.types").UpdateResourceParams} UpdateResourceParams
+ * @typedef {import("../../schema/__generated__/schema.types").GetRemoteResourceParams} GetRemoteResourceParams
  */
 
 /**
@@ -46,9 +48,26 @@ export class DebugToolsMessages {
   async getFeatures() {
     const response = await this.messaging.request('getFeatures')
     const parsed = getFeaturesResponseSchema.parse(response)
-    const resources = parsed.features.remoteResources.resources
-    parsed.features.remoteResources.resources = resources.map(formatResource)
+    console.log('parsed', parsed)
     return parsed
+  }
+
+  /**
+   * Retrieve a single Remote Resource
+   *
+   * @param {GetRemoteResourceParams} params
+   * @return {Promise<RemoteResource>}
+   */
+  async getRemoteResource(params) {
+    const outgoing = getRemoteResourceParamsSchema.parse(params)
+    const response = await this.messaging.request('getRemoteResource', outgoing)
+    const remoteResourceResponse = remoteResourceSchema.safeParse(response)
+    if (remoteResourceResponse.success) {
+      const formatted = formatResource(remoteResourceResponse.data)
+      return formatted
+    }
+    console.log(remoteResourceResponse.error)
+    throw new Error('todo: error handling')
   }
 
   /**

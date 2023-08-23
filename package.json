@@ -26,6 +26,7 @@
     "test.unit": "web-test-runner \"unit-tests/**/*.test.js\" --node-resolve",
     "test.unit.watch": "npm run test.unit -- --watch",
     "test.integration": "cd examples/bundled && npm run build && cd - && playwright test",
+    "posttest.integration": "npm run test.integration --workspaces --if-present",
     "tsc": "tsc",
     "tsc.watch": "tsc --watch",
     "verify.local": "npm run docs && npm run build && npm run lint.write && npm run prettier.write && npm run tsc && npm run test.unit && npm run test.integration"

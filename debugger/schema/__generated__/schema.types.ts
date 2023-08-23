@@ -19,18 +19,64 @@
  */
 export interface API {
   getFeatures?: GetFeaturesResponse
+  getRemoteResource?: GetRemoteResourceParams
   updateResource?: UpdateResourceParams
   getTabs?: GetTabsResponse
+  remoteResource?: RemoteResource
 }
 export interface GetFeaturesResponse {
   features: {
     remoteResources: {
-      resources: RemoteResource[]
+      resources: RemoteResourceRef[]
     }
     userScripts?: {
       scripts: UserScript[]
     }
   }
+}
+export interface RemoteResourceRef {
+  id: string
+  url: string
+  /**
+   * How this resources is referred to in the UI.
+   */
+  name: string
+}
+export interface UserScript {
+  name: string
+  id: string
+  contents: string
+}
+/**
+ * Used to retrieve a RemoteResource
+ */
+export interface GetRemoteResourceParams {
+  id: string
+}
+export interface UpdateResourceParams {
+  id: string
+  source: UpdatingRemoteSource | UpdatingDebugToolsSource
+}
+/**
+ * This is not the same as the source in the remote-resource schema. This is a subset of that schema that omits the 'fetchedAt' key.
+ */
+export interface UpdatingRemoteSource {
+  remote: {
+    url: string
+  }
+}
+export interface UpdatingDebugToolsSource {
+  debugTools: {
+    content: string
+  }
+}
+export interface GetTabsResponse {
+  tabs: Tab[]
+}
+export interface Tab {
+  id?: string
+  url: string
+  title?: string
 }
 export interface RemoteResource {
   id: string
@@ -61,34 +107,4 @@ export interface DebugToolsSource {
   debugTools: {
     modifiedAt: string
   }
-}
-export interface UserScript {
-  name: string
-  id: string
-  contents: string
-}
-export interface UpdateResourceParams {
-  id: string
-  source: UpdatingRemoteSource | UpdatingDebugToolsSource
-}
-/**
- * This is not the same as the source in the remote-resource schema. This is a subset of that schema that omits the 'fetchedAt' key.
- */
-export interface UpdatingRemoteSource {
-  remote: {
-    url: string
-  }
-}
-export interface UpdatingDebugToolsSource {
-  debugTools: {
-    content: string
-  }
-}
-export interface GetTabsResponse {
-  tabs: Tab[]
-}
-export interface Tab {
-  id?: string
-  url: string
-  title?: string
 }

@@ -133,6 +133,7 @@ export class DebugToolsPage {
     this.mocks.defaultResponses({
       getFeatures,
       getTabs,
+      getRemoteResource: resource,
       updateResource: updatedResource,
     })
 
@@ -214,8 +215,9 @@ export class DebugToolsPage {
   /**
    * @returns {Promise<void>}
    */
-  async hasLoaded() {
+  async hasLoadedWithFeature(feature = 'adClickAttribution') {
     await this.locators.loaded().waitFor()
+    await this.locators.featureToggle(feature).waitFor()
   }
 
   /**
@@ -520,6 +522,7 @@ export class DebugToolsPage {
     await this.page.addInitScript(mockResponses, {
       responses: {
         getFeatures,
+        getRemoteResource: resource,
       },
     })
   }
@@ -545,6 +548,7 @@ export class DebugToolsPage {
     await this.page.addInitScript(mockResponses, {
       responses: {
         getFeatures,
+        getRemoteResource: resource,
       },
     })
   }

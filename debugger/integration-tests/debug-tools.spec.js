@@ -7,7 +7,8 @@ test.describe('debug tools', () => {
       const dt = DebugToolsPage.create(page, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await page.pause()
+      await dt.hasLoadedWithFeature()
     })
   })
 
@@ -16,7 +17,7 @@ test.describe('debug tools', () => {
       const dt = DebugToolsPage.create(page, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
       await dt.refreshesCurrentResource()
       await dt.refreshedRemote()
     })
@@ -24,7 +25,7 @@ test.describe('debug tools', () => {
       const dt = DebugToolsPage.create(page, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
       await dt.overrideRemoteUrl()
       await dt.submitRemoteUrlForm()
       await dt.savedNewRemoteUrl()
@@ -33,7 +34,7 @@ test.describe('debug tools', () => {
       const dt = DebugToolsPage.create(page, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
 
       const error = 'TEST oops! TEST'
 
@@ -56,7 +57,7 @@ test.describe('debug tools', () => {
       const dt = DebugToolsPage.create(page, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
       await dt.switchesTo('inline')
       await dt.editsPreview()
       await dt.saves()
@@ -65,7 +66,7 @@ test.describe('debug tools', () => {
       const dt = DebugToolsPage.create(page, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
       await dt.switchesTo('inline')
       await dt.editsPreview('[]') // <- completely invalid type for this resource
       await dt.switchesTo('toggles')
@@ -75,7 +76,7 @@ test.describe('debug tools', () => {
       const dt = DebugToolsPage.create(page, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
 
       await test.step('toggles a feature globally', async () => {
         await dt.togglesGlobally('autofill')
@@ -92,14 +93,14 @@ test.describe('debug tools', () => {
       const dt = DebugToolsPage.create(page, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
       await dt.showsEmptyDomainsState()
     })
     test('handles adding a first domain exception', async ({ page }, workerInfo) => {
       const dt = DebugToolsPage.create(page, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
 
       await test.step('toggles a feature for example.com', async () => {
         // click add, because empty initially
@@ -157,7 +158,7 @@ test.describe('debug tools', () => {
       const dt = DebugToolsPage.create(page, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
       await dt.switchesTogglesTo('domain-exceptions')
       await dt.receivesNewTabs({
         tabs: [{ url: 'https://example.com/123/abc' }, { url: 'https://duckduckgo.com/?q=123' }],
@@ -173,7 +174,7 @@ test.describe('debug tools', () => {
         tabs: [{ url: 'https://example.com/123/abc' }, { url: 'https://duckduckgo.com/?q=123' }],
       })
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
       await dt.switchesTogglesTo('domain-exceptions')
       await dt.selectTab('duckduckgo.com')
       await dt.currentDomainIsStoredInUrl('duckduckgo.com')
@@ -184,7 +185,7 @@ test.describe('debug tools', () => {
       await dt.enabled()
       await dt.withTabsResponse({ tabs: [{ url: 'https://example.com/123/abc' }] })
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
       await dt.switchesTogglesTo('domain-exceptions')
       await dt.chooseTheOnlyOpenTab()
       await dt.currentDomainIsStoredInUrl('example.com')
@@ -194,7 +195,7 @@ test.describe('debug tools', () => {
       const dt = DebugToolsPage.create(page, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature()
       await dt.switchesTo('inline')
       await dt.editsPreview()
 

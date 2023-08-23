@@ -8,11 +8,17 @@
     "getFeatures": {
       "$ref": "./getFeatures.json"
     },
+    "getRemoteResource": {
+      "$ref": "./getRemoteResource.json"
+    },
     "updateResource": {
       "$ref": "./updateResource.json"
     },
     "getTabs": {
       "$ref": "./getTabs.json"
+    },
+    "remoteResource": {
+      "$ref": "./remote-resource.json"
     }
   }
 }

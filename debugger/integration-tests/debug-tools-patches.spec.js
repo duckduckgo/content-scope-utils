@@ -59,7 +59,7 @@ test.describe('Feature: Patches', () => {
       await dt.enabled()
       await dt.withPrivacyConfig(initial)
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature('abc')
       await dt.switchesTo('inline')
       await dt.editsPreview(editedString)
     })
@@ -114,7 +114,7 @@ test.describe('Feature: Patches', () => {
 
     await test.step('When I load the page', async () => {
       await dt.openRemoteResourceEditor()
-      await dt.hasLoaded()
+      await dt.hasLoadedWithFeature('abc')
     })
 
     await test.step('Then I can still copy the patch to my clipboard', async () => {
