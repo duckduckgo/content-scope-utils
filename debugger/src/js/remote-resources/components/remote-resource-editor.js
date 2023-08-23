@@ -14,7 +14,6 @@ import { Button } from '../../components/buttons'
  * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
  * @typedef {import('../../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
  * @typedef {import("../remote-resources.machine").EditorKind} EditorKind
- * @typedef {import("../remote-resources.machine").ToggleKind} ToggleKind
  * @typedef {import('../../app/components/feature-nav').SubNavItem} SubNavItem
  */
 
@@ -32,8 +31,6 @@ export function RemoteResourceEditor(props) {
   const saveNewRemote = (resp) => send({ type: 'save new remote', payload: resp })
   /** @type {(kind: EditorKind) => void} */
   const setEditorKind = (kind) => send({ type: 'set editor kind', payload: kind })
-  /** @type {(kind: ToggleKind) => void} */
-  const setToggleKind = (kind) => send({ type: 'set toggle kind', payload: kind })
   const showOverrideForm = () => send({ type: 'show url editor' })
   const copyPatch = () => {
     state.children.patches?.send({ type: 'COPY_TO_CLIPBOARD' })
@@ -97,11 +94,8 @@ export function RemoteResourceEditor(props) {
 
   /** @type {string[]} */
   const validKinds = state.context.currentResource?.editorKinds || []
-  const validToggleKinds = state.context.currentResource?.toggleKinds || []
   const nextKind = state.context.editorKind || 'inline'
-  const nextToggleKind = state.context.toggleKind || 'global-feature'
   const editorKind = validKinds.includes(nextKind) ? nextKind : 'inline'
-  const toggleKind = validToggleKinds.includes(nextToggleKind) ? nextToggleKind : 'global-feature'
 
   const switcherKinds =
     validKinds.map((v) => {
@@ -190,9 +184,6 @@ export function RemoteResourceEditor(props) {
               edited={hasEdits}
               pending={savingChanges}
               resource={props.resource}
-              toggleKind={toggleKind}
-              toggleKinds={validToggleKinds}
-              onToggleKind={setToggleKind}
             />
           )}
           {editorKind === 'patches' && (

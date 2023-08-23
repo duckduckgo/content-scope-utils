@@ -9,15 +9,13 @@ import invariant from 'tiny-invariant'
  * @typedef {import("./remote-resources.machine.types").RemoteResourcesBroadcastEvents} RemoteResourcesBroadcastEvents
  */
 
-/** @type {Record<string, {editorKinds: EditorKind[], toggleKinds: ToggleKind[]}>} */
+/** @type {Record<string, {editorKinds: EditorKind[]}>} */
 const editorKindsMapping = {
   'privacy-configuration': {
     editorKinds: ['toggles', 'inline', 'diff', 'patches'],
-    toggleKinds: ['global-feature', 'domain-exceptions', 'unprotected'],
   },
   default: {
     editorKinds: ['inline', 'diff'],
-    toggleKinds: [],
   },
 }
 
@@ -118,9 +116,6 @@ const _remoteResourcesMachine = createMachine({
           initial: 'editor has original content',
           on: {
             'set editor kind': {
-              actions: ['pushToRoute'],
-            },
-            'set toggle kind': {
               actions: ['pushToRoute'],
             },
             'set current domain': {
@@ -320,7 +315,6 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         return {
           id: matchingId,
           editorKinds: kinds.editorKinds,
-          toggleKinds: kinds.toggleKinds,
         }
       },
     }),
@@ -343,23 +337,6 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
           }
         }
         return 'inline' // default
-      },
-      toggleKind: (ctx) => {
-        const parentState = ctx.parent?.state?.context
-        const search = parentState.search
-        const parsed = ToggleKind.safeParse(search?.get('toggleKind'))
-        if (parsed.success) {
-          if (ctx.currentResource?.toggleKinds.includes(parsed.data)) {
-            return parsed.data
-          }
-        }
-        {
-          const parsed = ToggleKind.safeParse(ctx.currentResource?.toggleKinds[0])
-          if (parsed.success) {
-            return parsed.data
-          }
-        }
-        return 'global-feature' // default
       },
       currentDomain: (ctx) => {
         const parentState = ctx.parent?.state?.context
@@ -459,13 +436,6 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
           pathname,
           search: next.toString(),
         })
-      } else if (evt.type === 'set toggle kind') {
-        next.set('toggleKind', evt.payload) // setting the toggle kind
-        const pathname = '/remoteResources/' + ctx.currentResource.id
-        ctx.parent.state.context.history.push({
-          pathname,
-          search: next.toString(),
-        })
       } else if (evt.type === 'set current domain') {
         next.set('currentDomain', evt.payload) // setting the toggle kind
         const pathname = '/remoteResources/' + ctx.currentResource.id
@@ -515,14 +485,11 @@ async function minDuration(cb, minTime = 500) {
 }
 
 export const EditorKind = z.enum(['inline', 'diff', 'toggles', 'patches'])
-export const ToggleKind = z.enum(['global-feature', 'domain-exceptions', 'unprotected'])
 export const CurrentResource = z.object({
   id: z.string(),
   editorKinds: z.array(EditorKind),
-  toggleKinds: z.array(ToggleKind),
 })
 /** @typedef {import("zod").infer<typeof EditorKind>} EditorKind */
-/** @typedef {import("zod").infer<typeof ToggleKind>} ToggleKind */
 /** @typedef {import("zod").infer<typeof CurrentResource>} CurrentResource */
 
 /**

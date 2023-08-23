@@ -10,7 +10,6 @@ import styles from './toggles-editor.module.css'
 /**
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
  * @typedef {import('../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
- * @typedef {import('../remote-resources/remote-resources.machine').ToggleKind} ToggleKind
  * @typedef {import('../types').TabWithHostname} TabWithHostname
  * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
  * @typedef {import('react').ReactNode} ReactNode
