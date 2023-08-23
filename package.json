@@ -64,7 +64,5 @@
   "workspaces": [
     "debugger"
   ],
-  "dependencies": {
-
-  }
+  "dependencies": {}
 }
