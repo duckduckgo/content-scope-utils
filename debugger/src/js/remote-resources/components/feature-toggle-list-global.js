@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ToggleList } from './toggle-list'
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { parse } from 'tldts'
+import { toggleException, toggleFeature } from '../../transforms'
 
 // @ts-expect-error - debugging;
 window._parse = parse
@@ -39,28 +40,22 @@ export function FeatureToggleListGlobal(props) {
   }, [current])
 
   /**
-   * @param {string} key - a feature name, like `duckPlayer`
+   * @param {string} featureName - a feature name, like `duckPlayer`
    */
-  function toggleItem(key) {
+  function toggleItem(featureName) {
     const parsed = JSON.parse(props.model.getValue())
-    const prev = parsed.features[key].state
-    parsed.features[key].state = prev === 'enabled' ? 'disabled' : 'enabled'
+    toggleFeature(parsed, featureName)
     const asString = JSON.stringify(parsed, null, 4)
     props.model.setValue(asString)
   }
 
   /**
-   * @param {string} key - a feature name, like `duckPlayer`
+   * @param {string} featureName - a feature name, like `duckPlayer`
    * @param {string} domain - the domain to toggle
    */
-  function toggleDomain(key, domain) {
+  function toggleDomain(featureName, domain) {
     const parsed = JSON.parse(props.model.getValue())
-    const prev = parsed.features[key].exceptions.findIndex((x) => x.domain === domain)
-    if (prev === -1) {
-      parsed.features[key].exceptions.push({ domain: domain, reason: 'debug tools' })
-    } else {
-      parsed.features[key].exceptions.splice(prev, 1)
-    }
+    toggleException(parsed, featureName, domain)
     const asString = JSON.stringify(parsed, null, 4)
     props.model.setValue(asString)
   }

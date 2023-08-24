@@ -6,48 +6,50 @@
       "exceptions": [
         {
           "domain": "freecodecamp.org",
-          "reason": "Clicking 'get started' reloads the page and does not progress to the login page."
-        },
-        {
-          "domain": "www.audiosciencereview.com",
-          "reason": "Pages on the site end up in redirect loops in Firefox."
-        },
-        {
-          "domain": "golf.com",
-          "reason": "https://github.com/duckduckgo/privacy-configuration/issues/812"
+          "reason": "https://github.com/duckduckgo/privacy-configuration/issues/328"
         }
       ],
       "settings": {
         "deepExtractionEnabled": true,
         "deepExtractionTimeout": 1500,
         "linkFormats": [
-          "^https?:\\/\\/(?:w{3}\\.)?google\\.\\S{2,}\\/amp\\/s\\/(\\S+)$",
-          "^https?:\\/\\/\\S+ampproject\\.org\\/\\S\\/s\\/(\\S+)$"
+          "^https?:\\/\\/(?:w{3}\\.)?google\\.\\S{2,}\\/amp\\/s\\/(\\S+)$"
         ],
         "keywords": [
           "=amp",
           "amp=",
           "&amp",
-          "amp&",
-          "/amp",
-          "amp/",
-          ".amp",
-          "amp.",
-          "%amp",
-          "amp%",
-          "_amp",
-          "amp_",
-          "?amp"
+          "amp&"
         ]
       },
       "state": "enabled",
       "hash": "15f5da5429e7fd7145c35ed920d28c35"
+    },
+    "trackerAllowlist": {
+      "state": "enabled",
+      "settings": {
+        "allowlistedTrackers": {
+          "3lift.com": {
+            "rules": [
+              {
+                "rule": "tlx.3lift.com/header/auction",
+                "domains": [
+                  "aternos.org"
+                ],
+                "reason": "https://github.com/duckduckgo/privacy-configuration/issues/328"
+              }
+            ]
+          }
+        }
+      },
+      "exceptions": [],
+      "hash": "8da977185d316800299b1f019ae71e2d"
     }
   },
   "unprotectedTemporary": [
     {
-      "domain": "fidelity.com",
-      "reason": "https://github.com/duckduckgo/privacy-configuration/issues/794"
+      "domain": "example.com",
+      "reason": "debug tools"
     }
   ]
 }
