@@ -5,6 +5,7 @@ export function NotFound() {
     <main className={styles.appMain}>
       <div className="row">
         <p>Not found. Try a link from the top</p>
+        <p>Or add a file inside `features`</p>
       </div>
     </main>
   )

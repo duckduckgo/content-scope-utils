@@ -159,7 +159,9 @@ export const appMachine = createMachine(
       assignFeatures: assign({
         features: (_, evt) => {
           const data = getFeaturesResponseSchema.parse(/** @type {any} */ (evt).data)
-          return data.features
+          return {
+            ...data.features,
+          }
         },
       }),
       serviceError: pure((ctx, evt) => {

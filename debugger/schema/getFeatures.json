@@ -5,7 +5,7 @@
   "additionalProperties": false,
   "properties": {
     "features": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "type": "object",
       "properties": {
         "remoteResources": {

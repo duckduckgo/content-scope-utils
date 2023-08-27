@@ -18,93 +18,95 @@
  * @internal
  */
 export interface API {
-  getFeatures?: GetFeaturesResponse
-  getRemoteResource?: GetRemoteResourceParams
-  updateResource?: UpdateResourceParams
-  getTabs?: GetTabsResponse
-  remoteResource?: RemoteResource
+  getFeatures?: GetFeaturesResponse;
+  getRemoteResource?: GetRemoteResourceParams;
+  updateResource?: UpdateResourceParams;
+  getTabs?: GetTabsResponse;
+  remoteResource?: RemoteResource;
 }
 export interface GetFeaturesResponse {
   features: {
     remoteResources: {
-      resources: RemoteResourceRef[]
-    }
+      resources: RemoteResourceRef[];
+    };
     userScripts?: {
-      scripts: UserScript[]
-    }
-  }
+      scripts: UserScript[];
+    };
+    [k: string]: unknown;
+  };
 }
 export interface RemoteResourceRef {
-  id: string
-  url: string
+  id: string;
+  url: string;
   /**
    * How this resources is referred to in the UI.
    */
-  name: string
+  name: string;
 }
 export interface UserScript {
-  name: string
-  id: string
-  contents: string
+  name: string;
+  id: string;
+  contents: string;
 }
 /**
  * Used to retrieve a RemoteResource
  */
 export interface GetRemoteResourceParams {
-  id: string
+  id: string;
 }
 export interface UpdateResourceParams {
-  id: string
-  source: UpdatingRemoteSource | UpdatingDebugToolsSource
+  id: string;
+  source: UpdatingRemoteSource | UpdatingDebugToolsSource;
 }
 /**
  * This is not the same as the source in the remote-resource schema. This is a subset of that schema that omits the 'fetchedAt' key.
  */
 export interface UpdatingRemoteSource {
   remote: {
-    url: string
-  }
+    url: string;
+  };
 }
 export interface UpdatingDebugToolsSource {
   debugTools: {
-    content: string
-  }
+    content: string;
+  };
 }
 export interface GetTabsResponse {
-  tabs: Tab[]
+  tabs: Tab[];
 }
 export interface Tab {
-  id?: string
-  url: string
-  title?: string
+  id?: string;
+  url: string;
+  title?: string;
 }
 export interface RemoteResource {
-  id: string
-  url: string
+  id: string;
+  url: string;
   /**
    * How this resources is referred to in the UI.
    */
-  name: string
+  name: string;
   current: {
-    source: RemoteSource | DebugToolsSource
+    source: RemoteSource | DebugToolsSource;
     /**
      * The contents of the resource - always as a string value.
      */
-    contents: string
+    contents: string;
     /**
      * A mime type for the contents of the resource.
      */
-    contentType: string
-  }
+    contentType: string;
+  };
 }
 export interface RemoteSource {
   remote: {
-    url: string
-    fetchedAt: string
-  }
+    url: string;
+    fetchedAt: string;
+  };
 }
 export interface DebugToolsSource {
   debugTools: {
-    modifiedAt: string
-  }
+    modifiedAt: string;
+  };
 }
+

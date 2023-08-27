@@ -59,7 +59,12 @@ export class DebugToolsMessages {
   async getFeatures() {
     const response = await this.messaging.request('getFeatures')
     const parsed = getFeaturesResponseSchema.parse(response)
-    return parsed
+    return {
+      features: {
+        ...parsed.features,
+        // add additional features here if the native side isn't ready
+      }
+    }
   }
 
   /**
