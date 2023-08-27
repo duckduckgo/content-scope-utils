@@ -3,26 +3,25 @@ import { DebugToolsPage } from './page-objects/debug-tools.js'
 
 test.describe('debug tools', () => {
   test.describe('navigation', () => {
-    test('loads the application, defaults to remote resource editor', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('loads the application, defaults to remote resource editor', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
-      await page.pause()
       await dt.hasLoadedWithFeature()
     })
   })
 
   test.describe('remote url', () => {
-    test('refreshes current resource', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('refreshes current resource', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
       await dt.refreshesCurrentResource()
       await dt.refreshedRemote()
     })
-    test('sets a new remote url', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('sets a new remote url', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
@@ -30,8 +29,8 @@ test.describe('debug tools', () => {
       await dt.submitRemoteUrlForm()
       await dt.savedNewRemoteUrl()
     })
-    test('shows an error on updating a resource', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('shows an error on updating a resource', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
@@ -53,8 +52,8 @@ test.describe('debug tools', () => {
   })
 
   test.describe('editor', () => {
-    test('updates a resource', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('updates a resource', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
@@ -62,8 +61,8 @@ test.describe('debug tools', () => {
       await dt.editsPreview()
       await dt.saves()
     })
-    test('handles when input cannot be used with toggles (because of edits)', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('handles when input cannot be used with toggles (because of edits)', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
@@ -72,8 +71,8 @@ test.describe('debug tools', () => {
       await dt.switchesTo('toggles')
       await dt.showsErrorText('Cannot use toggles because the format was invalidated (probably because of edits)')
     })
-    test('handles when a global toggle is clicked', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('handles when a global toggle is clicked', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
@@ -89,15 +88,15 @@ test.describe('debug tools', () => {
         dt.featureWasDisabledGlobally(saved.source.debugTools.content, 'autofill')
       })
     })
-    test('shows an empty state when no domain is selected', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('shows an empty state when no domain is selected', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
       await dt.showsEmptyDomainsState()
     })
-    test('handles adding a first domain exception', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('handles adding a first domain exception', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
@@ -119,8 +118,8 @@ test.describe('debug tools', () => {
         // todo(Shane): add hash check here
       })
     })
-    test('edits the current domain in domain exceptions', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('edits the current domain in domain exceptions', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openDomainExceptions({
         currentDomain: 'example.com',
@@ -136,8 +135,8 @@ test.describe('debug tools', () => {
       await dt.exceptionsShownFor('example.ca')
       await dt.currentDomainIsStoredInUrl('example.ca')
     })
-    test('adds a new domain when one already exists', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('adds a new domain when one already exists', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
 
       await dt.openDomainExceptions({
@@ -154,8 +153,8 @@ test.describe('debug tools', () => {
       await dt.exceptionsShownFor('example.ca')
       await dt.currentDomainIsStoredInUrl('example.ca')
     })
-    test('handles tabs arriving after page load', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('handles tabs arriving after page load', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
@@ -167,8 +166,8 @@ test.describe('debug tools', () => {
       await dt.currentDomainIsStoredInUrl('duckduckgo.com')
       await dt.exceptionsShownFor('duckduckgo.com')
     })
-    test('handles choosing an open tab from many', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('handles choosing an open tab from many', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.withTabsResponse({
         tabs: [{ url: 'https://example.com/123/abc' }, { url: 'https://duckduckgo.com/?q=123' }],
@@ -180,8 +179,8 @@ test.describe('debug tools', () => {
       await dt.currentDomainIsStoredInUrl('duckduckgo.com')
       await dt.exceptionsShownFor('duckduckgo.com')
     })
-    test('handles choosing an open tab from single', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('handles choosing an open tab from single', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.withTabsResponse({ tabs: [{ url: 'https://example.com/123/abc' }] })
       await dt.openRemoteResourceEditor()
@@ -191,8 +190,8 @@ test.describe('debug tools', () => {
       await dt.currentDomainIsStoredInUrl('example.com')
       await dt.exceptionsShownFor('example.com')
     })
-    test('switches editor kind', async ({ page }, workerInfo) => {
-      const dt = DebugToolsPage.create(page, workerInfo)
+    test('switches editor kind', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()

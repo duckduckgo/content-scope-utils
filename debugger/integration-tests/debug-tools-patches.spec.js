@@ -24,8 +24,8 @@ import { DebugToolsPage } from './page-objects/debug-tools'
  */
 
 test.describe('Feature: Patches', () => {
-  test('Scenario: copying a patch for an override', async ({ page }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, workerInfo)
+  test('Scenario: copying a patch for an override', async ({ page, baseURL }, workerInfo) => {
+    const dt = DebugToolsPage.create(page, baseURL, workerInfo)
     const initial = {
       unprotectedTemporary: [],
       features: {
@@ -76,8 +76,8 @@ test.describe('Feature: Patches', () => {
       await dt.patchIsStoredInLocalStorage('privacy-configuration', initial, edited)
     })
   })
-  test('Scenario: restoring a patch', async ({ page }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, workerInfo)
+  test('Scenario: restoring a patch', async ({ page, baseURL }, workerInfo) => {
+    const dt = DebugToolsPage.create(page, baseURL, workerInfo)
     const initial = {
       unprotectedTemporary: [],
       features: {

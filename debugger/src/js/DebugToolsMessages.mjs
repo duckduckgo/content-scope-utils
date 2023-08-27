@@ -59,7 +59,6 @@ export class DebugToolsMessages {
   async getFeatures() {
     const response = await this.messaging.request('getFeatures')
     const parsed = getFeaturesResponseSchema.parse(response)
-    console.log('parsed', parsed)
     return parsed
   }
 

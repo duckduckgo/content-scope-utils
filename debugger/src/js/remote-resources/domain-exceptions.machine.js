@@ -188,7 +188,6 @@ export function useDomainState(params) {
       isValidDomain: (ctx, event) => {
         if (event.type === 'SAVE_NEW') {
           if (tryCreateDomain(event.domain)) {
-            console.log('is valid:')
             return true
           }
         }

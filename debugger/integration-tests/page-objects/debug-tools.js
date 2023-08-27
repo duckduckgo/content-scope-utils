@@ -9,6 +9,7 @@ import { readFileSync } from 'node:fs'
 import jsonpatch from 'fast-json-patch'
 import { perPlatform } from '@duckduckgo/content-scope-scripts/integration-test/playwright/type-helpers.mjs'
 import { ResourcePatches, STORAGE_KEY } from '../../src/js/remote-resources/patches-machine'
+import invariant from 'tiny-invariant'
 
 const DEFAULT_EDIT_VALUE = '{ "foo": "baz" }'
 
@@ -97,12 +98,14 @@ export class DebugToolsPage {
 
   /**
    * @param {import("@playwright/test").Page} page
+   * @param {string} baseURL
    * @param {Build} build
    * @param {PlatformInfo} platform
    */
-  constructor(page, build, platform) {
+  constructor(page, baseURL, build, platform) {
     this.page = page
     this.build = build
+    this.baseURL = baseURL
     this.platform = platform
     this.mocks = new Mocks(page, build, platform, {
       context: 'specialPages',
@@ -169,8 +172,10 @@ export class DebugToolsPage {
    * @return {Promise<void>}
    */
   async openPage(urlParams) {
-    const url = this.basePath + '#?' + urlParams.toString()
-    await this.page.goto(url)
+    const url = new URL(this.basePath, this.baseURL)
+    url.searchParams.set('platform', this.build.name)
+    url.hash = '?' + urlParams.toString()
+    await this.page.goto(url.href)
   }
 
   /**
@@ -369,12 +374,14 @@ export class DebugToolsPage {
 
   /**
    * @param {import("@playwright/test").Page} page
+   * @param {string|undefined} baseURL
    * @param {import("@playwright/test").TestInfo} testInfo
    */
-  static create(page, testInfo) {
+  static create(page, baseURL, testInfo) {
     // Read the configuration object to determine which platform we're testing against
     const { platformInfo, build } = perPlatform(testInfo.project.use)
-    return new DebugToolsPage(page, build, platformInfo)
+    invariant(baseURL, 'cannot continue without baseURL')
+    return new DebugToolsPage(page, baseURL, build, platformInfo)
   }
 
   /**
