@@ -85,7 +85,12 @@ const withContext = appMachine.withContext({
     try {
       const featureModule = await import(`./features/${featureName}.feature.js`)
       if ('feature' in featureModule) {
-        return featureModule.feature
+        /** @type {import('./types').FeatureModuleDescription} */
+        const output = {
+          title: featureModule.feature.title,
+          order: featureModule.feature.order,
+        }
+        return output
       }
     } catch (e) {
       console.error('could not match a feature name to a module...', featureName)

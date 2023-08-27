@@ -110,9 +110,13 @@ export const appMachine = createMachine(
        */
       handleFirstLoad: async (ctx) => {
         // retrieve all known feature modules (just enough meta data)
-        const preModuleJobs = Object.keys(ctx.features || {}).map((featureName) => {
+        const preModuleJobs = Object.keys(ctx.features || {}).map((featureName, index) => {
           return ctx.preLoader(featureName).then((preModule) => {
-            return { ...preModule, pathname: '/' + featureName }
+            return {
+              ...preModule,
+              pathname: '/' + featureName,
+              order: index,
+            }
           })
         })
 
@@ -125,7 +129,7 @@ export const appMachine = createMachine(
         const result = {
           search,
           feature,
-          preModules,
+          preModules: preModules.sort((a, b) => b.order - a.order),
         }
 
         return result
