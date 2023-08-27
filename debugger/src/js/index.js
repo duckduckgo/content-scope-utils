@@ -10,7 +10,6 @@
  * - {@link "Debug Tools Messaging"}
  *
  */
-import 'urlpattern-polyfill'
 import { DebugToolsMessages, GlobalContext } from './DebugToolsMessages.mjs'
 import { createSpecialPagesMessaging } from './create-messaging'
 import { createRoot } from 'react-dom/client'
@@ -18,7 +17,6 @@ import { inspect } from '@xstate/inspect'
 import { appMachine } from './app/app.machine'
 import { MockImpl } from './mock-transport'
 import { App, AppMachineContext } from './app/components/app'
-import { lazy } from 'react'
 import { createHashHistory } from 'history'
 
 const params = new URLSearchParams(window.location.search)
@@ -73,33 +71,53 @@ const history = createHashHistory(window)
 const withContext = appMachine.withContext({
   error: null,
   features: null,
-  params: null,
-  match: null,
-  page: null,
+  feature: null,
   messages,
   search: new URLSearchParams(),
   history,
-  routes: {
-    '/remoteResources/:id': {
-      loader: lazy(() => import('./remote-resources/remote-resources.page')),
-      title: 'Remote Resources',
-      feature: 'remoteResources',
-    },
-    '/remoteResources/**': {
-      loader: lazy(() => import('./remote-resources/remote-resources.page')),
-      title: 'Remote Resources',
-      feature: 'remoteResources',
-    },
-    '/userScripts/**': {
-      loader: lazy(() => import('./components/user-scripts')),
-      title: 'User Scripts',
-      feature: 'userScripts',
-    },
-    '**': {
-      loader: lazy(() => import('./components/not-found')),
-      title: 'Not Found',
-      feature: 'notFound',
-    },
+  preModules: [],
+  currentModule: null,
+  /**
+   * @param featureName
+   * @return {Promise<import('./types').FeatureModuleDescription>}
+   */
+  preLoader: async (featureName) => {
+    try {
+      const featureModule = await import(`./features/${featureName}.feature.js`)
+      if ('feature' in featureModule) {
+        return featureModule.feature
+      }
+    } catch (e) {
+      console.error('could not match a feature name to a module...', featureName)
+    }
+    throw new Error('unreachable - should fallback to notFound')
+  },
+  /**
+   * @param segment
+   * @return {Promise<import('./types').Feature>}
+   */
+  loader: async (segment) => {
+    try {
+      const featureModule = await import(`./features/${segment}.feature.js`)
+      if ('feature' in featureModule) {
+        const page = await featureModule.feature.loader()
+        return {
+          page,
+          title: featureModule.feature.title,
+          pathname: '/' + segment,
+        }
+      }
+    } catch (e) {
+      // console.log('error', e)
+      const notFound = await import(`./features/notFound.feature.js`)
+      const page = await notFound.feature.loader()
+      return {
+        page,
+        title: notFound.feature.title,
+        pathname: '/notFound',
+      }
+    }
+    throw new Error('unreachable - should fallback to notFound')
   },
 })
 
@@ -111,7 +129,7 @@ const root = createRoot(appNode)
 
 root.render(
   <GlobalContext.Provider value={{ messages, history }}>
-    <AppMachineContext.Provider machine={() => withContext}>
+    <AppMachineContext.Provider machine={withContext}>
       <App />
     </AppMachineContext.Provider>
   </GlobalContext.Provider>,

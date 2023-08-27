@@ -208,7 +208,7 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
   services: {
     'nav-listener': (ctx) => (send) => {
       const sub = ctx.parent.subscribe((evt) => {
-        if (evt.event.type === 'nav_internal') {
+        if (evt.event.type === 'NAV_INTERNAL') {
           send({ type: 'nav_resource' })
         }
       })
@@ -302,8 +302,8 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
       currentResource: (ctx) => {
         // otherwise select the first
         const resources = z.array(remoteResourceSchema).parse(ctx.resources)
-        const parentState = ctx.parent?.state?.context
-        const id = parentState.params?.id
+        const parentState = ctx.parent?.state?.context.history.location.pathname
+        const id = parentState.split('/')[2] || 'privacy-configuration' // default
         const match = resources.find((x) => x.id === id)
         const matchingId = match ? match.id : resources[0].id
 
@@ -429,30 +429,20 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
 
       if (!ctx.currentResource) return console.warn('pushToRoute - missing currentResource')
 
+      const pathname = '/remoteResources/' + ctx.currentResource.id
+
       if (evt.type === 'set editor kind') {
-        next.set('editorKind', evt.payload) // setting the editor kind
-        const pathname = '/remoteResources/' + ctx.currentResource.id
-        ctx.parent.state.context.history.push({
-          pathname,
-          search: next.toString(),
-        })
+        next.set('editorKind', evt.payload)
       } else if (evt.type === 'set current domain') {
         next.set('currentDomain', evt.payload) // setting the toggle kind
-        const pathname = '/remoteResources/' + ctx.currentResource.id
-        ctx.parent.state.context.history.push({
-          pathname,
-          search: next.toString(),
-        })
       } else if (evt.type === 'clear current domain') {
         next.delete('currentDomain')
-        const pathname = '/remoteResources/' + ctx.currentResource.id
-        ctx.parent.state.context.history.push({
-          pathname,
-          search: next.toString(),
-        })
-      } else {
-        console.warn('could not react to pushToRoute - missing')
       }
+
+      ctx.parent.state.context.history.push({
+        pathname,
+        search: next.toString(),
+      })
     },
     serviceError: pure((ctx, evt) => {
       const schema = z.string()

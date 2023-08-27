@@ -6,14 +6,14 @@ export const appMachine = createMachine(
   {
     id: 'Panel Open',
     initial: 'Initial state',
-    context: /** @type {import("./app.machine.types").AppMachineCtx} */ ({}),
+    context: /** @type {import('./app.machine.types').AppMachineCtx} */ ({}),
     invoke: {
-      src: 'nav_listener',
+      src: 'internalNavListener',
       id: 'history',
     },
     on: {
-      nav_internal: {
-        actions: ['handleInternalNav'],
+      NAV_INTERNAL: {
+        actions: ['handleInternalNavResult'],
       },
     },
     states: {
@@ -37,10 +37,14 @@ export const appMachine = createMachine(
       'waiting for nav': {
         description: 'waiting for navigations',
         invoke: {
-          src: 'handleInitialNav',
-        },
-        on: {
-          'routes resolved': { target: 'routes ready' },
+          src: 'handleFirstLoad',
+          id: 'handleFirstLoad',
+          onDone: [
+            {
+              target: 'routes ready',
+              actions: 'handleInternalNavResult',
+            },
+          ],
         },
       },
       'showing error': {
@@ -55,7 +59,7 @@ export const appMachine = createMachine(
       },
     },
     schema: {
-      events: /** @type {import("./app.machine.types").AppEvents} */ ({}),
+      events: /** @type {import('./app.machine.types').AppEvents} */ ({}),
     },
     predictableActionArguments: true,
     preserveActionOrder: true,
@@ -65,8 +69,11 @@ export const appMachine = createMachine(
       getFeatures: (ctx) => {
         return ctx.messages.getFeatures()
       },
-      nav_listener: (ctx) => (send) => {
+      internalNavListener: (ctx) => (send) => {
         const history = ctx.history
+        /**
+         * Handle click events on `<a href="" data-nav></a>`
+         */
         const handler = (e) => {
           if (!(e.target instanceof HTMLAnchorElement)) return
           if (e.target.tagName === 'A' && e.target.dataset.nav) {
@@ -79,15 +86,16 @@ export const appMachine = createMachine(
 
         document.addEventListener('click', handler)
 
-        const parsed = z.object({ routes: z.record(z.any()) }).parse(ctx)
-
-        const unsubscribe = ctx.history.listen((l) => {
-          const match = matchAll(parsed.routes, l.location)
-          if (match) {
-            const [key, params] = match
-            send({ type: 'nav_internal', match: key, params, search: l.location.search })
-          } else {
-            send({ type: 'nav_internal', match: '**', params: null, search: l.location.search })
+        const unsubscribe = ctx.history.listen((update) => {
+          const pathSegment = update.location.pathname.split('/')[1]
+          if (pathSegment.length > 0) {
+            ctx
+              .loader(pathSegment)
+              .then((feature) => {
+                const search = new URLSearchParams(update.location.search)
+                send({ type: 'NAV_INTERNAL', feature, search })
+              })
+              .catch(console.error)
           }
         })
 
@@ -96,49 +104,54 @@ export const appMachine = createMachine(
           document.removeEventListener('click', handler)
         }
       },
-      // eslint-disable-next-line require-await
-      handleInitialNav: (ctx) => (send) => {
-        const parsed = z.object({ routes: z.record(z.any()) }).parse(ctx)
-        const match = matchAll(parsed.routes, ctx.history.location)
-        if (match) {
-          const [key, params] = match
-          send({ type: 'nav_internal', match: key, params, search: ctx.history.location.search })
-          send({ type: 'routes resolved' })
-        } else {
-          send({
-            type: 'nav_internal',
-            match: '/remoteResources/**',
-            params: null,
-            search: ctx.history.location.search,
+      /**
+       * Handle the very first page load.
+       * Here we want to determine what can be shown
+       */
+      handleFirstLoad: async (ctx) => {
+        // retrieve all known feature modules (just enough meta data)
+        const preModuleJobs = Object.keys(ctx.features || {}).map((featureName) => {
+          return ctx.preLoader(featureName).then((preModule) => {
+            return { ...preModule, pathname: '/' + featureName }
           })
-          send({ type: 'routes resolved' })
+        })
+
+        const preModules = await Promise.all(preModuleJobs)
+        const pathSegment = ctx.history.location.pathname.split('/')[1]
+        const search = new URLSearchParams(ctx.history.location.search)
+        const feature = await ctx.loader(pathSegment)
+
+        /** @type {import('xstate').ExtractEvent<import('./app.machine.types').AppEvents, 'done.invoke.handleFirstLoad'>['data']} */
+        const result = {
+          search,
+          feature,
+          preModules,
         }
+
+        return result
       },
     },
     actions: {
-      handleInternalNav: assign({
-        params: (ctx, evt) => {
-          if (evt.type === 'nav_internal') {
-            return evt.params
+      handleInternalNavResult: assign({
+        preModules: (ctx, evt) => {
+          if (evt.type === 'done.invoke.handleFirstLoad') {
+            return evt.data.preModules
           }
-          return null
-        },
-        match: (ctx, evt) => {
-          if (evt.type === 'nav_internal') {
-            return evt.match
-          }
-          return null
+          return ctx.preModules
         },
         search: (ctx, evt) => {
-          if (evt.type === 'nav_internal') {
+          if (evt.type === 'NAV_INTERNAL') {
             return new URLSearchParams(evt.search)
+          } else if (evt.type === 'done.invoke.handleFirstLoad') {
+            return evt.data.search
           }
           return null
         },
-        page: (ctx, evt) => {
-          if (evt.type === 'nav_internal') {
-            const parsed = z.object({ routes: z.record(z.any()) }).parse(ctx)
-            return parsed.routes[evt.match].loader
+        feature: (ctx, evt) => {
+          if (evt.type === 'NAV_INTERNAL') {
+            return evt.feature
+          } else if (evt.type === 'done.invoke.handleFirstLoad') {
+            return evt.data.feature
           }
           throw new Error('unreachable')
         },
@@ -169,32 +182,3 @@ export const appMachine = createMachine(
     },
   },
 )
-
-/**
- * @param {Record<string, any>} routes
- * @param {import("history").Location} historyLocation
- * @returns {[string, Record<string, any>] | null | undefined}
- */
-function matchAll(routes, historyLocation) {
-  for (const key of Object.keys(routes)) {
-    if (key === '**') continue
-    const param = getRouteMatch(key, historyLocation)
-    if (param) {
-      return [key, param]
-    }
-  }
-  return null
-}
-
-/**
- * @param {string} inputString
- * @param {import("history").Location} historyLocation
- * @returns {Record<string, any> | null}
- */
-function getRouteMatch(inputString, historyLocation) {
-  // eslint-disable-next-line no-undef
-  const pattern = new URLPattern(window.location.origin + inputString)
-  const matched = pattern.exec(window.location.origin + historyLocation.pathname)
-  if (matched?.pathname?.groups) return matched.pathname.groups
-  return null
-}

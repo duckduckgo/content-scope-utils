@@ -8,7 +8,7 @@ import invariant from 'tiny-invariant'
 
 export const RemoteResourcesContext = createActorContext(remoteResourcesMachine, { devTools: true })
 
-export default function RemoteResourcesPage() {
+export function RemoteResourcesPage() {
   // give access to the global messages instance
   const { messages } = useContext(GlobalContext)
   invariant(messages, 'must have instantiated messages here')
@@ -41,3 +41,5 @@ export function usePatches() {
 
   return useActor(/** @type {import('./patches-machine').PatchesMachineRef} */ (patchesRef))
 }
+
+export default RemoteResourcesPage

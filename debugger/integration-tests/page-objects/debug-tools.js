@@ -169,12 +169,13 @@ export class DebugToolsPage {
   /**
    * This ensures we can choose when to apply mocks based on the platform
    * @param {URLSearchParams} urlParams
+   * @param {string} [pathname] optional starting path
    * @return {Promise<void>}
    */
-  async openPage(urlParams) {
+  async openPage(urlParams, pathname = '/remoteResources') {
     const url = new URL(this.basePath, this.baseURL)
     url.searchParams.set('platform', this.build.name)
-    url.hash = '?' + urlParams.toString()
+    url.hash = pathname + '?' + urlParams.toString()
     await this.page.goto(url.href)
   }
 

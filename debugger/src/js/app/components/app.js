@@ -32,34 +32,38 @@ export function App() {
 
 function AppShell() {
   // Read full snapshot and get `send` function from `useActor()`
-  const { Page, links } = AppMachineContext.useSelector((state) => {
+  const { feature, links } = AppMachineContext.useSelector((state) => {
     const parsed = z
       .object({
-        page: z.any(),
-        params: z.any(),
-        routes: z.record(z.object({ feature: z.string(), title: z.string() })),
-        features: z.record(z.any()),
-        match: z.string(),
+        feature: z.object({
+          title: z.string(),
+          page: z.any(),
+          pathname: z.string(),
+        }),
+        search: z.instanceof(URLSearchParams),
+        preModules: z.array(
+          z.object({
+            pathname: z.string(),
+            title: z.string(),
+          }),
+        ),
       })
       .parse(state.context)
+
     const links = []
-    const seen = new Set()
-    const supportedFeatures = Object.keys(parsed.features)
-    for (const [match, route] of Object.entries(parsed.routes)) {
-      if (match === '**') continue
-      if (!supportedFeatures.includes(route.feature)) continue
-      if (seen.has(route.feature)) continue
-      seen.add(route.feature)
-      const curr = parsed.routes[parsed.match]
+
+    for (const preModule of parsed.preModules) {
       links.push({
-        name: route.title,
-        active: curr.feature === route.feature,
-        url: '/' + route.feature,
+        name: preModule.title,
+        active: preModule.pathname === parsed.feature.pathname,
+        url: preModule.pathname,
       })
     }
+
     return {
-      Page: parsed.page,
+      feature: parsed.feature,
       links,
+      preModules: parsed.preModules,
     }
   })
 
@@ -68,9 +72,8 @@ function AppShell() {
       <header className={styles.appHeader}>
         <FeatureNav links={links} />
       </header>
-      {/*<p>Main</p>*/}
       <Suspense fallback={null}>
-        <Page />
+        <feature.page />
       </Suspense>
     </div>
   )
