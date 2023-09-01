@@ -161,7 +161,7 @@ function EditorSelection(props) {
   const contentIsInvalid = state.matches(['showing editor', 'contentErrors', 'some'])
 
   const editors = {
-    diff: (
+    diff: () => (
       <MonacoDiffEditor
         model={props.model}
         original={originalContents}
@@ -172,7 +172,7 @@ function EditorSelection(props) {
         additionalButtons={props.additionalButtons}
       />
     ),
-    inline: (
+    inline: () => (
       <MonacoEditor
         model={props.model}
         invalid={contentIsInvalid}
@@ -181,7 +181,7 @@ function EditorSelection(props) {
         id={props.resource.id}
       />
     ),
-    toggles: (
+    toggles: () => (
       <TogglesEditor
         model={props.model}
         invalid={contentIsInvalid}
@@ -190,7 +190,7 @@ function EditorSelection(props) {
         resource={props.resource}
       />
     ),
-    patches: (
+    patches: () => (
       <PatchesEditor
         model={props.model}
         pending={savingChanges}
@@ -200,7 +200,7 @@ function EditorSelection(props) {
       />
     ),
   }
-  return editors[editorKind]
+  return editors[editorKind]?.()
 }
 
 /**
