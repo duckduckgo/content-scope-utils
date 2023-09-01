@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ToggleList } from './toggle-list'
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { parse } from 'tldts'
-import { toggleException, toggleFeature } from '../../transforms'
+import { handler } from '../../transforms'
 
 // @ts-expect-error - debugging;
 window._parse = parse
@@ -42,11 +42,16 @@ export function FeatureToggleListGlobal(props) {
   /**
    * @param {string} featureName - a feature name, like `duckPlayer`
    */
-  function toggleItem(featureName) {
+  function toggleFeatureGlobally(featureName) {
     const parsed = JSON.parse(props.model.getValue())
-    toggleFeature(parsed, featureName)
-    const asString = JSON.stringify(parsed, null, 4)
-    props.model.setValue(asString)
+    const result = handler(parsed, { kind: 'PrivacyConfig.ToggleFeature', feature: featureName })
+    if (result.ok) {
+      const asString = JSON.stringify(result.success, null, 4)
+      props.model.setValue(asString)
+    } else {
+      console.log(result.error)
+      alert('toggleDomain failed..., check console')
+    }
   }
 
   /**
@@ -55,9 +60,14 @@ export function FeatureToggleListGlobal(props) {
    */
   function toggleDomain(featureName, domain) {
     const parsed = JSON.parse(props.model.getValue())
-    toggleException(parsed, featureName, domain)
-    const asString = JSON.stringify(parsed, null, 4)
-    props.model.setValue(asString)
+    const result = handler(parsed, { kind: 'PrivacyConfig.ToggleFeature', feature: featureName, domain })
+    if (result.ok) {
+      const asString = JSON.stringify(result.success, null, 4)
+      props.model.setValue(asString)
+    } else {
+      console.log(result.error)
+      alert('toggleDomain failed..., check console')
+    }
   }
 
   if ('value' in globalList) {
@@ -65,7 +75,7 @@ export function FeatureToggleListGlobal(props) {
       <div data-testid="FeatureToggleListGlobal">
         <ToggleList
           domain={current}
-          onClick={toggleItem}
+          onClick={toggleFeatureGlobally}
           onClickDomain={toggleDomain}
           items={globalList.value}
           renderInfo={(item) => {

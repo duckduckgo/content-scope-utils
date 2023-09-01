@@ -2,6 +2,39 @@ import invariant from 'tiny-invariant'
 
 /**
  * @param {Record<string, any>} config
+ * @param {import('./transforms.types').PrivacyConfigTransformCommands} command
+ * @returns {import('./transforms.types').TransformResult<Record<string, any>>}
+ */
+export function handler(config, command) {
+  switch (command.kind) {
+    case 'PrivacyConfig.ToggleFeature': {
+      if ('domain' in command) {
+        // toggle a feature + domain exception
+        return tryCatch(() => toggleException(config, command.feature, command.domain))
+      } else {
+        // toggle a feature globally
+        return tryCatch(() => toggleFeature(config, command.feature))
+      }
+    }
+    case 'PrivacyConfig.ToggleUnprotectedDomain': {
+      return tryCatch(() => toggleUnprotected(config, command.domain))
+    }
+  }
+  return { error: { message: 'command not handled' }, ok: false }
+}
+
+function tryCatch(fn) {
+  try {
+    return /** @type {const} */ ({ success: fn(), ok: true })
+  } catch (e) {
+    console.error(e)
+    // @ts-ignore
+    return /** @type {const} */ ({ error: { message: e.message }, ok: false })
+  }
+}
+
+/**
+ * @param {Record<string, any>} config
  * @param {string} featureName
  * @param {string} domain
  */
@@ -17,6 +50,7 @@ export function toggleException(config, featureName, domain) {
   } else {
     exceptions.splice(prev, 1)
   }
+  return config
 }
 
 /**
@@ -26,6 +60,23 @@ export function toggleException(config, featureName, domain) {
 export function toggleFeature(config, featureName) {
   const feature = config.features?.[featureName]
   feature.state = feature.state === 'enabled' ? 'disabled' : 'enabled'
+  return config
+}
+
+/**
+ * @param {Record<string, any>} config
+ * @param {string} domain
+ */
+export function toggleUnprotected(config, domain) {
+  invariant(Array.isArray(config.unprotectedTemporary), 'unprotectedTemporary should be an array')
+  const prev = config.unprotectedTemporary.findIndex((x) => x.domain === domain)
+  // console.log(config.unprotectedTemporary)
+  if (prev === -1) {
+    config.unprotectedTemporary.push({ domain, reason: 'debug tools' })
+  } else {
+    config.unprotectedTemporary.splice(prev, 1)
+  }
+  return config
 }
 
 /**

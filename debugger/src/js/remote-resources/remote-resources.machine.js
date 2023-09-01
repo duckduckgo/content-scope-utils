@@ -9,7 +9,7 @@ import invariant from 'tiny-invariant'
  */
 
 /** @type {Record<string, {editorKinds: EditorKind[]}>} */
-const editorKindsMapping = {
+const resourceCapabilities = {
   'privacy-configuration': {
     editorKinds: ['toggles', 'inline', 'diff', 'patches'],
   },
@@ -312,11 +312,11 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         if (!matchingId) throw new Error('unreachable - must have valid resource ID by this point')
 
         // matching, or default
-        const kinds = editorKindsMapping[matchingId] || editorKindsMapping.default
+        const capabilties = resourceCapabilities[matchingId] || resourceCapabilities.default
 
         return {
           id: matchingId,
-          editorKinds: kinds.editorKinds,
+          editorKinds: capabilties.editorKinds,
         }
       },
     }),

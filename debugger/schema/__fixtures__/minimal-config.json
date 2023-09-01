@@ -46,10 +46,5 @@
       "hash": "8da977185d316800299b1f019ae71e2d"
     }
   },
-  "unprotectedTemporary": [
-    {
-      "domain": "example.com",
-      "reason": "debug tools"
-    }
-  ]
+  "unprotectedTemporary": []
 }

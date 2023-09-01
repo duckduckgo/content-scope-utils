@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai'
 import jsonpatch from 'fast-json-patch'
-import { toggleException, toggleFeature, updateFeatureHash } from '../src/js/transforms'
+import { toggleException, toggleFeature, toggleUnprotected, updateFeatureHash } from '../src/js/transforms'
 
 const minimal = new URL('../schema/__fixtures__/minimal-config.json', import.meta.url)
 
@@ -45,6 +45,27 @@ describe('global feature toggles', () => {
     // back on
     toggleFeature(config, 'ampLinks')
     expect(config.features.ampLinks.state).to.deep.eq('enabled')
+  })
+})
+
+// eslint-disable-next-line no-undef
+describe('unprotected domains', () => {
+  it('toggles a domain from the unprotected list', async () => {
+    const original = await fetch(minimal).then((x) => x.json())
+    const config = JSON.parse(JSON.stringify(original))
+
+    // add domain to the unprotected list
+    const result = toggleUnprotected(config, 'example.com')
+    expect(result.unprotectedTemporary).to.deep.eq([
+      {
+        domain: 'example.com',
+        reason: 'debug tools',
+      },
+    ])
+
+    // remove it
+    const result2 = toggleUnprotected(config, 'example.com')
+    expect(result2.unprotectedTemporary).to.deep.eq([])
   })
 })
 
