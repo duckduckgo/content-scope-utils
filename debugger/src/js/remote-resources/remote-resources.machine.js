@@ -1,8 +1,7 @@
-import { assign, createMachine, pure, raise, send, spawn } from 'xstate'
+import { assign, createMachine, pure, raise, send } from 'xstate'
 import { remoteResourceSchema } from '../../../schema/__generated__/schema.parsers.mjs'
 import * as z from 'zod'
 import { DebugToolsMessages } from '../DebugToolsMessages.mjs'
-import { patchesMachine } from './patches-machine'
 import invariant from 'tiny-invariant'
 
 /**
@@ -24,6 +23,17 @@ const _remoteResourcesMachine = createMachine({
   initial: 'loading resource',
   context: /** @type {import("./remote-resources.machine.types").RemoteResourcesCtx} */ ({}),
   entry: ['spawn-children'], // some features are just child actors
+  on: {
+    REGISTER_CHILD: {
+      actions: assign({
+        children: (ctx, evt, meta) => {
+          const child = meta._event.origin
+          invariant(typeof child === 'string', 'tried to use meta._event.origin, but it wasnt a string')
+          return (ctx.children || []).concat(child)
+        },
+      }),
+    },
+  },
   states: {
     'loading resource': {
       description: 'this will try to read from the incoming data',
@@ -252,14 +262,6 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
     },
   },
   actions: {
-    'spawn-children': assign({
-      children: () => {
-        return [
-          // list child features
-          spawn(patchesMachine, { name: 'patches' }),
-        ]
-      },
-    }),
     assignContentMarkers: assign({
       contentMarkers: (ctx, evt) => {
         if (evt.type === 'content is invalid') {

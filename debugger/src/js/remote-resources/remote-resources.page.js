@@ -1,12 +1,14 @@
-import { createActorContext, useActor } from '@xstate/react'
+import { createActorContext } from '@xstate/react'
 import { remoteResourcesMachine } from './remote-resources.machine'
 import { useContext } from 'react'
 import { GlobalContext } from '../DebugToolsMessages.mjs'
 import { AppMachineContext } from '../app/components/app'
 import { RemoteResources } from './components/remote-resources'
 import invariant from 'tiny-invariant'
+import { patchesMachine } from './patches-machine'
 
 export const RemoteResourcesContext = createActorContext(remoteResourcesMachine, { devTools: true })
+export const PatchesContext = createActorContext(patchesMachine, { devTools: true })
 
 export function RemoteResourcesPage() {
   // give access to the global messages instance
@@ -17,7 +19,9 @@ export function RemoteResourcesPage() {
 
   return (
     <RemoteResourcesContext.Provider machine={() => remoteResourcesMachine.withContext({ messages, parent, tabs: [] })}>
-      <RemoteResourcesLoader />
+      <PatchesProvider>
+        <RemoteResourcesLoader />
+      </PatchesProvider>
     </RemoteResourcesContext.Provider>
   )
 }
@@ -33,13 +37,23 @@ function RemoteResourcesLoader() {
   return null
 }
 
-export function usePatches() {
-  const patchesRef = RemoteResourcesContext.useSelector((state) => {
-    invariant('patches' in state.children, 'expected `patches` to be a child of RemoteResourcesContext')
-    return state.children.patches
-  })
+function PatchesProvider(props) {
+  const parent = RemoteResourcesContext.useActorRef()
+  return (
+    <PatchesContext.Provider
+      options={{
+        // @ts-ignore
+        parent,
+      }}
+    >
+      {props.children}
+    </PatchesContext.Provider>
+  )
+}
 
-  return useActor(/** @type {import('./patches-machine').PatchesMachineRef} */ (patchesRef))
+export function usePatches() {
+  const actor = PatchesContext.useActor()
+  return actor
 }
 
 export default RemoteResourcesPage

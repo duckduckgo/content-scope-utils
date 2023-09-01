@@ -1,4 +1,4 @@
-import { assign, createMachine, pure, raise } from 'xstate'
+import { assign, createMachine, pure, raise, sendParent } from 'xstate'
 import jsonpatch from 'fast-json-patch'
 import * as z from 'zod'
 import invariant from 'tiny-invariant'
@@ -23,6 +23,7 @@ export const patchesMachine = createMachine(
       patches: {},
     },
     type: 'parallel',
+    entry: ['registerAsChild'],
     states: {
       stored: {
         initial: 'idle',
@@ -189,6 +190,7 @@ export const patchesMachine = createMachine(
   },
   {
     actions: {
+      registerAsChild: sendParent('REGISTER_CHILD'),
       'raise-if-available': pure((ctx) => {
         if (ctx.currentId && ctx.currentId in ctx.patches) {
           return raise('PATCH_AVAILABLE')

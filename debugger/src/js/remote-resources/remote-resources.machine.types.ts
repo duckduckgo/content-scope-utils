@@ -1,6 +1,6 @@
 import { CurrentResource, EditorKind } from './remote-resources.machine'
 import { GetTabsResponse, RemoteResource, UpdateResourceParams } from '../../../schema/__generated__/schema.types'
-import { ActorRef, ActorRefFrom } from 'xstate'
+import { ActorRefFrom } from 'xstate'
 import { appMachine } from '../app/app.machine'
 import { TabWithHostname } from '../types'
 
@@ -15,6 +15,7 @@ export type RemoteResourcesEvents =
   | { type: 'clearErrors' }
   | { type: 'hide url editor' }
   | { type: 'show url editor' }
+  | { type: 'REGISTER_CHILD' }
 
   // content
   | { type: 'content was reverted' }
@@ -35,7 +36,8 @@ export interface RemoteResourcesCtx {
   currentResource?: CurrentResource
   contentMarkers?: import('monaco-editor').editor.IMarker[]
   tabs: TabWithHostname[]
-  children?: ActorRef<any>[]
+  // children?: ActorRef<any>[]
+  children?: string[]
 }
 
 export type RemoteResourcesBroadcastEvents =
