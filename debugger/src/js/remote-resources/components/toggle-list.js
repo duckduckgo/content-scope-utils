@@ -28,7 +28,6 @@ export function ToggleList(props) {
    */
   const onClick = (e) => {
     if (!(e.target instanceof HTMLInputElement)) return
-    console.log(e.target.checked, e.target.value)
     props.onClick(e.target.value)
   }
 

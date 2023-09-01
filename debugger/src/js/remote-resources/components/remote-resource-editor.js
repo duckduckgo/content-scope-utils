@@ -88,11 +88,9 @@ function Footer(props) {
 
   function saveDebugContent() {
     send({
-      type: 'save edited',
-      payload: {
-        id: props.resource.id,
-        source: { debugTools: { content: props.model.getValue() } },
-      },
+      type: 'RemoteResource.SetDebugContent',
+      id: props.resource.id,
+      content: props.model.getValue(),
     })
   }
 

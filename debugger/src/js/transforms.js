@@ -7,14 +7,12 @@ import invariant from 'tiny-invariant'
  */
 export function handler(config, command) {
   switch (command.kind) {
+    case 'PrivacyConfig.ToggleFeatureDomain': {
+      // toggle a feature + domain exception
+      return tryCatch(() => toggleException(config, command.feature, command.domain))
+    }
     case 'PrivacyConfig.ToggleFeature': {
-      if ('domain' in command) {
-        // toggle a feature + domain exception
-        return tryCatch(() => toggleException(config, command.feature, command.domain))
-      } else {
-        // toggle a feature globally
-        return tryCatch(() => toggleFeature(config, command.feature))
-      }
+      return tryCatch(() => toggleFeature(config, command.feature))
     }
     case 'PrivacyConfig.ToggleUnprotectedDomain': {
       return tryCatch(() => toggleUnprotected(config, command.domain))

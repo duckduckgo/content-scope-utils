@@ -1,8 +1,9 @@
 import { CurrentResource, EditorKind } from './remote-resources.machine'
-import { GetTabsResponse, RemoteResource, UpdateResourceParams } from '../../../schema/__generated__/schema.types'
+import { GetTabsResponse, RemoteResource } from '../../../schema/__generated__/schema.types'
 import { ActorRefFrom } from 'xstate'
 import { appMachine } from '../app/app.machine'
 import { TabWithHostname } from '../types'
+import { RemoteResourceCommands } from '../transforms.types'
 
 export type RemoteResourcesEvents =
   | { type: 'set editor kind'; payload: EditorKind }
@@ -16,14 +17,13 @@ export type RemoteResourcesEvents =
   | { type: 'hide url editor' }
   | { type: 'show url editor' }
   | { type: 'REGISTER_CHILD' }
+  | RemoteResourceCommands
 
   // content
   | { type: 'content was reverted' }
   | { type: 'content was edited' }
   | { type: 'content is invalid'; markers: import('monaco-editor').editor.IMarker[] }
   | { type: 'content is valid' }
-  | { type: 'save new remote'; payload: UpdateResourceParams }
-  | { type: 'save edited'; payload: UpdateResourceParams }
 
 export interface RemoteResourcesCtx {
   messages: import('../DebugToolsMessages.mjs').DebugToolsMessages

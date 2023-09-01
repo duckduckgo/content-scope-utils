@@ -134,7 +134,7 @@ const _remoteResourcesMachine = createMachine({
             'clear current domain': {
               actions: ['pushToRoute'],
             },
-            'save new remote': {
+            'RemoteResource.SetRemoteUrl': {
               target: '.saving new remote',
             },
           },
@@ -148,7 +148,7 @@ const _remoteResourcesMachine = createMachine({
             },
             'editor has edited content': {
               on: {
-                'save edited': [
+                'RemoteResource.SetDebugContent': [
                   {
                     cond: 'editor has valid content',
                     target: 'saving edited',
@@ -247,15 +247,25 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
     },
     // eslint-disable-next-line require-await
     saveNewRemote: async (ctx, evt) => {
-      if (evt.type === 'save new remote') {
-        const response = await minDuration(ctx.messages.updateResource(evt.payload))
+      if (evt.type === 'RemoteResource.SetRemoteUrl') {
+        /** @type {import('../DebugToolsMessages.mjs').UpdateResourceParams} */
+        const next = {
+          id: evt.id,
+          source: { remote: { url: evt.url } },
+        }
+        const response = await minDuration(ctx.messages.updateResource(next))
         return response
       }
       throw new Error('not supported')
     },
     saveEdited: async (ctx, evt) => {
-      if (evt.type === 'save edited') {
-        const response = await minDuration(ctx.messages.updateResource(evt.payload))
+      if (evt.type === 'RemoteResource.SetDebugContent') {
+        /** @type {import('../DebugToolsMessages.mjs').UpdateResourceParams} */
+        const next = {
+          id: evt.id,
+          source: { debugTools: { content: evt.content } },
+        }
+        const response = await minDuration(ctx.messages.updateResource(next))
         return response
       }
       throw new Error('not supported')

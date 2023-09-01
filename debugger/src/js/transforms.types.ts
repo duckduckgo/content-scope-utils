@@ -1,7 +1,43 @@
+interface SetRemoteUrl {
+  type: 'RemoteResource.SetRemoteUrl'
+  id: string
+  url: string
+}
+
+interface SetDebugContent {
+  type: 'RemoteResource.SetDebugContent'
+  id: string
+  content: string
+}
+
+// prettier-ignore
+export type RemoteResourceCommands =
+    | SetRemoteUrl
+    | SetDebugContent
+    ;
+
+interface ToggleUnprotectedDomain {
+  kind: 'PrivacyConfig.ToggleUnprotectedDomain'
+  domain: string
+}
+
+interface ToggleFeatureDomain {
+  kind: 'PrivacyConfig.ToggleFeatureDomain'
+  feature: string
+  domain: string
+}
+
+interface ToggleFeature {
+  kind: 'PrivacyConfig.ToggleFeature'
+  feature: string
+}
+
+// prettier-ignore
 export type PrivacyConfigTransformCommands =
-  | { kind: 'PrivacyConfig.ToggleUnprotectedDomain'; domain: string }
-  | { kind: 'PrivacyConfig.ToggleFeature'; feature: string; domain: string }
-  | { kind: 'PrivacyConfig.ToggleFeature'; feature: string }
+    | ToggleUnprotectedDomain
+    | ToggleFeatureDomain
+    | ToggleFeature
+    ;
 
 // export type Transforms = PrivacyConfigTransforms
 // prettier-ignore

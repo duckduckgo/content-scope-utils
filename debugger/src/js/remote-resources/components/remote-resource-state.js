@@ -34,11 +34,9 @@ export function RemoteResourceState(props) {
   /** @type {(url: string) => void} */
   function setUrl(url) {
     send({
-      type: 'save new remote',
-      payload: {
-        id: props.resource.id,
-        source: { remote: { url } },
-      },
+      type: 'RemoteResource.SetRemoteUrl',
+      id: props.resource.id,
+      url,
     })
   }
 
@@ -160,11 +158,9 @@ function Override(props) {
   /** @type {(url: string) => void} */
   function setUrl(url) {
     send({
-      type: 'save new remote',
-      payload: {
-        id: props.resource.id,
-        source: { remote: { url } },
-      },
+      type: 'RemoteResource.SetRemoteUrl',
+      id: props.resource.id,
+      url,
     })
   }
 

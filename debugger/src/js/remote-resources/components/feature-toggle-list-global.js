@@ -60,7 +60,7 @@ export function FeatureToggleListGlobal(props) {
    */
   function toggleDomain(featureName, domain) {
     const parsed = JSON.parse(props.model.getValue())
-    const result = handler(parsed, { kind: 'PrivacyConfig.ToggleFeature', feature: featureName, domain })
+    const result = handler(parsed, { kind: 'PrivacyConfig.ToggleFeatureDomain', feature: featureName, domain })
     if (result.ok) {
       const asString = JSON.stringify(result.success, null, 4)
       props.model.setValue(asString)
