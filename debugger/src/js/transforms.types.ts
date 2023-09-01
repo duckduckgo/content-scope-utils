@@ -1,10 +1,28 @@
-interface SetRemoteUrl {
+/**
+ * @module Remote Resource Commands
+ *
+ * @description
+ *
+ * The actions that can be invoked onto a remote resource
+ */
+/**
+ * Override The current remote url. This is useful
+ * for loading a resource that you serve yourself, or for trying a new/beta resource
+ */
+export interface SetRemoteUrl {
   type: 'RemoteResource.SetRemoteUrl'
   id: string
+  /**
+   * Provide the full URL here.
+   */
   url: string
 }
 
-interface SetDebugContent {
+/**
+ * Override the content of the current resource with an arbitrary string
+ * value. This is useful for making manual edits to a resource
+ */
+export interface SetDebugContent {
   type: 'RemoteResource.SetDebugContent'
   id: string
   content: string
@@ -16,18 +34,18 @@ export type RemoteResourceCommands =
     | SetDebugContent
     ;
 
-interface ToggleUnprotectedDomain {
+export interface ToggleUnprotectedDomain {
   kind: 'PrivacyConfig.ToggleUnprotectedDomain'
   domain: string
 }
 
-interface ToggleFeatureDomain {
+export interface ToggleFeatureDomain {
   kind: 'PrivacyConfig.ToggleFeatureDomain'
   feature: string
   domain: string
 }
 
-interface ToggleFeature {
+export interface ToggleFeature {
   kind: 'PrivacyConfig.ToggleFeature'
   feature: string
 }
@@ -45,6 +63,6 @@ export type TransformResult<T> =
     | { success: T, ok: true }
     | { error: TransformError, ok: false }
 
-interface TransformError {
+export interface TransformError {
   message: string
 }

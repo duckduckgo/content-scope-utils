@@ -5,7 +5,8 @@
     "lib/messaging/webkit.js",
     "debugger/schema/__generated__/schema.types.ts",
     "debugger/src/js/DebugToolsMessages.mjs",
-    "debugger/src/js/index.js"
+    "debugger/src/js/index.js",
+    "debugger/src/js/transforms.types.ts"
   ],
   "excludeExternals": true,
   "readme": "DOCS.md",
