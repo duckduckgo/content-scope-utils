@@ -88,7 +88,7 @@ function Footer(props) {
 
   function saveDebugContent() {
     send({
-      type: 'RemoteResource.SetDebugContent',
+      type: 'RemoteResource.setDebugContent',
       id: props.resource.id,
       content: props.model.getValue(),
     })

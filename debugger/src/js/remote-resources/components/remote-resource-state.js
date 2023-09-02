@@ -34,7 +34,7 @@ export function RemoteResourceState(props) {
   /** @type {(url: string) => void} */
   function setUrl(url) {
     send({
-      type: 'RemoteResource.SetRemoteUrl',
+      type: 'RemoteResource.setRemoteUrl',
       id: props.resource.id,
       url,
     })
@@ -158,7 +158,7 @@ function Override(props) {
   /** @type {(url: string) => void} */
   function setUrl(url) {
     send({
-      type: 'RemoteResource.SetRemoteUrl',
+      type: 'RemoteResource.setRemoteUrl',
       id: props.resource.id,
       url,
     })

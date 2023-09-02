@@ -10,7 +10,7 @@
  * for loading a resource that you serve yourself, or for trying a new/beta resource
  */
 export interface SetRemoteUrl {
-  type: 'RemoteResource.SetRemoteUrl'
+  type: 'RemoteResource.setRemoteUrl'
   id: string
   /**
    * Provide the full URL here.
@@ -23,35 +23,35 @@ export interface SetRemoteUrl {
  * value. This is useful for making manual edits to a resource
  */
 export interface SetDebugContent {
-  type: 'RemoteResource.SetDebugContent'
+  type: 'RemoteResource.setDebugContent'
   id: string
   content: string
 }
 
 // prettier-ignore
-export type RemoteResourceCommands =
+export type RemoteResourceMethods =
     | SetRemoteUrl
     | SetDebugContent
     ;
 
 export interface ToggleUnprotectedDomain {
-  kind: 'PrivacyConfig.ToggleUnprotectedDomain'
+  kind: 'PrivacyConfig.toggleUnprotectedDomain'
   domain: string
 }
 
 export interface ToggleFeatureDomain {
-  kind: 'PrivacyConfig.ToggleFeatureDomain'
+  kind: 'PrivacyConfig.toggleFeatureDomain'
   feature: string
   domain: string
 }
 
 export interface ToggleFeature {
-  kind: 'PrivacyConfig.ToggleFeature'
+  kind: 'PrivacyConfig.toggleFeature'
   feature: string
 }
 
 // prettier-ignore
-export type PrivacyConfigTransformCommands =
+export type PrivacyConfigTransformMethods =
     | ToggleUnprotectedDomain
     | ToggleFeatureDomain
     | ToggleFeature

@@ -3,7 +3,7 @@ import { GetTabsResponse, RemoteResource } from '../../../schema/__generated__/s
 import { ActorRefFrom } from 'xstate'
 import { appMachine } from '../app/app.machine'
 import { TabWithHostname } from '../types'
-import { RemoteResourceCommands } from '../transforms.types'
+import { RemoteResourceMethods } from '../transforms.types'
 
 export type RemoteResourcesEvents =
   | { type: 'set editor kind'; payload: EditorKind }
@@ -17,7 +17,7 @@ export type RemoteResourcesEvents =
   | { type: 'hide url editor' }
   | { type: 'show url editor' }
   | { type: 'REGISTER_CHILD' }
-  | RemoteResourceCommands
+  | RemoteResourceMethods
 
   // content
   | { type: 'content was reverted' }

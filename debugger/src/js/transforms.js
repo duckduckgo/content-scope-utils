@@ -2,19 +2,19 @@ import invariant from 'tiny-invariant'
 
 /**
  * @param {Record<string, any>} config
- * @param {import('./transforms.types').PrivacyConfigTransformCommands} command
+ * @param {import('./transforms.types').PrivacyConfigTransformMethods} command
  * @returns {import('./transforms.types').TransformResult<Record<string, any>>}
  */
 export function handler(config, command) {
   switch (command.kind) {
-    case 'PrivacyConfig.ToggleFeatureDomain': {
+    case 'PrivacyConfig.toggleFeatureDomain': {
       // toggle a feature + domain exception
       return tryCatch(() => toggleException(config, command.feature, command.domain))
     }
-    case 'PrivacyConfig.ToggleFeature': {
+    case 'PrivacyConfig.toggleFeature': {
       return tryCatch(() => toggleFeature(config, command.feature))
     }
-    case 'PrivacyConfig.ToggleUnprotectedDomain': {
+    case 'PrivacyConfig.toggleUnprotectedDomain': {
       return tryCatch(() => toggleUnprotected(config, command.domain))
     }
   }
