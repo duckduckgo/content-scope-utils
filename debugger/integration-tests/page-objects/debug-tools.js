@@ -14,8 +14,6 @@ import invariant from 'tiny-invariant'
 const DEFAULT_EDIT_VALUE = '{ "foo": "baz" }'
 
 /**
- * @typedef {import('@duckduckgo/content-scope-scripts/integration-test/playwright/type-helpers.mjs').Build} Build
- * @typedef {import('@duckduckgo/content-scope-scripts/integration-test/playwright/type-helpers.mjs').PlatformInfo} PlatformInfo
  * @typedef {import('../../src/js/remote-resources/remote-resources.machine').EditorKind} EditorKind
  * @typedef {import('../../schema/__generated__/schema.types').GetFeaturesResponse} GetFeaturesResponse
  * @typedef {import('../../schema/__generated__/schema.types').GetTabsResponse} GetTabsResponse
@@ -463,6 +461,13 @@ export class DebugToolsPage {
   featureWasDisabledGlobally(contents, featureName) {
     const json = typeof contents === 'string' ? JSON.parse(contents) : contents
     expect(json.features[featureName].state).toBe('disabled')
+  }
+
+  featureHasUpdatedHash(contents, featureName) {
+    const json = typeof contents === 'string' ? JSON.parse(contents) : contents
+    expect(typeof json.features[featureName].hash).toBe('string')
+    expect(json.features[featureName].hash.length).toBeGreaterThan(3)
+    expect(json.features[featureName].hash).not.toBe('abc')
   }
 
   /**

@@ -104,7 +104,8 @@ export async function updateFeatureHash(patches, config) {
     }
 
     // compute and re-assign to `hash`
-    config.features[changedFeature].hash = await sha256(JSON.stringify(config.features[changedFeature]))
+    const featureAsString = JSON.stringify(config.features[changedFeature])
+    config.features[changedFeature].hash = await sha256(featureAsString)
   }
 }
 
