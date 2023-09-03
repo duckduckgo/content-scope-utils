@@ -1,6 +1,8 @@
 import { FeatureToggleListGlobal } from '../remote-resources/components/feature-toggle-list-global'
 import { FeatureToggleListDomainExceptions } from '../remote-resources/components/feature-toggle-list-domain-exceptions'
 import styles from './toggles-editor.module.css'
+import { TrackerFeed } from '../remote-resources/components/tracker-feed'
+import { TrackerFeedProvider } from '../remote-resources/components/tracker-feed.machine'
 
 /**
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -27,9 +29,16 @@ export function TogglesEditor(props) {
   return (
     <div data-testid="TogglesEditor">
       {/*<div className="row">{components[props.toggleKind](props)}</div>*/}
+      <FeatureToggleListDomainExceptions {...props} />
       <div className={styles.togglesGrid}>
-        <FeatureToggleListDomainExceptions {...props} />
-        <FeatureToggleListGlobal {...props} />
+        <div className={styles.featureList}>
+          <FeatureToggleListGlobal {...props} />
+        </div>
+        <div className={styles.trackerFeed}>
+          <TrackerFeedProvider>
+            <TrackerFeed {...props} />
+          </TrackerFeedProvider>
+        </div>
       </div>
     </div>
   )

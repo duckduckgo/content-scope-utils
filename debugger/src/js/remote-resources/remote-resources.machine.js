@@ -24,7 +24,9 @@ const _remoteResourcesMachine = createMachine({
   id: 'remote resources machine',
   initial: 'loading resource',
   context: /** @type {import("./remote-resources.machine.types").RemoteResourcesCtx} */ ({}),
-  entry: ['spawn-children'], // some features are just child actors
+  schema: {
+    events: /** @type {import("./remote-resources.machine.types").RemoteResourcesEvents} */ ({}),
+  },
   on: {
     REGISTER_CHILD: {
       actions: assign({
@@ -49,6 +51,7 @@ const _remoteResourcesMachine = createMachine({
               'assignCurrentResource',
               'broadcastResourceSelected',
               'assignEditorKind',
+              'assignCurrentDomain',
               'raiseUpdated',
             ],
           },
@@ -74,10 +77,10 @@ const _remoteResourcesMachine = createMachine({
       ],
       on: {
         nav_resource: {
-          actions: ['assignCurrentResource', 'broadcastResourceSelected', 'assignEditorKind'],
+          actions: ['assignCurrentResource', 'broadcastResourceSelected', 'assignEditorKind', 'assignCurrentDomain'],
         },
         nav_other: {
-          actions: ['assignCurrentResource', 'broadcastResourceSelected', 'assignEditorKind'],
+          actions: ['assignCurrentResource', 'broadcastResourceSelected', 'assignEditorKind', 'assignCurrentDomain'],
         },
         tabs_received: {
           actions: ['assignTabs'],
@@ -207,9 +210,6 @@ const _remoteResourcesMachine = createMachine({
       },
     },
     'invalid resource': {},
-  },
-  schema: {
-    events: /** @type {import("./remote-resources.machine.types").RemoteResourcesEvents} */ ({}),
   },
   predictableActionArguments: true,
   preserveActionOrder: true,
@@ -382,6 +382,8 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         }
         return 'inline' // default
       },
+    }),
+    assignCurrentDomain: assign({
       currentDomain: (ctx) => {
         const parentState = ctx.parent?.state?.context
         const search = parentState.search

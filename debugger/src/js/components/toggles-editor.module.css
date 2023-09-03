@@ -1,22 +1,16 @@
 .togglesGrid {
   display: grid;
-  /*grid-template-columns: 50% 50%;*/
-  /*grid-column-gap: var(--ddg-ui-gutter);*/
+  grid-template-columns: auto 1fr;
+  grid-template-areas: 'feature-list tracker-feed';
+  grid-column-gap: var(--ddg-ui-gutter);
 }
 
-.patchesGrid {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  grid-template-areas: 'patches-header' 'patches-body';
-  grid-row-gap: var(--ddg-ui-gutter);
-  height: 100%;
+.featureList {
+  grid-area: feature-list
+}
+.trackerFeed {
+  grid-area: tracker-feed
 }
 
-.patchesGridHeader {
-  grid-area: patches-header;
-}
 
-.patchesGridBody {
-  grid-area: patches-body;
-  border: 1px dotted pink;
-}
+

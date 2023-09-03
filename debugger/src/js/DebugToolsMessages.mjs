@@ -23,6 +23,7 @@ import {
   updateResourceParamsSchema,
 } from '../../schema/__generated__/schema.parsers.mjs'
 import { createContext } from 'react'
+import * as z from 'zod'
 
 /**
  * @typedef {import("../../schema/__generated__/schema.types").RemoteResource} RemoteResource
@@ -177,7 +178,62 @@ export class DebugToolsMessages {
       }
     })
   }
+
+  /**
+   * @param {string} domain
+   * @param {(data: OnTrackersUpdatedSchema) => void} callback
+   */
+  onTrackersUpdated(domain, callback) {
+    this.messaging.notify('subscribeToTrackers', { domain })
+    return this.messaging.subscribe('onTrackersUpdated', (params) => {
+      const parsed = onTrackersUpdatedSchema.safeParse(params);
+      if (parsed.success) {
+        callback(parsed.data)
+      } else {
+        console.error(parsed.error)
+      }
+    })
+  }
 }
+
+export const protectionsDisabledReasonSchema = z.literal("protectionDisabled");
+
+export const ownedByFirstPartyReasonSchema = z.literal("ownedByFirstParty");
+
+export const ruleExceptionReasonSchema = z.literal("ruleException");
+
+export const adClickAttributionReasonSchema = z.literal("adClickAttribution");
+
+export const otherThirdPartyRequestReasonSchema = z.literal("otherThirdPartyRequest");
+
+export const stateBlockedSchema = z.object({
+  blocked: z.record(z.unknown())
+});
+
+export const stateAllowedSchema = z.object({
+  allowed: z.object({
+    reason: z.union([protectionsDisabledReasonSchema, ownedByFirstPartyReasonSchema, ruleExceptionReasonSchema, adClickAttributionReasonSchema, otherThirdPartyRequestReasonSchema])
+  })
+});
+
+export const detectedRequestSchema = z.object({
+  url: z.string(),
+  eTLDplus1: z.string().optional(),
+  pageUrl: z.string(),
+  state: z.union([stateBlockedSchema, stateAllowedSchema]),
+  entityName: z.string().optional(),
+  category: z.string().optional(),
+  prevalence: z.number().optional(),
+  ownerName: z.string().optional()
+});
+
+export const onTrackersUpdatedSchema = z.object({
+  requests: z.array(detectedRequestSchema)
+})
+
+/**
+ * @typedef {import("zod").infer<typeof onTrackersUpdatedSchema>} OnTrackersUpdatedSchema
+ */
 
 /**
  * @param {RemoteResource} input

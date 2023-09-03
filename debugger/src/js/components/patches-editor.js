@@ -5,7 +5,7 @@ import { DD, DT, InlineDL } from './definition-list'
 import { MicroButton } from './buttons'
 import { useEffect } from 'react'
 import { MonacoEditorRaw } from './monaco-editor'
-import styles from './toggles-editor.module.css'
+import styles from './patches-editor.module.css'
 
 /**
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
