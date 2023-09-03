@@ -55,11 +55,11 @@ test.describe('debug tools', () => {
     test('updates a resource', async ({ page, baseURL }, workerInfo) => {
       const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
+      await dt.withTestResources()
       await dt.openRemoteResourceEditor()
-      await dt.hasLoadedWithFeature()
       await dt.switchesTo('inline')
       await dt.editsPreview()
-      await dt.saves()
+      await dt.saves('test-resource')
     })
     test('handles when input cannot be used with toggles (because of edits)', async ({ page, baseURL }, workerInfo) => {
       const dt = DebugToolsPage.create(page, baseURL, workerInfo)

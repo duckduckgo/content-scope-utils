@@ -7,10 +7,17 @@ import {
 } from '@duckduckgo/content-scope-scripts/packages/messaging/lib/test-utils.mjs'
 import { readFileSync } from 'node:fs'
 import jsonpatch from 'fast-json-patch'
-import { perPlatform } from '@duckduckgo/content-scope-scripts/integration-test/playwright/type-helpers.mjs'
+import {
+  perPlatform,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  Build,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  PlatformInfo,
+} from '@duckduckgo/content-scope-scripts/integration-test/playwright/type-helpers.mjs'
 import { ResourcePatches, STORAGE_KEY } from '../../src/js/remote-resources/patches-machine'
 import invariant from 'tiny-invariant'
 
+const DEFAULT_BASE_VALUE = '{ "foo": "bar" }'
 const DEFAULT_EDIT_VALUE = '{ "foo": "baz" }'
 
 /**
@@ -25,8 +32,28 @@ export class DebugToolsPage {
     return {
       macos: () => readFileSync('./schema/__fixtures__/macos-config.json', 'utf8'),
       /**
-       * @return {{current: {contents: string, source: {remote: {fetchedAt: string, url: string}}, contentType: string}, name: string, id: string, url: string}}
+       * @param {string} content
+       * @return {RemoteResource}
        */
+      testResource: (content = DEFAULT_BASE_VALUE) => {
+        /** @type {RemoteResource} */
+        const resource = {
+          id: 'test-resource',
+          url: 'https://example.com/test-resource.json',
+          name: 'Test Resource',
+          current: {
+            source: {
+              remote: {
+                url: 'https://example.com/test-resource.json',
+                fetchedAt: '2023-07-05T12:34:56Z',
+              },
+            },
+            contents: content,
+            contentType: 'application/json',
+          },
+        }
+        return resource
+      },
       privacyConfig: (contents = this.remoteResources.macos()) => {
         return {
           id: 'privacy-configuration',
@@ -251,11 +278,11 @@ export class DebugToolsPage {
     await this.mocks.waitForCallCount({ method: 'updateResource', count: 1 })
   }
 
-  async saves(expected = DEFAULT_EDIT_VALUE) {
+  async saves(id = 'privacy-configuration', expected = DEFAULT_EDIT_VALUE) {
     await this.submitsEditorSave()
     const calls = await this.mocks.waitForCallCount({ method: 'updateResource', count: 1 })
     expect(calls[0].payload.params).toMatchObject({
-      id: 'privacy-configuration',
+      id,
       source: {
         debugTools: {
           content: expected,
@@ -549,6 +576,24 @@ export class DebugToolsPage {
     /** @type {RemoteResource} */
     const resource = this.remoteResources.privacyConfig(jsonString)
 
+    /** @type {GetFeaturesResponse} */
+    const getFeatures = {
+      features: {
+        remoteResources: {
+          resources: [resource],
+        },
+      },
+    }
+
+    await this.page.addInitScript(mockResponses, {
+      responses: {
+        getFeatures,
+        getRemoteResource: resource,
+      },
+    })
+  }
+
+  async withTestResources(resource = this.remoteResources.testResource()) {
     /** @type {GetFeaturesResponse} */
     const getFeatures = {
       features: {

@@ -1,4 +1,5 @@
 import invariant from 'tiny-invariant'
+import { PrivacyConfig } from './remote-resources/remote-resources.machine'
 
 /**
  * @param {Record<string, any>} config
@@ -79,7 +80,8 @@ export function toggleUnprotected(config, domain) {
 
 /**
  * @param {import("fast-json-patch").Operation[]} patches
- * @param {Record<string, any>} config
+ * @param {PrivacyConfig} config
+ * @returns {Promise<PrivacyConfig>}
  */
 export async function updateFeatureHash(patches, config) {
   const changedFeatures = new Set()
@@ -107,6 +109,7 @@ export async function updateFeatureHash(patches, config) {
     const featureAsString = JSON.stringify(config.features[changedFeature])
     config.features[changedFeature].hash = await sha256(featureAsString)
   }
+  return config
 }
 
 /**

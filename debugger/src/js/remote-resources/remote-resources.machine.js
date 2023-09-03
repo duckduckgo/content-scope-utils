@@ -3,6 +3,8 @@ import { remoteResourceSchema } from '../../../schema/__generated__/schema.parse
 import * as z from 'zod'
 import { DebugToolsMessages } from '../DebugToolsMessages.mjs'
 import invariant from 'tiny-invariant'
+import { updateFeatureHash } from '../transforms'
+import jsonpatch from 'fast-json-patch'
 
 /**
  * @typedef {import("./remote-resources.machine.types").RemoteResourcesBroadcastEvents} RemoteResourcesBroadcastEvents
@@ -259,16 +261,46 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
       throw new Error('not supported')
     },
     saveEdited: async (ctx, evt) => {
-      if (evt.type === 'RemoteResource.setDebugContent') {
-        /** @type {import('../DebugToolsMessages.mjs').UpdateResourceParams} */
-        const next = {
-          id: evt.id,
-          source: { debugTools: { content: evt.content } },
+      invariant(evt.type === 'RemoteResource.setDebugContent')
+
+      const match = ctx.resources?.find((res) => res.id === ctx.currentResource?.id)
+      invariant(match, 'must be referring to a local resource')
+
+      // any pre-processing to do?
+      let content = evt.content // string
+
+      // apply privacy-configuration pre-processing
+      if (evt.id === 'privacy-configuration') {
+        const original = JSON.parse(match.current.contents)
+        const nextJson = JSON.parse(evt.content)
+
+        // to apply hash, both must conform to basic structure
+        try {
+          PrivacyConfig.parse(original)
+        } catch (e) {
+          console.log(e)
+          throw new Error('CURRENT json format doesnt conform to privacy config. see console for more info')
         }
-        const response = await minDuration(ctx.messages.updateResource(next))
-        return response
+
+        try {
+          PrivacyConfig.parse(nextJson)
+        } catch (e) {
+          console.log(e)
+          throw new Error('NEXT json format doesnt conform to privacy config. see console for more info')
+        }
+
+        const patches = jsonpatch.compare(original, nextJson)
+        const nextConfig = await updateFeatureHash(patches, nextJson)
+        content = JSON.stringify(nextConfig)
       }
-      throw new Error('not supported')
+
+      /** @type {import('../DebugToolsMessages.mjs').UpdateResourceParams} */
+      const next = {
+        id: evt.id,
+        source: { debugTools: { content: content } },
+      }
+
+      return await minDuration(ctx.messages.updateResource(next))
     },
   },
   actions: {
@@ -491,8 +523,20 @@ export const CurrentResource = z.object({
   id: z.string(),
   editorKinds: z.array(EditorKind),
 })
+export const PrivacyConfig = z.object({
+  unprotectedTemporary: z.array(z.any()),
+  features: z.record(
+    z.object({
+      settings: z.record(z.any()).optional(),
+      state: z.string(),
+      exceptions: z.array(z.any()),
+      hash: z.string().optional(),
+    }),
+  ),
+})
 /** @typedef {import("zod").infer<typeof EditorKind>} EditorKind */
 /** @typedef {import("zod").infer<typeof CurrentResource>} CurrentResource */
+/** @typedef {import("zod").infer<typeof PrivacyConfig>} PrivacyConfig */
 
 /**
  * @param {unknown} input

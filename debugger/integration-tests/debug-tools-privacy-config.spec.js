@@ -3,7 +3,7 @@ import { DebugToolsPage } from './page-objects/debug-tools.js'
 
 test.describe('debug tools privacy config', () => {
   test.describe('transforms', () => {
-    test.only('updates the hash', async ({ page, baseURL }, workerInfo) => {
+    test('updates the hash', async ({ page, baseURL }, workerInfo) => {
       const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       const initial = {
         unprotectedTemporary: [],
@@ -36,17 +36,15 @@ test.describe('debug tools privacy config', () => {
       }
       const editedString = JSON.stringify(edited, null, 2)
 
-      await test.step('Given I have edited a remote resource', async () => {
-        await dt.enabled()
-        await dt.withPrivacyConfig(initial)
-        await dt.openRemoteResourceEditor()
-        await dt.hasLoadedWithFeature('abc')
-        await dt.switchesTo('inline')
-        await dt.editsPreview(editedString)
-        await dt.submitsEditorSave()
-        const saved = await dt.savedWithValue()
-        dt.featureHasUpdatedHash(saved.source.debugTools.content, 'abc')
-      })
+      await dt.enabled()
+      await dt.withPrivacyConfig(initial)
+      await dt.openRemoteResourceEditor()
+      await dt.hasLoadedWithFeature('abc')
+      await dt.switchesTo('inline')
+      await dt.editsPreview(editedString)
+      await dt.submitsEditorSave()
+      const saved = await dt.savedWithValue()
+      dt.featureHasUpdatedHash(saved.source.debugTools.content, 'abc')
     })
   })
 })
