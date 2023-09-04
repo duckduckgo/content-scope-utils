@@ -48,7 +48,7 @@ export function ToggleList(props) {
           {props.domain && (
             <>
               <th className="p-4 text-left text-sm">
-                <code>{props.domain}</code>
+                <code>current</code>
               </th>
             </>
           )}

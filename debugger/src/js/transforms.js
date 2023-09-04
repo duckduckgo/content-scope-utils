@@ -25,6 +25,9 @@ export function handler(config, command) {
     case 'PrivacyConfig.toggleAllowlistedTrackerUrl': {
       return tryCatch(() => toggleAllowlistedTrackerUrl(config, command.trackerUrl, command.domains))
     }
+    case 'PrivacyConfig.toggleAllowlistedTrackerDomain': {
+      return tryCatch(() => toggleAllowlistedTrackerUrl(config, command.trackerUrl, command.domains, false))
+    }
   }
   return { error: { message: 'command not handled' }, ok: false }
 }
@@ -91,7 +94,7 @@ export function toggleUnprotected(config, domain) {
  * @param {string[]} domains
  * @returns {PrivacyConfig}
  */
-export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains) {
+export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains, includePath = true) {
   const allowList = config.features?.trackerAllowlist?.settings?.allowlistedTrackers
   invariant(allowList, 'allowlistedTrackers must be present on setttings of trackerAllowlist')
   const parsed = parse(trackerUrl)
@@ -100,7 +103,10 @@ export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains) {
   allowList[parsed.domain] ??= { rules: [] }
 
   // format is like example.com/a/b.js
-  const nextRule = `${url.hostname}${url.pathname}`
+  let nextRule = `${url.hostname}`
+  if (includePath) {
+    nextRule += url.pathname
+  }
 
   // is this rule already there?
   const matchingRule = allowList[parsed.domain].rules.find((x) => x.rule === nextRule)
@@ -129,31 +135,63 @@ export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains) {
       }
     }
   } else {
-    allowList[parsed.domain].rules.push({
+    const rule = {
       rule: nextRule,
       domains: domains,
       reason: 'debug tools',
+    }
+
+    const rule_domain_score = nextRule.split('.').length
+    const rule_path_score = url.pathname.split('.').length
+    const insert = allowList[parsed.domain].rules.findIndex((r) => {
+      const [a_domain, ...a_path] = r.rule.split(/\//g)
+      const domain_score = a_domain.split('.').length
+      const path_score = a_path.filter(Boolean).length
+      if (domain_score < rule_domain_score) {
+        return true
+      }
+      if (domain_score === rule_domain_score) {
+        if (path_score < rule_path_score) {
+          return true
+        }
+      }
+      return false
     })
+
+    if (insert === -1) {
+      allowList[parsed.domain].rules.push(rule)
+    } else {
+      allowList[parsed.domain].rules.splice(insert, 0, rule)
+    }
   }
   if (!allowList[parsed.domain]) return config
 
-  allowList[parsed.domain].rules.sort((a, b) => {
-    const [a_domain, ...a_path] = a.rule.split(/\//g)
-    const [b_domain, ...b_path] = b.rule.split(/\//g)
-
-    const a_domain_len = a_domain.split('.').length
-    const b_domain_len = b_domain.split('.').length
-
-    if (a_domain_len !== b_domain_len) {
-      return b_domain_len - a_domain_len
-    }
-
-    const a_path_len = a_path.length
-    const b_path_len = b_path.length
-    return b_path_len - a_path_len
-  })
-
   return config
+}
+
+/**
+ * @param {PrivacyConfig} config
+ * @param {string} trackerUrl
+ * @param {string} domain
+ * @return {*|boolean}
+ */
+export function isAllowlisted(config, trackerUrl, domain) {
+  const allowList = config.features?.trackerAllowlist?.settings?.allowlistedTrackers
+  if (!allowList) return false
+  const parsed = parse(trackerUrl)
+  invariant(parsed.domain, 'must have domain')
+  const rules = allowList[parsed.domain]?.rules
+  if (!rules) return false
+
+  const url = new URL(trackerUrl)
+  const nextRule = `${url.hostname}${url.pathname}`
+  const matchingRule = rules.find((x) => {
+    let normalized_a = x.rule.replace(/\/$/, '')
+    let normalized_b = nextRule.replace(/\/$/, '')
+    return normalized_a === normalized_b
+  })
+  if (!matchingRule) return false
+  return matchingRule.domains.includes(domain)
 }
 
 /**

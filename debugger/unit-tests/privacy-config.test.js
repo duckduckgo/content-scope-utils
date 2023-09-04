@@ -1,6 +1,7 @@
 import { expect } from '@esm-bundle/chai'
 import jsonpatch from 'fast-json-patch'
 import {
+  isAllowlisted,
   toggleAllowlistedTrackerUrl,
   toggleException,
   toggleFeature,
@@ -159,23 +160,10 @@ describe('updating feature hash', () => {
 
 // eslint-disable-next-line no-undef
 describe('allow listing trackers', () => {
-  it('respects ordering', async () => {
+  it('matches', async () => {
     const original = await fetch(minimal).then((x) => x.json())
     const config = JSON.parse(JSON.stringify(original))
     config.features.trackerAllowlist.settings.allowlistedTrackers['facebook.net'] = {
-      rules: [
-        {
-          rule: 'connect.facebook.net/en_US/sdk.js',
-          domains: ['bandsintown.com', 'nextdoor.co.uk', 'nextdoor.com'],
-        },
-        {
-          rule: 'facebook.net',
-          domains: ['edition.cnn.com'],
-        },
-      ],
-    }
-    const next = toggleAllowlistedTrackerUrl(config, 'https://connect.facebook.net/en_US/fbevents.js', ['example.com'])
-    expect(next.features.trackerAllowlist.settings?.allowlistedTrackers['facebook.net']).to.deep.eq({
       rules: [
         {
           rule: 'connect.facebook.net/en_US/sdk.js',
@@ -189,6 +177,74 @@ describe('allow listing trackers', () => {
         {
           rule: 'facebook.net',
           domains: ['edition.cnn.com'],
+        },
+      ],
+    }
+    const cases = [
+      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'bandsintown.com', expected: true },
+      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'nextdoor.co.uk', expected: true },
+      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'nextdoor.com', expected: true },
+      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'example.com', expected: false },
+      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'edition.cnn.com', expected: false },
+
+      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'bandsintown.com', expected: false },
+      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'nextdoor.co.uk', expected: false },
+      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'nextdoor.com', expected: false },
+      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'example.com', expected: true },
+      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'edition.cnn.com', expected: false },
+
+      { trackerUrl: 'https://facebook.net', domain: 'bandsintown.com', expected: false },
+      { trackerUrl: 'https://facebook.net', domain: 'nextdoor.co.uk', expected: false },
+      { trackerUrl: 'https://facebook.net', domain: 'nextdoor.com', expected: false },
+      { trackerUrl: 'https://facebook.net', domain: 'example.com', expected: false },
+      { trackerUrl: 'https://facebook.net', domain: 'edition.cnn.com', expected: true },
+    ]
+
+    for (const { trackerUrl, domain, expected } of cases) {
+      const actual = isAllowlisted(config, trackerUrl, domain)
+      expect(actual).to.eq(expected, `expect ${domain} : ${trackerUrl}`)
+    }
+  })
+  it('respects ordering', async () => {
+    const original = await fetch(minimal).then((x) => x.json())
+    const config = JSON.parse(JSON.stringify(original))
+    config.features.trackerAllowlist.settings.allowlistedTrackers['facebook.net'] = {
+      rules: [
+        {
+          rule: 'connect.facebook.net/en_US/sdk.js',
+          domains: ['bandsintown.com', 'nextdoor.co.uk', 'nextdoor.com'],
+        },
+        {
+          rule: 'facebook.net',
+          domains: ['edition.cnn.com'],
+        },
+        {
+          rule: 'connect.facebook.net/en_US/fbevents.js',
+          domains: ['example.com'],
+          reason: 'debug tools',
+        },
+      ],
+    }
+    const next = toggleAllowlistedTrackerUrl(config, 'https://connect.facebook.net', ['example.com'])
+    expect(next.features.trackerAllowlist.settings?.allowlistedTrackers['facebook.net']).to.deep.eq({
+      rules: [
+        {
+          rule: 'connect.facebook.net/en_US/sdk.js',
+          domains: ['bandsintown.com', 'nextdoor.co.uk', 'nextdoor.com'],
+        },
+        {
+          rule: 'connect.facebook.net/',
+          domains: ['example.com'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'facebook.net',
+          domains: ['edition.cnn.com'],
+        },
+        {
+          rule: 'connect.facebook.net/en_US/fbevents.js',
+          domains: ['example.com'],
+          reason: 'debug tools',
         },
       ],
     })
