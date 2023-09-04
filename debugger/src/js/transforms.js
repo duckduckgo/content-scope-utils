@@ -1,8 +1,12 @@
 import invariant from 'tiny-invariant'
-import { PrivacyConfig } from './remote-resources/remote-resources.machine'
+import { parse } from 'tldts'
 
 /**
- * @param {Record<string, any>} config
+ * @typedef {import("./remote-resources/remote-resources.machine").PrivacyConfig} PrivacyConfig
+ */
+
+/**
+ * @param {PrivacyConfig} config
  * @param {import('./transforms.types').PrivacyConfigTransformMethods} command
  * @returns {import('./transforms.types').TransformResult<Record<string, any>>}
  */
@@ -17,6 +21,9 @@ export function handler(config, command) {
     }
     case 'PrivacyConfig.toggleUnprotectedDomain': {
       return tryCatch(() => toggleUnprotected(config, command.domain))
+    }
+    case 'PrivacyConfig.toggleAllowlistedTrackerUrl': {
+      return tryCatch(() => toggleAllowlistedTrackerUrl(config, command.trackerUrl, command.domains))
     }
   }
   return { error: { message: 'command not handled' }, ok: false }
@@ -75,6 +82,27 @@ export function toggleUnprotected(config, domain) {
   } else {
     config.unprotectedTemporary.splice(prev, 1)
   }
+  return config
+}
+
+/**
+ * @param {PrivacyConfig} config
+ * @param {string} trackerUrl
+ * @param {string[]} domains
+ * @returns {PrivacyConfig}
+ */
+export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains) {
+  const allowList = config.features?.trackerAllowlist?.settings?.allowlistedTrackers
+  invariant(allowList, 'allowlistedTrackers must be present on setttings of trackerAllowlist')
+  const parsed = parse(trackerUrl)
+  const url = new URL(trackerUrl)
+  invariant(parsed.domain, 'must have domain')
+  allowList[parsed.domain] ??= { rules: [] }
+  allowList[parsed.domain].rules.push({
+    rule: `${url.hostname}${url.pathname}`,
+    domains: domains,
+    reason: 'debug tools',
+  })
   return config
 }
 

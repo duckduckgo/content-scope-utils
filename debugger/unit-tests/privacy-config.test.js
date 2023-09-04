@@ -1,6 +1,12 @@
 import { expect } from '@esm-bundle/chai'
 import jsonpatch from 'fast-json-patch'
-import { toggleException, toggleFeature, toggleUnprotected, updateFeatureHash } from '../src/js/transforms'
+import {
+  toggleAllowlistedTrackerUrl,
+  toggleException,
+  toggleFeature,
+  toggleUnprotected,
+  updateFeatureHash,
+} from '../src/js/transforms'
 
 const minimal = new URL('../schema/__fixtures__/minimal-config.json', import.meta.url)
 
@@ -148,5 +154,58 @@ describe('updating feature hash', () => {
 
     // hash should still be absent
     expect(nextJson.features.trackerAllowlist.hash).to.deep.eq(undefined)
+  })
+})
+
+// eslint-disable-next-line no-undef
+describe('allow listing trackers', () => {
+  it.only('adds a new allow listed tracker', async () => {
+    const original = await fetch(minimal).then((x) => x.json())
+    const config = JSON.parse(JSON.stringify(original))
+    const next = toggleAllowlistedTrackerUrl(config, 'https://example.com', ['<all>'])
+    expect(next.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
+      rules: [
+        {
+          rule: 'example.com/',
+          domains: ['<all>'],
+          reason: 'debug tools',
+        },
+      ],
+    })
+    const next2 = toggleAllowlistedTrackerUrl(config, 'https://example.com/a/b', ['mysite.com'])
+    expect(next2.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
+      rules: [
+        {
+          rule: 'example.com/',
+          domains: ['<all>'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'example.com/a/b',
+          domains: ['mysite.com'],
+          reason: 'debug tools',
+        },
+      ],
+    })
+    const next3 = toggleAllowlistedTrackerUrl(config, 'https://abc.example.com/foo', ['tesco.com'])
+    expect(next3.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
+      rules: [
+        {
+          rule: 'example.com/',
+          domains: ['<all>'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'example.com/a/b',
+          domains: ['mysite.com'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'abc.example.com/foo',
+          domains: ['tesco.com'],
+          reason: 'debug tools',
+        },
+      ],
+    })
   })
 })

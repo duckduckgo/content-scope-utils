@@ -50,11 +50,18 @@ export interface ToggleFeature {
   feature: string
 }
 
+export interface ToggleAllowlistedTracker {
+  kind: 'PrivacyConfig.toggleAllowlistedTrackerUrl'
+  trackerUrl: string
+  domains: string[]
+}
+
 // prettier-ignore
 export type PrivacyConfigTransformMethods =
     | ToggleUnprotectedDomain
     | ToggleFeatureDomain
     | ToggleFeature
+    | ToggleAllowlistedTracker
     ;
 
 // export type Transforms = PrivacyConfigTransforms

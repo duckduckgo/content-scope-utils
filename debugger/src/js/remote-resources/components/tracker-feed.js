@@ -26,11 +26,16 @@ export function TrackerFeed(props) {
   return (
     <>
       {state.matches(['subscribing']) && (
-        <table>
+        <table style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
             <tr>
               <th className="p-4 text-left text-sm">Tracker url</th>
-              <th className="p-4 text-left text-sm">State</th>
+              <th className="p-4 text-left text-sm" style={{ width: '20%' }}>
+                State
+              </th>
+              <th className="p-4 text-left text-sm" style={{ width: '15%' }}>
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -39,20 +44,18 @@ export function TrackerFeed(props) {
               const blocked = 'blocked' in req.state
               const params = new URLSearchParams(url.searchParams)
               return (
-                <tr style={{ background: blocked ? 'rgb(255, 204, 204)' : 'white' }}>
-                  <td className="px-4">
+                <tr style={{ background: blocked ? 'rgb(255, 204, 204)' : 'white' }} key={req.url}>
+                  <td className="px-4" style={{ overflow: 'hidden' }}>
                     <small>
-                      <code>
-                        {url.protocol}//{url.hostname}
-                        {url.pathname}
-                      </code>
+                      <code>{req.url}</code>
                     </small>
                   </td>
                   <td className="px-4">
                     <small>
-                      <code>{blocked ? '🚫' : req.state.allowed.reason}</code>
+                      <code>{blocked ? 'blocked' : req.state.allowed.reason}</code>
                     </small>
                   </td>
+                  <td className="px-4">{blocked && <button>Allow</button>}</td>
                 </tr>
               )
             })}

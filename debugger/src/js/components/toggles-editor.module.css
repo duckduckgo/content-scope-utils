@@ -1,6 +1,6 @@
 .togglesGrid {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
   grid-template-areas: 'feature-list tracker-feed';
   grid-column-gap: var(--ddg-ui-gutter);
 }

@@ -76,7 +76,7 @@ buildSync({
   define: {
     'import.meta.env': JSON.stringify(NODE_ENV),
   },
-  minify: true,
+  minifySyntax: true,
 })
 
 for (const copyJob of copyJobs) {

@@ -1,4 +1,4 @@
-import { assign, createMachine } from 'xstate'
+import { assign, createMachine, pure } from 'xstate'
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { createActorContext } from '@xstate/react'
 import { useContext, useEffect } from 'react'
@@ -11,13 +11,17 @@ export const trackerFeedMachine = createMachine(
     context: /** @type {import("./tracker-feed.types").TrackerFeedContext} */ ({}),
     initial: 'idle',
     on: {
-      broadcastCurrentDomain: {
-        target: 'subscribing',
-        actions: ['domainChanged'],
-      },
-      onTrackersUpdated: {
-        actions: ['assignRequests'],
-      },
+      broadcastCurrentDomain: [
+        {
+          actions: ['assignDomain'],
+          target: 'subscribing',
+          cond: 'will-set-domain',
+        },
+        {
+          actions: ['assignDomain'],
+          target: 'waiting for domain selection',
+        },
+      ],
     },
     states: {
       idle: {
@@ -25,9 +29,15 @@ export const trackerFeedMachine = createMachine(
       },
       'waiting for domain selection': {},
       subscribing: {
+        on: {
+          onTrackersUpdated: {
+            actions: ['assignRequests'],
+          },
+        },
         invoke: {
           id: 'tracker-feed',
           src: 'tracker-feed',
+          onDone: [{ actions: 'clear' }],
         },
       },
     },
@@ -41,29 +51,40 @@ export const trackerFeedMachine = createMachine(
   {
     services: {
       'tracker-feed': (ctx, evt) => (send) => {
-        invariant(ctx.domain)
+        invariant(ctx.domain, 'ctx.domain must be set before getting here')
         const unsub = ctx.messages.onTrackersUpdated(ctx.domain, (data) => {
-          console.log(data)
           send({ type: 'onTrackersUpdated', payload: data })
         })
         return () => {
+          console.log('stop!')
           unsub()
         }
       },
     },
     guards: {
-      'has domain': (ctx) => typeof ctx.domain === 'string',
+      'will-set-domain': (ctx, evt) => {
+        invariant(evt.type === 'broadcastCurrentDomain', `evt.type === 'broadcastCurrentDomain'`)
+        return typeof evt.payload.domain === 'string'
+      },
+      'has domain': (ctx) => {
+        return typeof ctx.domain === 'string'
+      },
     },
     actions: {
-      domainChanged: assign({
+      assignDomain: assign({
         domain: (ctx, evt) => {
-          invariant(evt.type === 'broadcastCurrentDomain')
+          invariant(evt.type === 'broadcastCurrentDomain', `evt.type === 'broadcastCurrentDomain'`)
+          console.log('hhhh', evt.payload)
+          // this could be undefined, that's a valid situation (it means no domain was selected in the UI)
           return evt.payload.domain
         },
       }),
+      clear: () => {
+        console.log('CLEAR')
+      },
       assignRequests: assign({
         requests: (ctx, evt) => {
-          invariant(evt.type === 'onTrackersUpdated')
+          invariant(evt.type === 'onTrackersUpdated', `evt.type === 'onTrackersUpdated'`)
           return evt.payload.requests
         },
       }),

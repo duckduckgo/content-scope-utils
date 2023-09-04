@@ -6,4 +6,6 @@ export interface TrackerFeedContext {
   requests: OnTrackersUpdatedSchema['requests']
 }
 
-export type TrackerFeedEvents = { type: 'onTrackersUpdated'; payload: OnTrackersUpdatedSchema }
+export type TrackerFeedEvents =
+  | { type: 'onTrackersUpdated'; payload: OnTrackersUpdatedSchema }
+  | { type: 'subscribeToDomain' }
