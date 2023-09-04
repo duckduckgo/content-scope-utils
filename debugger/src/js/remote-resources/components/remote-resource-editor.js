@@ -9,6 +9,7 @@ import styles from '../../app/components/app.module.css'
 import { SubNav } from '../../app/components/feature-nav'
 import { useRef } from 'react'
 import { Button } from '../../components/buttons'
+import { Sidebar } from './sidebar'
 
 /**
  * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -49,11 +50,11 @@ export function RemoteResourceEditor(props) {
           <RemoteResourceState resource={props.resource} model={props.model} />
         </div>
 
-        {/*<div className={styles.sidebar}>*/}
-        {/*  <div className={styles.inner}>*/}
-        {/*    <button>click</button>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
+        <div className={styles.sidebar}>
+          <div className={styles.inner}>
+            <Sidebar />
+          </div>
+        </div>
 
         <div className={styles.mainContent}>
           <EditorSelection
@@ -113,9 +114,6 @@ function Footer(props) {
   )
   return (
     <div className="flex column-gap">
-      <div className="flex column-gap">
-        <Switcher kind={editorKind} toggleKind={setEditorKind} values={values} />
-      </div>
       <div className="flex column-gap" ref={props.additionalButtons} />
       <div className="flex column-gap ml-auto">{buttons}</div>
     </div>
@@ -267,32 +265,5 @@ function FloatingErrors(props) {
       })}
       <div className="row">{props.children}</div>
     </div>
-  )
-}
-
-/**
- * @param {object} props
- * @param {{value: string; label: string}[]} props.values
- * @param {EditorKind} props.kind
- * @param {(kind: EditorKind) => void} props.toggleKind
- */
-function Switcher(props) {
-  return (
-    <label className="inline-select">
-      <span className="inline-select__label">Editor kind: </span>
-      <select
-        className="inline-select__select"
-        value={props.kind}
-        onChange={(e) => props.toggleKind(/** @type {any} */ (e.target.value))}
-      >
-        {props.values.map((value) => {
-          return (
-            <option value={value.value} key={value.value}>
-              {value.label}
-            </option>
-          )
-        })}
-      </select>
-    </label>
   )
 }

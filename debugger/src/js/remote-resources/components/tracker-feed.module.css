@@ -16,3 +16,18 @@
     left: 0;
     top: 0;
 }
+.urlCell {
+    position: relative;
+    overflow: auto;
+    white-space: nowrap
+}
+
+.trackerUrl {
+    display: block;
+}
+.pageUrl {
+    display: block;
+    padding-left: .5rem;
+    opacity: .6;
+    font-size: 8px;
+}

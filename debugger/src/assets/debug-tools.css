@@ -83,6 +83,7 @@ h6 {
   --ddg-color-txt: var(--ddg-shade-84);
   --ddg-color-txt-link-02: #ababab;
   --ddg-ui-gutter: 0.7rem;
+  --ddg-ui-radius: 0.2rem;
   --ddg-ui-gutter-tight: 0.4rem;
 }
 @media (prefers-color-scheme: dark) {
@@ -272,15 +273,15 @@ dialog::backdrop {
   background: #f6f6f6;
   padding: 1rem;
   border: 1px solid #e9e9e9;
-  border-radius: 0.2rem;
+  border-radius: var(--ddg-ui-radius);
 }
 
 .error {
   color: #a80000;
-  font-size: 0var (--ddg-ui-gutter);
+  font-size: var(--ddg-ui-gutter);
   padding: 1.4rem;
   background: #ffbdbd;
-  border-radius: 0.2rem;
+  border-radius: var(--ddg-ui-radius);
 }
 
 .floating {

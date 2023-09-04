@@ -34,10 +34,11 @@
 
   grid-template-areas:
     'main-header main-header'
-    'main-content main-content';
+    'main-sidebar main-content';
 
   grid-template-rows: auto 1fr;
-  /*grid-template-columns: 50px 1fr;*/
+  grid-template-columns: 70px 1fr;
+  grid-column-gap: var(--ddg-ui-gutter);
 
   padding-left: var(--ddg-ui-gutter);
   padding-right: var(--ddg-ui-gutter);
@@ -75,7 +76,9 @@
 
 .sidebar {
   grid-area: main-sidebar;
-  border: 2px dotted red;
+  /*border: 2px dotted red;*/
+  padding-top: var(--ddg-ui-gutter);
+  padding-bottom: var(--ddg-ui-gutter);
 }
 
 .inner {
