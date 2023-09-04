@@ -159,6 +159,40 @@ describe('updating feature hash', () => {
 
 // eslint-disable-next-line no-undef
 describe('allow listing trackers', () => {
+  it('respects ordering', async () => {
+    const original = await fetch(minimal).then((x) => x.json())
+    const config = JSON.parse(JSON.stringify(original))
+    config.features.trackerAllowlist.settings.allowlistedTrackers['facebook.net'] = {
+      rules: [
+        {
+          rule: 'connect.facebook.net/en_US/sdk.js',
+          domains: ['bandsintown.com', 'nextdoor.co.uk', 'nextdoor.com'],
+        },
+        {
+          rule: 'facebook.net',
+          domains: ['edition.cnn.com'],
+        },
+      ],
+    }
+    const next = toggleAllowlistedTrackerUrl(config, 'https://connect.facebook.net/en_US/fbevents.js', ['example.com'])
+    expect(next.features.trackerAllowlist.settings?.allowlistedTrackers['facebook.net']).to.deep.eq({
+      rules: [
+        {
+          rule: 'connect.facebook.net/en_US/sdk.js',
+          domains: ['bandsintown.com', 'nextdoor.co.uk', 'nextdoor.com'],
+        },
+        {
+          rule: 'connect.facebook.net/en_US/fbevents.js',
+          domains: ['example.com'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'facebook.net',
+          domains: ['edition.cnn.com'],
+        },
+      ],
+    })
+  })
   it('adds a new allow listed tracker', async () => {
     const original = await fetch(minimal).then((x) => x.json())
     const config = JSON.parse(JSON.stringify(original))
@@ -176,13 +210,13 @@ describe('allow listing trackers', () => {
     expect(next2.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
       rules: [
         {
-          rule: 'example.com/',
-          domains: ['<all>'],
+          rule: 'example.com/a/b',
+          domains: ['mysite.com'],
           reason: 'debug tools',
         },
         {
-          rule: 'example.com/a/b',
-          domains: ['mysite.com'],
+          rule: 'example.com/',
+          domains: ['<all>'],
           reason: 'debug tools',
         },
       ],
@@ -191,8 +225,8 @@ describe('allow listing trackers', () => {
     expect(next3.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
       rules: [
         {
-          rule: 'example.com/',
-          domains: ['<all>'],
+          rule: 'abc.example.com/foo',
+          domains: ['tesco.com'],
           reason: 'debug tools',
         },
         {
@@ -201,8 +235,8 @@ describe('allow listing trackers', () => {
           reason: 'debug tools',
         },
         {
-          rule: 'abc.example.com/foo',
-          domains: ['tesco.com'],
+          rule: 'example.com/',
+          domains: ['<all>'],
           reason: 'debug tools',
         },
       ],
@@ -212,29 +246,29 @@ describe('allow listing trackers', () => {
     expect(next4.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
       rules: [
         {
-          rule: 'example.com/',
-          domains: ['<all>'],
-          reason: 'debug tools',
-        },
-        {
-          rule: 'example.com/a/b',
-          domains: ['mysite.com'],
-          reason: 'debug tools',
-        },
-        {
           rule: 'abc.example.com/foo',
           domains: ['tesco.com', 'edition.cnn.com'],
           reason: 'debug tools',
         },
+        {
+          rule: 'example.com/a/b',
+          domains: ['mysite.com'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'example.com/',
+          domains: ['<all>'],
+          reason: 'debug tools',
+        },
       ],
     })
-    // remove a domain from a rule
+    // // remove a domain from a rule
     const next5 = toggleAllowlistedTrackerUrl(config, 'https://abc.example.com/foo', ['edition.cnn.com'])
     expect(next5.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
       rules: [
         {
-          rule: 'example.com/',
-          domains: ['<all>'],
+          rule: 'abc.example.com/foo',
+          domains: ['tesco.com'],
           reason: 'debug tools',
         },
         {
@@ -243,8 +277,8 @@ describe('allow listing trackers', () => {
           reason: 'debug tools',
         },
         {
-          rule: 'abc.example.com/foo',
-          domains: ['tesco.com'],
+          rule: 'example.com/',
+          domains: ['<all>'],
           reason: 'debug tools',
         },
       ],
@@ -254,13 +288,13 @@ describe('allow listing trackers', () => {
     expect(next6.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
       rules: [
         {
-          rule: 'example.com/',
-          domains: ['<all>'],
+          rule: 'abc.example.com/foo',
+          domains: ['tesco.com'],
           reason: 'debug tools',
         },
         {
-          rule: 'abc.example.com/foo',
-          domains: ['tesco.com'],
+          rule: 'example.com/',
+          domains: ['<all>'],
           reason: 'debug tools',
         },
       ],

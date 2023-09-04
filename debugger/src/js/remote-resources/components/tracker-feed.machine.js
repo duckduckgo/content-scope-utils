@@ -1,4 +1,4 @@
-import { assign, createMachine, pure } from 'xstate'
+import { assign, createMachine } from 'xstate'
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { createActorContext } from '@xstate/react'
 import { useContext, useEffect } from 'react'
@@ -9,6 +9,9 @@ export const trackerFeedMachine = createMachine(
   {
     id: 'trackerfeed',
     context: /** @type {import("./tracker-feed.types").TrackerFeedContext} */ ({}),
+    schema: {
+      events: /** @type {import('./tracker-feed.types').TrackerFeedEvents} */ ({}),
+    },
     initial: 'idle',
     on: {
       broadcastCurrentDomain: [
@@ -33,6 +36,9 @@ export const trackerFeedMachine = createMachine(
           onTrackersUpdated: {
             actions: ['assignRequests'],
           },
+          refresh: {
+            target: 'subscribing',
+          },
         },
         invoke: {
           id: 'tracker-feed',
@@ -40,10 +46,6 @@ export const trackerFeedMachine = createMachine(
           onDone: [{ actions: 'clear' }],
         },
       },
-    },
-    schema: {
-      events:
-        /** @type {import('../remote-resources.machine.types').RemoteResourcesBroadcastEvents | import('./tracker-feed.types').TrackerFeedEvents} */ ({}),
     },
     predictableActionArguments: true,
     preserveActionOrder: true,

@@ -9,3 +9,5 @@ export interface TrackerFeedContext {
 export type TrackerFeedEvents =
   | { type: 'onTrackersUpdated'; payload: OnTrackersUpdatedSchema }
   | { type: 'subscribeToDomain' }
+  | { type: 'broadcastCurrentDomain'; payload: { domain: string | undefined } }
+  | { type: 'refresh' }

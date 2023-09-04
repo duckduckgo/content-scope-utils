@@ -6,6 +6,7 @@ import { AppMachineContext } from '../app/components/app'
 import { RemoteResources } from './components/remote-resources'
 import invariant from 'tiny-invariant'
 import { patchesMachine } from './patches-machine'
+import { TrackerFeedProvider } from './components/tracker-feed.machine'
 
 export const RemoteResourcesContext = createActorContext(remoteResourcesMachine, { devTools: true })
 export const PatchesContext = createActorContext(patchesMachine, { devTools: true })
@@ -20,7 +21,9 @@ export function RemoteResourcesPage() {
   return (
     <RemoteResourcesContext.Provider machine={() => remoteResourcesMachine.withContext({ messages, parent, tabs: [] })}>
       <PatchesProvider>
-        <RemoteResourcesLoader />
+        <TrackerFeedProvider>
+          <RemoteResourcesLoader />
+        </TrackerFeedProvider>
       </PatchesProvider>
     </RemoteResourcesContext.Provider>
   )

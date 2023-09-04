@@ -317,7 +317,6 @@ dialog::backdrop {
 }
 
 .inline-dl__dt {
-  color: gray;
   margin-right: 0.4rem;
   display: flex;
   flex-wrap: wrap;

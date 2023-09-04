@@ -2,7 +2,6 @@ import { FeatureToggleListGlobal } from '../remote-resources/components/feature-
 import { FeatureToggleListDomainExceptions } from '../remote-resources/components/feature-toggle-list-domain-exceptions'
 import styles from './toggles-editor.module.css'
 import { TrackerFeed } from '../remote-resources/components/tracker-feed'
-import { TrackerFeedProvider } from '../remote-resources/components/tracker-feed.machine'
 
 /**
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -35,9 +34,7 @@ export function TogglesEditor(props) {
           <FeatureToggleListGlobal {...props} />
         </div>
         <div className={styles.trackerFeed}>
-          <TrackerFeedProvider>
-            <TrackerFeed {...props} />
-          </TrackerFeedProvider>
+          <TrackerFeed {...props} />
         </div>
       </div>
     </div>

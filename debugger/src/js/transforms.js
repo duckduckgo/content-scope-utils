@@ -119,6 +119,7 @@ export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains) {
     filteredDomains.push(...addOps)
     const nextDomains = new Set(filteredDomains)
     matchingRule.domains = Array.from(nextDomains)
+
     if (matchingRule.domains.length === 0) {
       const nextRules = allowList[parsed.domain].rules.filter((rule) => rule !== matchingRule)
       if (nextRules.length === 0) {
@@ -134,6 +135,23 @@ export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains) {
       reason: 'debug tools',
     })
   }
+  if (!allowList[parsed.domain]) return config
+
+  allowList[parsed.domain].rules.sort((a, b) => {
+    const [a_domain, ...a_path] = a.rule.split(/\//g)
+    const [b_domain, ...b_path] = b.rule.split(/\//g)
+
+    const a_domain_len = a_domain.split('.').length
+    const b_domain_len = b_domain.split('.').length
+
+    if (a_domain_len !== b_domain_len) {
+      return b_domain_len - a_domain_len
+    }
+
+    const a_path_len = a_path.length
+    const b_path_len = b_path.length
+    return b_path_len - a_path_len
+  })
 
   return config
 }
