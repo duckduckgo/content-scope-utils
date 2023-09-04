@@ -76,7 +76,6 @@ export const trackerFeedMachine = createMachine(
       assignDomain: assign({
         domain: (ctx, evt) => {
           invariant(evt.type === 'broadcastCurrentDomain', `evt.type === 'broadcastCurrentDomain'`)
-          console.log('hhhh', evt.payload)
           // this could be undefined, that's a valid situation (it means no domain was selected in the UI)
           return evt.payload.domain
         },
