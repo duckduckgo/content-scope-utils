@@ -98,11 +98,43 @@ export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains) {
   const url = new URL(trackerUrl)
   invariant(parsed.domain, 'must have domain')
   allowList[parsed.domain] ??= { rules: [] }
-  allowList[parsed.domain].rules.push({
-    rule: `${url.hostname}${url.pathname}`,
-    domains: domains,
-    reason: 'debug tools',
-  })
+
+  // format is like example.com/a/b.js
+  const nextRule = `${url.hostname}${url.pathname}`
+
+  // is this rule already there?
+  const matchingRule = allowList[parsed.domain].rules.find((x) => x.rule === nextRule)
+
+  if (matchingRule) {
+    const addOps = []
+    const removeOps = []
+    for (let incomingDomain of domains) {
+      if (matchingRule.domains.includes(incomingDomain)) {
+        removeOps.push(incomingDomain)
+      } else {
+        addOps.push(incomingDomain)
+      }
+    }
+    const filteredDomains = matchingRule.domains.filter((domain) => !removeOps.includes(domain))
+    filteredDomains.push(...addOps)
+    const nextDomains = new Set(filteredDomains)
+    matchingRule.domains = Array.from(nextDomains)
+    if (matchingRule.domains.length === 0) {
+      const nextRules = allowList[parsed.domain].rules.filter((rule) => rule !== matchingRule)
+      if (nextRules.length === 0) {
+        delete allowList[parsed.domain]
+      } else {
+        allowList[parsed.domain].rules = nextRules
+      }
+    }
+  } else {
+    allowList[parsed.domain].rules.push({
+      rule: nextRule,
+      domains: domains,
+      reason: 'debug tools',
+    })
+  }
+
   return config
 }
 

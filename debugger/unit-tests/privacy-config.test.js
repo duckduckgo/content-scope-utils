@@ -159,7 +159,7 @@ describe('updating feature hash', () => {
 
 // eslint-disable-next-line no-undef
 describe('allow listing trackers', () => {
-  it.only('adds a new allow listed tracker', async () => {
+  it('adds a new allow listed tracker', async () => {
     const original = await fetch(minimal).then((x) => x.json())
     const config = JSON.parse(JSON.stringify(original))
     const next = toggleAllowlistedTrackerUrl(config, 'https://example.com', ['<all>'])
@@ -207,5 +207,67 @@ describe('allow listing trackers', () => {
         },
       ],
     })
+    // add another domain to an existing rule
+    const next4 = toggleAllowlistedTrackerUrl(config, 'https://abc.example.com/foo', ['edition.cnn.com'])
+    expect(next4.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
+      rules: [
+        {
+          rule: 'example.com/',
+          domains: ['<all>'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'example.com/a/b',
+          domains: ['mysite.com'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'abc.example.com/foo',
+          domains: ['tesco.com', 'edition.cnn.com'],
+          reason: 'debug tools',
+        },
+      ],
+    })
+    // remove a domain from a rule
+    const next5 = toggleAllowlistedTrackerUrl(config, 'https://abc.example.com/foo', ['edition.cnn.com'])
+    expect(next5.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
+      rules: [
+        {
+          rule: 'example.com/',
+          domains: ['<all>'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'example.com/a/b',
+          domains: ['mysite.com'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'abc.example.com/foo',
+          domains: ['tesco.com'],
+          reason: 'debug tools',
+        },
+      ],
+    })
+    // remove a rule entirely
+    const next6 = toggleAllowlistedTrackerUrl(config, 'https://example.com/a/b', ['mysite.com'])
+    expect(next6.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
+      rules: [
+        {
+          rule: 'example.com/',
+          domains: ['<all>'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'abc.example.com/foo',
+          domains: ['tesco.com'],
+          reason: 'debug tools',
+        },
+      ],
+    })
+    // remove a rule entirely
+    const next7 = toggleAllowlistedTrackerUrl(config, 'https://example.com', ['<all>'])
+    const next8 = toggleAllowlistedTrackerUrl(next7, 'https://abc.example.com/foo', ['tesco.com'])
+    expect(next8.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq(undefined)
   })
 })
