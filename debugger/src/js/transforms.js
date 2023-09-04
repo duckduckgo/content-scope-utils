@@ -115,10 +115,17 @@ export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains, include
     const addOps = []
     const removeOps = []
     for (let incomingDomain of domains) {
-      if (matchingRule.domains.includes(incomingDomain)) {
-        removeOps.push(incomingDomain)
+      if (incomingDomain === '<all>' && matchingRule.domains.includes('<all>')) {
+        removeOps.push('<all>')
       } else {
-        addOps.push(incomingDomain)
+        const parsed = parse(incomingDomain)
+        if (matchingRule.domains.includes(parsed.hostname)) {
+          removeOps.push(parsed.hostname)
+        } else if (matchingRule.domains.includes(parsed.domain)) {
+          removeOps.push(parsed.domain)
+        } else {
+          addOps.push(incomingDomain)
+        }
       }
     }
     const filteredDomains = matchingRule.domains.filter((domain) => !removeOps.includes(domain))
@@ -179,6 +186,7 @@ export function isAllowlisted(config, trackerUrl, domain) {
   const allowList = config.features?.trackerAllowlist?.settings?.allowlistedTrackers
   if (!allowList) return false
   const parsed = parse(trackerUrl)
+  const parsedDomain = parse(domain)
   invariant(parsed.domain, 'must have domain')
   const rules = allowList[parsed.domain]?.rules
   if (!rules) return false
@@ -191,7 +199,7 @@ export function isAllowlisted(config, trackerUrl, domain) {
     return normalized_a === normalized_b
   })
   if (!matchingRule) return false
-  return matchingRule.domains.includes(domain)
+  return matchingRule.domains.includes(parsedDomain.hostname) || matchingRule.domains.includes(parsedDomain.domain)
 }
 
 /**

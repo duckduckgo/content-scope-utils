@@ -1,7 +1,14 @@
 .row {
     position: relative;
 }
-
+.table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+}
+.row {
+    border-bottom: 1px solid rgb(233, 233, 233);
+}
 .row[data-state="blocked"] {
     background: rgb(255, 210, 210);
 }

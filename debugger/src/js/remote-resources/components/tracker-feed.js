@@ -1,12 +1,10 @@
 import { parse } from 'tldts'
 import { useTrackerFeed } from './tracker-feed.machine'
-import { handler, isAllowlisted } from '../../transforms'
+import { handler } from '../../transforms'
 import invariant from 'tiny-invariant'
 import { MicroButton } from '../../components/buttons'
 import { DD, DT, InlineDL } from '../../components/definition-list'
-import { useEffect, useState } from 'react'
 import styles from './tracker-feed.module.css'
-import { RemoteResourcesContext } from '../remote-resources.page'
 import classnames from 'classnames'
 
 // @ts-expect-error - debugging;
@@ -28,13 +26,6 @@ window._parse = parse
 export function TrackerFeed(props) {
   // some local state not stored in xstate (yet)
   const [state, send] = useTrackerFeed()
-  const key = RemoteResourcesContext.useSelector((state) => {
-    return state.context.resourceKey
-  })
-  // console.log('-> feed state', state.context.domain)
-  // console.log('-> feed requests', state.context)
-  // const current = state.context.currentDomain || ''
-  const [parsedConfig, setParsedConfig] = useState(() => JSON.parse(props.model.getValue()))
 
   function toggleTrackerUrl(trackerUrl) {
     invariant(typeof state.context.domain === 'string', 'state.context.domain should be a string here')
@@ -73,19 +64,6 @@ export function TrackerFeed(props) {
     }
   }
 
-  useEffect(() => {
-    const sub = props.model.onDidChangeContent((v) => {
-      setParsedConfig(JSON.parse(props.model.getValue()))
-    })
-    return () => {
-      sub.dispose()
-    }
-  }, [props.model])
-
-  // useEffect(() => {
-  //   send({ type: 'refresh' })
-  // }, [key])
-
   function refresh() {
     send({ type: 'refresh' })
   }
@@ -101,7 +79,7 @@ export function TrackerFeed(props) {
         </>
       )}
       {state.matches(['subscribing']) && state.context.requests.length > 0 && (
-        <table style={{ tableLayout: 'fixed', width: '100%' }} key={key}>
+        <table className={styles.table}>
           <thead>
             <tr>
               <th className="p-4 text-left text-sm">
@@ -122,18 +100,15 @@ export function TrackerFeed(props) {
           </thead>
           <tbody>
             {state.context.requests.map((req) => {
-              const url = new URL(req.url)
+              // const url = new URL(req.url)
+              // const params = new URLSearchParams(url.searchParams)
+              // const allowlisted =
+              //   !blocked && state.context.domain && isAllowlisted(parsedConfig, req.url, state.context.domain)
+              // const partiallyAllowlisted =
+              //   state.context.domain && isAllowlisted(parsedConfig, req.url, state.context.domain)
+              // const canBeAllowlisted = blocked && !partiallyAllowlisted
               const blocked = 'blocked' in req.state
-              const params = new URLSearchParams(url.searchParams)
-              const allowlisted =
-                !blocked && state.context.domain && isAllowlisted(parsedConfig, req.url, state.context.domain)
-              const partiallyAllowlisted =
-                state.context.domain && isAllowlisted(parsedConfig, req.url, state.context.domain)
-              const canBeAllowlisted = blocked && !partiallyAllowlisted
               let rowstate = blocked ? 'blocked' : 'allowed'
-              if (blocked && partiallyAllowlisted) {
-                rowstate = 'partially-allowlisted'
-              }
               return (
                 <tr className={styles.row} data-state={rowstate} key={req.url}>
                   <td className={classnames('px-4', styles.urlCell)}>
@@ -146,12 +121,12 @@ export function TrackerFeed(props) {
                   </td>
                   <td className="px-4">
                     <small>
-                      <code>{blocked ? 'blocked' : req.state.allowed.reason}</code>
+                      <code>{blocked ? 'blocked' : 'allowed' in req.state ? req.state.allowed.reason : null}</code>
                     </small>
                   </td>
                   <td className="px-4">
-                    {allowlisted && <MicroButton onClick={() => toggleTrackerUrl(req.url)}>Remove</MicroButton>}
-                    {canBeAllowlisted && (
+                    {/*{allowlisted && <MicroButton onClick={() => toggleTrackerUrl(req.url)}>Remove</MicroButton>}*/}
+                    {blocked && (
                       <div className="flex">
                         <MicroButton onClick={() => toggleTrackerUrl(req.url)}>+ tracker</MicroButton>
                         <MicroButton onClick={() => toggleDomain(req.url)}>+ domain</MicroButton>

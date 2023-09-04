@@ -194,6 +194,10 @@ export class DebugToolsMessages {
       }
     })
   }
+
+  unsubscribeToTrackers() {
+    this.messaging.notify('unsubscribeToTrackers')
+  }
 }
 
 export const protectionsDisabledReasonSchema = z.literal("protectionDisabled");

@@ -180,24 +180,60 @@ describe('allow listing trackers', () => {
         },
       ],
     }
+    config.features.trackerAllowlist.settings.allowlistedTrackers['yottaa.com'] = {
+      rules: [
+        {
+          rule: 'cdn.yottaa.com/rapid.min.',
+          domains: ['<all>'],
+          reason: 'https://github.com/duckduckgo/privacy-configuration/issues/492',
+        },
+        {
+          rule: 'cdn.yottaa.com/rapid.security.min.',
+          domains: ['<all>'],
+          reason: 'https://github.com/duckduckgo/privacy-configuration/issues/830',
+        },
+        {
+          rule: 'rapid-cdn.yottaa.com/rapid/lib/ows8CdAyrC5lTw.js',
+          domains: ['scheels.com'],
+          reason: 'https://github.com/duckduckgo/privacy-configuration/issues/492',
+        },
+      ],
+    }
     const cases = [
-      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'bandsintown.com', expected: true },
-      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'nextdoor.co.uk', expected: true },
-      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'nextdoor.com', expected: true },
-      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'example.com', expected: false },
-      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'edition.cnn.com', expected: false },
+      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'https://bandsintown.com', expected: true },
+      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'https://nextdoor.co.uk', expected: true },
+      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'https://nextdoor.com', expected: true },
+      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'https://example.com', expected: false },
+      { trackerUrl: 'https://connect.facebook.net/en_US/sdk.js', domain: 'https://edition.cnn.com', expected: false },
 
-      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'bandsintown.com', expected: false },
-      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'nextdoor.co.uk', expected: false },
-      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'nextdoor.com', expected: false },
-      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'example.com', expected: true },
-      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'edition.cnn.com', expected: false },
+      {
+        trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js',
+        domain: 'https://bandsintown.com',
+        expected: false,
+      },
+      {
+        trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js',
+        domain: 'https://nextdoor.co.uk',
+        expected: false,
+      },
+      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'https://nextdoor.com', expected: false },
+      { trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js', domain: 'https://example.com', expected: true },
+      {
+        trackerUrl: 'https://connect.facebook.net/en_US/fbevents.js',
+        domain: 'https://edition.cnn.com',
+        expected: false,
+      },
 
-      { trackerUrl: 'https://facebook.net', domain: 'bandsintown.com', expected: false },
-      { trackerUrl: 'https://facebook.net', domain: 'nextdoor.co.uk', expected: false },
-      { trackerUrl: 'https://facebook.net', domain: 'nextdoor.com', expected: false },
-      { trackerUrl: 'https://facebook.net', domain: 'example.com', expected: false },
-      { trackerUrl: 'https://facebook.net', domain: 'edition.cnn.com', expected: true },
+      { trackerUrl: 'https://facebook.net', domain: 'https://bandsintown.com', expected: false },
+      { trackerUrl: 'https://facebook.net', domain: 'https://nextdoor.co.uk', expected: false },
+      { trackerUrl: 'https://facebook.net', domain: 'https://nextdoor.com', expected: false },
+      { trackerUrl: 'https://facebook.net', domain: 'https://example.com', expected: false },
+      { trackerUrl: 'https://facebook.net', domain: 'https://edition.cnn.com', expected: true },
+      {
+        trackerUrl: 'https://rapid-cdn.yottaa.com/rapid/lib/ows8CdAyrC5lTw.js',
+        domain: 'https://www.scheels.com',
+        expected: true,
+      },
     ]
 
     for (const { trackerUrl, domain, expected } of cases) {
@@ -244,6 +280,34 @@ describe('allow listing trackers', () => {
         {
           rule: 'connect.facebook.net/en_US/fbevents.js',
           domains: ['example.com'],
+          reason: 'debug tools',
+        },
+      ],
+    })
+  })
+  it('toggles domain match', async () => {
+    const original = await fetch(minimal).then((x) => x.json())
+    const config = JSON.parse(JSON.stringify(original))
+    config.features.trackerAllowlist.settings.allowlistedTrackers['example.com'] = {
+      rules: [
+        {
+          rule: 'example.com/',
+          domains: ['scheels.com'],
+          reason: 'debug tools',
+        },
+        {
+          rule: 'example.com/a/b',
+          domains: ['<all>'],
+          reason: 'debug tools',
+        },
+      ],
+    }
+    const next = toggleAllowlistedTrackerUrl(config, 'https://example.com', ['www.scheels.com'])
+    expect(next.features.trackerAllowlist.settings?.allowlistedTrackers['example.com']).to.deep.eq({
+      rules: [
+        {
+          rule: 'example.com/a/b',
+          domains: ['<all>'],
           reason: 'debug tools',
         },
       ],

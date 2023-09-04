@@ -21,7 +21,7 @@ export const trackerFeedMachine = createMachine(
           cond: 'will-set-domain',
         },
         {
-          actions: ['assignDomain'],
+          actions: ['assignDomain', 'clearSubscription'],
           target: 'waiting for domain selection',
         },
       ],
@@ -73,6 +73,9 @@ export const trackerFeedMachine = createMachine(
       },
     },
     actions: {
+      clearSubscription: (ctx) => {
+        ctx.messages.unsubscribeToTrackers()
+      },
       assignDomain: assign({
         domain: (ctx, evt) => {
           invariant(evt.type === 'broadcastCurrentDomain', `evt.type === 'broadcastCurrentDomain'`)
