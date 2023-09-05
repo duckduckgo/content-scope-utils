@@ -60,7 +60,8 @@ buildSync({
   bundle: true,
   format: 'iife',
   outdir: join(BUILD, 'js/editor'),
-  minify: true,
+  minify: NODE_ENV === 'production' ? true : undefined,
+  minifySyntax: NODE_ENV === 'development' ? true : undefined,
 })
 buildSync({
   entryPoints: [buildJob.src],
@@ -76,7 +77,8 @@ buildSync({
   define: {
     'import.meta.env': JSON.stringify(NODE_ENV),
   },
-  minifySyntax: true,
+  minify: NODE_ENV === 'production' ? true : undefined,
+  minifySyntax: NODE_ENV === 'development' ? true : undefined,
 })
 
 for (const copyJob of copyJobs) {
