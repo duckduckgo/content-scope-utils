@@ -8,6 +8,7 @@ import { lazy, Suspense, useContext, useRef } from 'react'
 import { Button } from '../../components/buttons'
 import { Sidebar } from './sidebar'
 import { TextModelContext } from '../../models/text-model'
+import { DiffViewer } from '../../components/diff-viewer'
 
 const MonacoEditor = lazy(() => import('../../components/monaco-editor.js'))
 const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))
@@ -183,7 +184,15 @@ function EditorSelection(props) {
       />
     ),
     diff: () => {
-      if (editorType === 'web') return <p>Cannot show rich editor</p>
+      if (editorType === 'web') {
+        return (
+          <DiffViewer
+            before={originalContents}
+            after={props.model.getValue()}
+            additionalButtons={props.additionalButtons}
+          />
+        )
+      }
       return (
         <Suspense>
           <MonacoDiffEditor

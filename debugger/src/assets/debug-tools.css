@@ -343,3 +343,11 @@ dialog::backdrop {
     visibility: visible;
   }
 }
+del {
+  background: pink;
+  text-decoration: none;
+}
+ins {
+  background: rgb(205, 249, 205);
+  text-decoration: none;
+}

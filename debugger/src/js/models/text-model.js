@@ -32,19 +32,30 @@ export class PlainTextModel {
    */
   setValue(value) {
     this.#value = value
+    this.#publish()
   }
 
+  /** @type {((e: any) => void)[]} */
+  #listeners = []
+
   /**
-   * onDidChangeContent(listener: (e: IModelContentChangedEvent) => void): IDisposable;
    * @param {(e: any) => void} listener
    * @returns {Disposable}
    */
   onDidChangeContent(listener) {
-    console.log('got listener')
+    this.#listeners.push(listener)
+
     return {
-      dispose() {
-        console.log('dispose...')
+      dispose: () => {
+        const index = this.#listeners.indexOf(listener)
+        this.#listeners.splice(index, 1)
       },
+    }
+  }
+
+  #publish() {
+    for (let listener of this.#listeners) {
+      listener(null)
     }
   }
 }
