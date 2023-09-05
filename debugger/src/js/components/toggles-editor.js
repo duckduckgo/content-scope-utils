@@ -7,18 +7,18 @@ import { TrackerFeed } from '../remote-resources/components/tracker-feed'
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
  * @typedef {import('../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
  * @typedef {import('../types').TabWithHostname} TabWithHostname
- * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
+ * @typedef {import('../models/text-model').TextModel} TextModel
  * @typedef {import('react').ReactNode} ReactNode
  */
 
 /**
  * @typedef ToggleComponentProps
- * @property {ITextModel} model
+ * @property {TextModel} model
  */
 
 /**
  * @param {object} props
- * @param {ITextModel} props.model
+ * @param {TextModel} props.model
  * @param {boolean} props.pending
  * @param {boolean} props.edited
  * @param {boolean} props.invalid

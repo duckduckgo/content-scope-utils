@@ -23,8 +23,12 @@ export type RemoteResourcesEvents =
   // content
   | { type: 'content was reverted' }
   | { type: 'content was edited' }
-  | { type: 'content is invalid'; markers: import('monaco-editor').editor.IMarker[] }
+  | { type: 'content is invalid'; errors: ContentError[] }
   | { type: 'content is valid' }
+
+export interface ContentError {
+  message: string
+}
 
 export interface RemoteResourcesCtx {
   messages: import('../DebugToolsMessages.mjs').DebugToolsMessages
@@ -35,7 +39,7 @@ export interface RemoteResourcesCtx {
   resourceKey?: number
   resources?: RemoteResource[]
   currentResource?: CurrentResource
-  contentMarkers?: import('monaco-editor').editor.IMarker[]
+  contentErrors?: ContentError[]
   tabs: TabWithHostname[]
   // children?: ActorRef<any>[]
   children?: string[]

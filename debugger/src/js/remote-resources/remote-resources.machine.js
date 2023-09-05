@@ -305,15 +305,15 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
   },
   actions: {
     assignContentMarkers: assign({
-      contentMarkers: (ctx, evt) => {
+      contentErrors: (ctx, evt) => {
         if (evt.type === 'content is invalid') {
-          return evt.markers
+          return evt.errors
         }
         return []
       },
     }),
     removeContentMarkers: assign({
-      contentMarkers: () => [],
+      contentErrors: () => [],
     }),
     assignTabs: assign({
       tabs: (ctx, evt) => {
@@ -501,7 +501,7 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
   },
   guards: {
     'editor has valid content': (ctx) => {
-      if (ctx.contentMarkers && ctx.contentMarkers?.length > 0) return false
+      if (ctx.contentErrors && ctx.contentErrors?.length > 0) return false
       return true
     },
   },

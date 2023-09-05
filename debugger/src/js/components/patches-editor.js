@@ -13,6 +13,9 @@ import styles from './patches-editor.module.css'
  * @typedef {import('../types').TabWithHostname} TabWithHostname
  * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
  * @typedef {import('react').ReactNode} ReactNode
+ * @typedef {import('../models/text-model').TextModel} TextModel
+ * @typedef {import('../remote-resources/remote-resources.machine.types').ContentError} ContentError
+ *
  */
 
 /**
@@ -22,10 +25,11 @@ import styles from './patches-editor.module.css'
 
 /**
  * @param {object} props
- * @param {ITextModel} props.model
+ * @param {TextModel} props.model
  * @param {boolean} props.pending
  * @param {boolean} props.edited
  * @param {boolean} props.invalid
+ * @param {(errors: ContentError[]) => void} props.onErrors
  * @param {RemoteResource} props.resource
  */
 export function PatchesEditor(props) {
@@ -108,8 +112,10 @@ export function PatchesEditor(props) {
         </div>
       </div>
       <div className={styles.patchesGridBody}>
-        <MonacoEditorRaw model={patchModel} />
+        <MonacoEditorRaw model={patchModel} onErrors={(errors) => console.log('todo: handle these errors', errors)} />
       </div>
     </div>
   )
 }
+
+export default PatchesEditor

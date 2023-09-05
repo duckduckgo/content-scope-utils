@@ -18,6 +18,7 @@ import { appMachine } from './app/app.machine'
 import { MockImpl } from './mock-transport'
 import { App, AppMachineContext } from './app/components/app'
 import { createHashHistory } from 'history'
+import { TextModelContext } from './models/text-model'
 
 const params = new URLSearchParams(window.location.search)
 /**
@@ -34,20 +35,6 @@ if (!params.has('platform')) {
 }
 
 const injectName = /** @type {any} */ (params.get('platform') || 'apple')
-
-/**
- * Global Setup for Monaco
- */
-// @ts-ignore
-// eslint-disable-next-line no-undef
-globalThis.MonacoEnvironment = {
-  getWorkerUrl: function (moduleId, label) {
-    if (label === 'json') {
-      return './js/editor/json.js'
-    }
-    return './js/editor/editor.js'
-  },
-}
 
 /**
  * Communications
@@ -126,16 +113,24 @@ const withContext = appMachine.withContext({
   },
 })
 
-/**
- * Now try to render
- */
-const appNode = document.querySelector('#app')
-const root = createRoot(appNode)
+;(async () => {
+  const useRichEditor = !params.has('simple')
+  const model = useRichEditor ? 'monaco-opt-in.js' : 'text-model.js'
+  const { createTextModel } = await import(`./models/${model}`)
 
-root.render(
-  <GlobalContext.Provider value={{ messages, history }}>
-    <AppMachineContext.Provider machine={withContext}>
-      <App />
-    </AppMachineContext.Provider>
-  </GlobalContext.Provider>,
-)
+  /**
+   * Now try to render
+   */
+  const appNode = document.querySelector('#app')
+  const root = createRoot(appNode)
+
+  root.render(
+    <TextModelContext.Provider value={{ createTextModel, editorType: useRichEditor ? 'monaco' : 'web' }}>
+      <GlobalContext.Provider value={{ messages, history }}>
+        <AppMachineContext.Provider machine={withContext}>
+          <App />
+        </AppMachineContext.Provider>
+      </GlobalContext.Provider>
+    </TextModelContext.Provider>,
+  )
+})()

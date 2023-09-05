@@ -2,24 +2,30 @@ import { useEffect, useRef } from 'react'
 import * as monaco from 'monaco-editor'
 import { createPortal } from 'react-dom'
 import { Button } from './buttons'
+import { useMonacoErrors } from '../models/monaco-opt-in'
 
 /**
  * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
+ * @typedef {import('../models/text-model').TextModel} TextModel
+ * @typedef {import('../remote-resources/remote-resources.machine.types').ContentError} ContentError
  */
 
 /**
  * @param {object} props
  * @param {string} props.original
- * @param {ITextModel} props.model
+ * @param {TextModel} props.model
  * @param {boolean} props.pending
  * @param {boolean} props.edited
  * @param {boolean} props.invalid
  * @param {string} props.id
  * @param {any} props.additionalButtons
+ * @param {(errors: ContentError[]) => void} props.onErrors
  */
 export function MonacoDiffEditor(props) {
   const ref = useRef(null)
   const editorRefs = /** @type {import('react').MutableRefObject} */ (useRef({}))
+
+  useMonacoErrors(props.onErrors)
 
   useEffect(() => {
     if (!ref.current) throw new Error('unreachable')
@@ -32,7 +38,7 @@ export function MonacoDiffEditor(props) {
 
     diffEditor.setModel({
       original: originalModel,
-      modified: props.model,
+      modified: /** @type {ITextModel} */ (props.model),
     })
 
     editorRefs.current.navi = monaco.editor.createDiffNavigator(diffEditor, {
@@ -87,3 +93,5 @@ export function MonacoDiffEditor(props) {
     </>
   )
 }
+
+export default MonacoDiffEditor

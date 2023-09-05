@@ -3,18 +3,21 @@ import { remoteResourceSchema } from '../../../../schema/__generated__/schema.pa
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { RemoteResourceEditor } from './remote-resource-editor'
 import useConstant from '@xstate/react/es/useConstant'
-import * as monaco from 'monaco-editor'
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { CurrentResource } from '../remote-resources.machine'
+import invariant from 'tiny-invariant'
+import { TextModelContext } from '../../models/text-model'
 
 /**
- * @typedef{ import('@duckduckgo/content-scope-scripts/packages/messaging/index.js').MessagingTransport} MessagingTransport
- * @typedef{ import('../../../../schema/__generated__/schema.types').GetFeaturesResponse} GetFeaturesResponse
- * @typedef{ import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
- * @typedef{ import('../../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
+ * @typedef {import('@duckduckgo/content-scope-scripts/packages/messaging/index.js').MessagingTransport} MessagingTransport
+ * @typedef {import('../../../../schema/__generated__/schema.types').GetFeaturesResponse} GetFeaturesResponse
+ * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
+ * @typedef {import('../../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
+ * @typedef {import('../../models/text-model').TextModel} TextModel
  */
 
 export function RemoteResources() {
+  const { createTextModel } = useContext(TextModelContext)
   const [state, send] = RemoteResourcesContext.useActor()
   const { resource, resourceKey, nav } = RemoteResourcesContext.useSelector((state) => {
     const schema = z.object({
@@ -45,10 +48,11 @@ export function RemoteResources() {
 
   /**
    * Share a text model between the views
-   * @type {monaco.editor.ITextModel}
+   * @type {TextModel}
    */
   const sharedTextModel = useConstant(() => {
-    const model = monaco.editor.createModel(resource.current.contents, resource.current.contentType)
+    invariant(typeof createTextModel === 'function', 'createTextModel required')
+    const model = createTextModel?.({ content: resource.current.contents, contentType: resource.current.contentType })
 
     window._test_editor_value = () => model.getValue()
     window._test_editor_set_value = (value) => {
@@ -66,15 +70,15 @@ export function RemoteResources() {
 
   // subscribe to the shared model and publish events back to xstate
   useEffect(() => {
-    monaco.editor.onDidChangeMarkers((uriList) => {
-      const markers = monaco.editor.getModelMarkers({ resource: uriList[0] })
-      const errors = markers.filter((m) => m.severity === monaco.MarkerSeverity.Error)
-      if (errors.length > 0) {
-        send({ type: 'content is invalid', markers })
-      } else {
-        send({ type: 'content is valid' })
-      }
-    })
+    // monaco.editor.onDidChangeMarkers((uriList) => {
+    //   const markers = monaco.editor.getModelMarkers({ resource: uriList[0] })
+    //   const errors = markers.filter((m) => m.severity === monaco.MarkerSeverity.Error)
+    //   if (errors.length > 0) {
+    //     send({ type: 'content is invalid', markers })
+    //   } else {
+    //     send({ type: 'content is valid' })
+    //   }
+    // })
 
     // normally this logic would live inside xstate, but I want to prevent chatty messages
     // on every key stroke

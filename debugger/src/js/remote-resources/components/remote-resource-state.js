@@ -10,12 +10,13 @@ import { useEditorKinds } from './remote-resource-editor'
  * @typedef {import('./remote-resource-editor.js').EditorKind} EditorKind
  * @typedef {import('../../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
  * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
+ * @typedef {import('../../models/text-model').TextModel} TextModel
  */
 
 /**
  * @param {{
  *   resource: RemoteResource;
- *   model: ITextModel;
+ *   model: TextModel;
  * }} props
  */
 export function RemoteResourceState(props) {
@@ -142,7 +143,7 @@ export function RemoteResourceState(props) {
 /**
  * @param {object} props
  * @param {RemoteResource} props.resource
- * @param {import('monaco-editor').editor.ITextModel} props.model
+ * @param {TextModel} props.model
  */
 function Override(props) {
   const [state, send] = RemoteResourcesContext.useActor()

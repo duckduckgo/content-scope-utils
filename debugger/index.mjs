@@ -52,6 +52,7 @@ if (NODE_ENV === 'production') {
 const buildJob = {
   src: join(CWD, 'src/js/index.js'),
   dest: join(BUILD, 'js/index.js'),
+  destDir: join(BUILD, 'js'),
 }
 // monaco stuff
 const workerEntryPoints = ['editor/json.mjs', 'editor/editor.mjs']
@@ -65,10 +66,11 @@ buildSync({
 })
 buildSync({
   entryPoints: [buildJob.src],
-  outfile: buildJob.dest,
+  outdir: buildJob.destDir,
   bundle: true,
-  format: 'iife',
+  format: 'esm',
   sourcemap: NODE_ENV === 'development' ? 'inline' : undefined,
+  splitting: true,
   loader: {
     '.js': 'jsx',
     '.ttf': 'file',

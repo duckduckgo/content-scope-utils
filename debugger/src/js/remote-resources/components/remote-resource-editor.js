@@ -1,27 +1,31 @@
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { RemoteResourceState } from './remote-resource-state'
-import { MonacoEditor } from '../../components/monaco-editor'
-import { MonacoDiffEditor } from '../../components/monaco-diff-editor'
 import invariant from 'tiny-invariant'
 import { TogglesEditor } from '../../components/toggles-editor'
-import { PatchesEditor } from '../../components/patches-editor'
 import styles from '../../app/components/app.module.css'
 import { SubNav } from '../../app/components/feature-nav'
-import { useRef } from 'react'
+import { lazy, Suspense, useContext, useRef } from 'react'
 import { Button } from '../../components/buttons'
 import { Sidebar } from './sidebar'
+import { TextModelContext } from '../../models/text-model'
+
+const MonacoEditor = lazy(() => import('../../components/monaco-editor.js'))
+const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))
+const PatchesEditor = lazy(() => import('../../components/patches-editor.js'))
 
 /**
  * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
  * @typedef {import('../../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
  * @typedef {import("../remote-resources.machine").EditorKind} EditorKind
  * @typedef {import('../../app/components/feature-nav').SubNavItem} SubNavItem
+ * @typedef {import('../../models/text-model').TextModel} TextModel
+ * @typedef {import('../remote-resources.machine.types').ContentError} ContentError
  */
 
 /**
  * @param {object} props
  * @param {RemoteResource} props.resource
- * @param {import("monaco-editor").editor.ITextModel} props.model
+ * @param {TextModel} props.model
  * @param {SubNavItem[]} props.nav
  */
 export function RemoteResourceEditor(props) {
@@ -75,7 +79,7 @@ export function RemoteResourceEditor(props) {
  * @param {object} props
  * @param {RemoteResource} props.resource
  * @param {any} props.additionalButtons
- * @param {import("monaco-editor").editor.ITextModel} props.model
+ * @param {TextModel} props.model
  */
 function Footer(props) {
   const [state, send] = RemoteResourcesContext.useActor()
@@ -145,10 +149,11 @@ export function useEditorKinds() {
  * @param {object} props
  * @param {RemoteResource} props.resource
  * @param {any} props.additionalButtons
- * @param {import("monaco-editor").editor.ITextModel} props.model
+ * @param {TextModel} props.model
  */
 function EditorSelection(props) {
-  const [state] = RemoteResourcesContext.useActor()
+  const [state, send] = RemoteResourcesContext.useActor()
+  const { editorType } = useContext(TextModelContext)
   const { editorKind } = useEditorKinds()
   const originalContents = props.resource.current.contents
 
@@ -156,27 +161,18 @@ function EditorSelection(props) {
   const hasEdits = state.matches(['showing editor', 'editing', 'editor has edited content'])
   const contentIsInvalid = state.matches(['showing editor', 'contentErrors', 'some'])
 
+  /**
+   * @param {ContentError[]} errors
+   */
+  function onErrors(errors) {
+    if (errors.length === 0) {
+      send({ type: 'content is valid' })
+    } else {
+      send({ type: 'content is invalid', errors })
+    }
+  }
+
   const editors = {
-    diff: () => (
-      <MonacoDiffEditor
-        model={props.model}
-        original={originalContents}
-        edited={hasEdits}
-        invalid={contentIsInvalid}
-        pending={savingChanges}
-        id={props.resource.id}
-        additionalButtons={props.additionalButtons}
-      />
-    ),
-    inline: () => (
-      <MonacoEditor
-        model={props.model}
-        invalid={contentIsInvalid}
-        edited={hasEdits}
-        pending={savingChanges}
-        id={props.resource.id}
-      />
-    ),
     toggles: () => (
       <TogglesEditor
         model={props.model}
@@ -186,15 +182,53 @@ function EditorSelection(props) {
         resource={props.resource}
       />
     ),
-    patches: () => (
-      <PatchesEditor
-        model={props.model}
-        pending={savingChanges}
-        edited={hasEdits}
-        invalid={contentIsInvalid}
-        resource={props.resource}
-      />
-    ),
+    diff: () => {
+      if (editorType === 'web') return <p>Cannot show rich editor</p>
+      return (
+        <Suspense>
+          <MonacoDiffEditor
+            model={props.model}
+            original={originalContents}
+            edited={hasEdits}
+            invalid={contentIsInvalid}
+            pending={savingChanges}
+            id={props.resource.id}
+            additionalButtons={props.additionalButtons}
+            onErrors={onErrors}
+          />
+        </Suspense>
+      )
+    },
+    inline: () => {
+      if (editorType === 'web') return <p>Cannot show rich editor</p>
+      return (
+        <Suspense>
+          <MonacoEditor
+            model={props.model}
+            invalid={contentIsInvalid}
+            edited={hasEdits}
+            pending={savingChanges}
+            id={props.resource.id}
+            onErrors={onErrors}
+          />
+        </Suspense>
+      )
+    },
+    patches: () => {
+      if (editorType === 'web') return <p>Cannot show rich editor</p>
+      return (
+        <Suspense>
+          <PatchesEditor
+            model={props.model}
+            pending={savingChanges}
+            edited={hasEdits}
+            invalid={contentIsInvalid}
+            resource={props.resource}
+            onErrors={onErrors}
+          />
+        </Suspense>
+      )
+    },
   }
   return editors[editorKind]?.()
 }
@@ -206,11 +240,7 @@ function InvalidEditorErrors(props) {
   const errors = RemoteResourcesContext.useSelector((state) => {
     const errorState = state.matches(['showing editor', 'contentErrors', 'some'])
     if (!errorState) return []
-    const markers = state.context.contentMarkers || []
-    invariant(Array.isArray(markers), 'Markers must exit and be an array')
-    return markers.map((x) => {
-      return { message: 'line: ' + x.startLineNumber + ' ' + x.message }
-    })
+    return state.context.contentErrors || []
   })
 
   if (errors.length === 0) return null

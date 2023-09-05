@@ -2,12 +2,12 @@ import { RemoteResourcesContext } from '../remote-resources.page'
 import { DomainForm } from './domain-form'
 
 /**
- * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
+ * @typedef {import('../../models/text-model').TextModel} TextModel
  */
 
 /**
  * @param {object} props
- * @param {ITextModel} props.model
+ * @param {TextModel} props.model
  */
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

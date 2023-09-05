@@ -1,11 +1,13 @@
 import * as monaco from 'monaco-editor'
 import { useEffect, useRef } from 'react'
 import invariant from 'tiny-invariant'
+import { useMonacoErrors } from '../models/monaco-opt-in'
 
 /**
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
  * @typedef {import('../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
  * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
+ * @typedef {import('../remote-resources/remote-resources.machine.types').ContentError} ContentError
  */
 
 /**
@@ -14,10 +16,14 @@ import invariant from 'tiny-invariant'
  * @param {boolean} props.pending
  * @param {boolean} props.edited
  * @param {boolean} props.invalid
+ * @param {(errors: ContentError[]) => void} props.onErrors
  * @param {string} props.id
  */
 export function MonacoEditor(props) {
   const ref = useRef(null)
+
+  // propagate errors
+  useMonacoErrors(props.onErrors)
 
   useEffect(() => {
     invariant(ref.current, 'ref must exist here')
@@ -46,12 +52,17 @@ export function MonacoEditor(props) {
   return <div ref={ref} style={{ height: '100%', width: '100%' }}></div>
 }
 
+export default MonacoEditor
+
 /**
  * @param {object} props
  * @param {ITextModel} props.model
+ * @param {(errors: ContentError[]) => void} props.onErrors
  */
 export function MonacoEditorRaw(props) {
   const ref = useRef(null)
+
+  useMonacoErrors(props.onErrors)
 
   useEffect(() => {
     invariant(ref.current, 'ref must exist here')

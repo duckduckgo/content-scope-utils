@@ -89,8 +89,11 @@ export class DebugToolsPage {
       errorDismiss: () => page.getByRole('button', { name: '↩️ Dismiss' }),
       diffEditorModified: () => page.locator('.editor.modified'),
       inlineEditor: () => page.locator('.monaco-editor'),
+      inlineEditorButton: () => page.getByRole('button', { name: 'Inline' }),
+      togglesButton: () => page.getByRole('button', { name: 'Toggles' }),
+      patchesButton: () => page.getByRole('button', { name: 'Patches' }),
+      diffEditorButton: () => page.getByRole('button', { name: 'Diff', exact: true }),
       editorToggle: () => page.getByLabel('Editor kind:'),
-      togglesSwitcher: () => page.getByLabel('Editor kind:'),
       togglesEditor: () => page.getByTestId('TogglesEditor'),
       patchesScreen: () => page.getByTestId('PatchesEditor'),
       globalToggleList: () => page.getByTestId('FeatureToggleListGlobal'),
@@ -417,33 +420,17 @@ export class DebugToolsPage {
   // eslint-disable-next-line require-await
   async switchesTo(kind) {
     if (kind === 'diff') {
-      await this.locators.editorToggle().selectOption('diff')
+      await this.locators.diffEditorButton().click()
       await this.locators.diffEditorModified().waitFor()
     } else if (kind === 'inline') {
-      await this.locators.editorToggle().selectOption('inline')
+      await this.locators.inlineEditorButton().click()
       await this.locators.inlineEditor().waitFor()
     } else if (kind === 'toggles') {
-      await this.locators.editorToggle().selectOption('toggles')
+      await this.locators.togglesButton().click()
       await this.locators.togglesEditor().waitFor()
     } else if (kind === 'patches') {
-      await this.locators.editorToggle().selectOption('patches')
+      await this.locators.patchesButton().click()
       await this.locators.patchesScreen().waitFor()
-    }
-  }
-
-  /**
-   * @param {'global' | 'domain-exceptions'} kind
-   * @return {Promise<void>}
-   */
-  // eslint-disable-next-line require-await
-  async switchesTogglesTo(kind) {
-    if (kind === 'global') {
-      await this.locators.editorToggle().selectOption('diff')
-      await this.locators.diffEditorModified().waitFor()
-    } else if (kind === 'domain-exceptions') {
-      await this.locators.editorToggle().selectOption('toggles')
-    } else {
-      throw new Error('unreachable')
     }
   }
 
@@ -454,14 +441,6 @@ export class DebugToolsPage {
 
   async refreshesCurrentResource() {
     await this.locators.remoteFormRefresh().click()
-  }
-
-  async cancelOverride() {
-    await this.locators.remoteFormCancel().click()
-  }
-
-  async formIshidden() {
-    await this.locators.remoteFormInput().waitFor({ state: 'detached' })
   }
 
   /**

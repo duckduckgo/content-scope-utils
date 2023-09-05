@@ -158,7 +158,7 @@ test.describe('debug tools', () => {
       await dt.enabled()
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
-      await dt.switchesTogglesTo('domain-exceptions')
+      await dt.switchesTo('toggles')
       await dt.receivesNewTabs({
         tabs: [{ url: 'https://example.com/123/abc' }, { url: 'https://duckduckgo.com/?q=123' }],
       })
@@ -174,7 +174,7 @@ test.describe('debug tools', () => {
       })
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
-      await dt.switchesTogglesTo('domain-exceptions')
+      await dt.switchesTo('toggles')
       await dt.selectTab('duckduckgo.com')
       await dt.currentDomainIsStoredInUrl('duckduckgo.com')
       await dt.exceptionsShownFor('duckduckgo.com')
@@ -185,7 +185,7 @@ test.describe('debug tools', () => {
       await dt.withTabsResponse({ tabs: [{ url: 'https://example.com/123/abc' }] })
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
-      await dt.switchesTogglesTo('domain-exceptions')
+      await dt.switchesTo('toggles')
       await dt.chooseTheOnlyOpenTab()
       await dt.currentDomainIsStoredInUrl('example.com')
       await dt.exceptionsShownFor('example.com')

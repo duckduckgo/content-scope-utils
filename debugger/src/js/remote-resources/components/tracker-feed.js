@@ -15,12 +15,13 @@ window._parse = parse
  * @typedef {import('../../../../schema/__generated__/schema.types').Tab} Tab
  * @typedef {import('../../types').TabWithHostname} TabWithHostname
  * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
+ * @typedef {import('../../models/text-model').TextModel} TextModel
  * @typedef {import('./toggle-list').ToggleListItem} ToggleListItem
  */
 
 /**
  * @param {object} props
- * @param {import('monaco-editor').editor.ITextModel} props.model
+ * @param {TextModel} props.model
  * @param {RemoteResource} props.resource
  */
 export function TrackerFeed(props) {
