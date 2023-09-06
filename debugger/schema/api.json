@@ -17,6 +17,15 @@
     "getTabs": {
       "$ref": "./getTabs.json"
     },
+    "getTrackers": {
+      "$ref": "./getTrackers.json"
+    },
+    "getTrackersParams": {
+      "$ref": "./getTrackersParams.json"
+    },
+    "subscribeToTrackers": {
+      "$ref": "./subscribeToTrackers.json"
+    },
     "remoteResource": {
       "$ref": "./remote-resource.json"
     }

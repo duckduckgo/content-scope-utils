@@ -14,6 +14,27 @@
  */
 
 /**
+ * This indicates that the request was allowed because either the user or DuckDuckGo disabled protections
+ */
+export type ProtectionsDisabledReason = "protectionDisabled";
+/**
+ * This indicates that the request was allowed because the request was to a domain that the current web page's owner also owns
+ */
+export type OwnedByFirstPartyReason = "ownedByFirstParty";
+/**
+ * This indicates that the request was allowed because of a rule exception, such as a Tracker Radar 'ignore' entry
+ */
+export type RuleExceptionReason = "ruleException";
+/**
+ * This indicates that the request was allowed because of Ad Attribution
+ */
+export type AdClickAttributionReason = "adClickAttribution";
+/**
+ * This indicates that the request was allowed because it was to a third party, but was not classified to be a tracker
+ */
+export type OtherThirdPartyRequestReason = "otherThirdPartyRequest";
+
+/**
  * This describes all of the top-level generated types
  * @internal
  */
@@ -22,6 +43,9 @@ export interface API {
   getRemoteResource?: GetRemoteResourceParams;
   updateResource?: UpdateResourceParams;
   getTabs?: GetTabsResponse;
+  getTrackers?: GetTrackersResponse;
+  getTrackersParams?: GetTrackersParams;
+  subscribeToTrackers?: SubscribeToTrackersParams;
   remoteResource?: RemoteResource;
 }
 export interface GetFeaturesResponse {
@@ -78,6 +102,102 @@ export interface Tab {
   id?: string;
   url: string;
   title?: string;
+}
+export interface GetTrackersResponse {
+  requests: DetectedRequest[];
+}
+/**
+ * This describes a single request
+ */
+export interface DetectedRequest {
+  /**
+   * The full URL of this request
+   */
+  url: string;
+  /**
+   * The eTLD+1 for this request. For example, if the tracker `https://google.com/a.js` was loaded in the page `https://example.com`, then the eTLD+1 for this request would be `google.com`
+   */
+  eTLDplus1?: string;
+  /**
+   * The full page URL where this request was observed
+   */
+  pageUrl: string;
+  /**
+   * The state of the request - 'blocked', or 'allowed' with a given reason
+   *
+   * @example
+   *
+   * When blocked, there're no additional properties (yet):
+   *
+   * ```json
+   * { "blocked": {} }
+   * ```
+   *
+   * When allowed, 'reason' is always present and will be one of the keys defined in {@link StateAllowed}
+   *
+   * ```json
+   * {
+   *   "allowed": {
+   *     "reason": "adClickAttribution"
+   *   }
+   * }
+   * ```
+   *
+   *
+   */
+  state: StateBlocked | StateAllowed;
+  /**
+   * The **display name** of the entity this request belongs to, for example: `Amazon.com`, or `Google`. **NOT** `Google LLC` <- that would be the `ownerName`
+   */
+  entityName?: string;
+  /**
+   * The category to display for this request. For example, 'Advertising'. Note: the Tracker Radar may assign multiple categories, but we would only show one of them. Please refer to existing implementations to see the order in which you should choose.
+   */
+  category?: string;
+  /**
+   * The prevalence of the associated entity - if one is known. For example, `10.2` or `82.8`
+   */
+  prevalence?: number;
+  /**
+   * The name of the company this requests belongs to, if one is known. For example `Google LLC`
+   */
+  ownerName?: string;
+}
+/**
+ * When present, indicates that this request was blocked
+ */
+export interface StateBlocked {
+  blocked: {
+    [k: string]: unknown;
+  };
+}
+/**
+ * When present, indicates that this request was allowed to load. The `reason` key should indicate why it was allowed
+ */
+export interface StateAllowed {
+  allowed: {
+    /**
+     * The reason a tracker was not blocked
+     */
+    reason:
+      | ProtectionsDisabledReason
+      | OwnedByFirstPartyReason
+      | RuleExceptionReason
+      | AdClickAttributionReason
+      | OtherThirdPartyRequestReason;
+  };
+}
+export interface GetTrackersParams {
+  /**
+   * An array of domain names to be tracked. The domains can be specific like 'a.example.com' or general like 'example.com'.
+   */
+  domains: string[];
+}
+export interface SubscribeToTrackersParams {
+  /**
+   * An array of domain names to be tracked. The domains can be specific like 'a.example.com' or general like 'example.com'.
+   */
+  domains: string[];
 }
 export interface RemoteResource {
   id: string;

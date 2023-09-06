@@ -45,7 +45,29 @@ const messagingInstance = createSpecialPagesMessaging({
   featureName: 'debugToolsPage',
   mockImpl: () => new MockImpl(),
 })
-const messages = new DebugToolsMessages(messagingInstance)
+
+function createDebugProxy(instance) {
+  return new Proxy(instance, {
+    get(target, propKey, receiver) {
+      if (typeof propKey !== 'string') return Reflect.get(target, propKey, receiver)
+      const origMethod = target[propKey]
+
+      // Check if it's a function (ignoring properties)
+      if (typeof origMethod === 'function') {
+        return function (...args) {
+          console.log(`Called: ${propKey} with arguments:`, args)
+          // Call the original method using Reflect
+          return Reflect.apply(origMethod, target, args)
+        }
+      }
+
+      // Handle properties by simply returning them
+      return Reflect.get(target, propKey, receiver)
+    },
+  })
+}
+
+const messages = createDebugProxy(new DebugToolsMessages(messagingInstance))
 
 /**
  * History instance for navigation

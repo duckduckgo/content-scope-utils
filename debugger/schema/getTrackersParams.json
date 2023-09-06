@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "GetTrackersParams",
+  "additionalProperties": false,
+  "properties": {
+    "domains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "An array of domain names to be tracked. The domains can be specific like 'a.example.com' or general like 'example.com'.",
+      "examples": ["a.example.com", "example.com"]
+    }
+  },
+  "required": ["domains"]
+}

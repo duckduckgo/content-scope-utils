@@ -16,11 +16,12 @@
  */
 
 import {
+  detectedRequestSchema,
   getFeaturesResponseSchema,
   getRemoteResourceParamsSchema,
-  getTabsResponseSchema,
+  getTabsResponseSchema, getTrackersParamsSchema, getTrackersResponseSchema,
   remoteResourceSchema,
-  updateResourceParamsSchema,
+  updateResourceParamsSchema
 } from '../../schema/__generated__/schema.parsers.mjs'
 import { createContext } from 'react'
 import * as z from 'zod'
@@ -31,6 +32,9 @@ import * as z from 'zod'
  * @typedef {import("../../schema/__generated__/schema.types").GetFeaturesResponse} GetFeaturesResponse
  * @typedef {import("../../schema/__generated__/schema.types").UpdateResourceParams} UpdateResourceParams
  * @typedef {import("../../schema/__generated__/schema.types").GetRemoteResourceParams} GetRemoteResourceParams
+ * @typedef {import('../../schema/__generated__/schema.types').SubscribeToTrackersParams} SubscribeToTrackersParams
+ * @typedef {import('../../schema/__generated__/schema.types').GetTrackersParams} GetTrackersParams
+ * @typedef {import('../../schema/__generated__/schema.types').GetTrackersResponse} GetTrackersResponse
  */
 
 /**
@@ -180,64 +184,64 @@ export class DebugToolsMessages {
   }
 
   /**
-   * @param {string} domain
-   * @param {(data: OnTrackersUpdatedSchema) => void} callback
+   * A notification that you'd like the native platform to keep a list of
+   * trackers observed for a given domain.
+   *
+   * @param {SubscribeToTrackersParams} params
    */
-  onTrackersUpdated(domain, callback) {
-    this.messaging.notify('subscribeToTrackers', { domain })
-    return this.messaging.subscribe('onTrackersUpdated', (params) => {
-      const parsed = onTrackersUpdatedSchema.safeParse(params);
+  subscribeToTrackers(params) {
+    // todo(Shane): Should we wait for confirmation here?
+    this.messaging.notify('subscribeToTrackers', params)
+  }
+
+  /**
+   * An explicit request to retrieve any observed trackers.
+   * Note: this can return an empty array if there was no previous subscription in place
+   * @param {GetTrackersParams} params
+   */
+  async getTrackers(params) {
+    const outgoing = getTrackersParamsSchema.parse(params);
+    const response = await this.messaging.request('getTrackers', outgoing)
+    const parsed = getTrackersResponseSchema.safeParse(response);
+
+    if (parsed.success) {
+      return parsed.data
+    }
+    console.log(parsed.error)
+    throw new Error('todo: error handling for getTrackers')
+  }
+
+  /**
+   * A notification to inform the native side that any existing
+   * tracker observations can be ignored
+   */
+  unsubscribeToTrackers() {
+    this.messaging.notify('unsubscribeToTrackers')
+  }
+
+  /**
+   * A convenience for creating the subscription, listening to it
+   * and then cleaning up
+   * @internal
+   * @param {SubscribeToTrackersParams} params
+   * @param {(data: GetTrackersResponse) => void} callback
+   */
+  createTrackersSubscription(params, callback) {
+    this.subscribeToTrackers(params);
+    const unsubscribe = this.messaging.subscribe('onTrackersUpdated', (params) => {
+      const parsed = getTrackersResponseSchema.safeParse(params);
       if (parsed.success) {
         callback(parsed.data)
       } else {
         console.error(parsed.error)
       }
     })
-  }
-
-  unsubscribeToTrackers() {
-    this.messaging.notify('unsubscribeToTrackers')
+    return () => {
+      unsubscribe()
+      this.unsubscribeToTrackers();
+    }
   }
 }
-
-export const protectionsDisabledReasonSchema = z.literal("protectionDisabled");
-
-export const ownedByFirstPartyReasonSchema = z.literal("ownedByFirstParty");
-
-export const ruleExceptionReasonSchema = z.literal("ruleException");
-
-export const adClickAttributionReasonSchema = z.literal("adClickAttribution");
-
-export const otherThirdPartyRequestReasonSchema = z.literal("otherThirdPartyRequest");
-
-export const stateBlockedSchema = z.object({
-  blocked: z.record(z.unknown())
-});
-
-export const stateAllowedSchema = z.object({
-  allowed: z.object({
-    reason: z.union([protectionsDisabledReasonSchema, ownedByFirstPartyReasonSchema, ruleExceptionReasonSchema, adClickAttributionReasonSchema, otherThirdPartyRequestReasonSchema])
-  })
-});
-
-export const detectedRequestSchema = z.object({
-  url: z.string(),
-  eTLDplus1: z.string().optional(),
-  pageUrl: z.string(),
-  state: z.union([stateBlockedSchema, stateAllowedSchema]),
-  entityName: z.string().optional(),
-  category: z.string().optional(),
-  prevalence: z.number().optional(),
-  ownerName: z.string().optional()
-});
-
-export const onTrackersUpdatedSchema = z.object({
-  requests: z.array(detectedRequestSchema)
-})
-
-/**
- * @typedef {import("zod").infer<typeof onTrackersUpdatedSchema>} OnTrackersUpdatedSchema
- */
 
 /**
  * @param {RemoteResource} input

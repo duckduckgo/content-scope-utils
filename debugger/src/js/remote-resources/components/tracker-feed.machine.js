@@ -54,7 +54,7 @@ export const trackerFeedMachine = createMachine(
     services: {
       'tracker-feed': (ctx, evt) => (send) => {
         invariant(ctx.domain, 'ctx.domain must be set before getting here')
-        const unsub = ctx.messages.onTrackersUpdated(ctx.domain, (data) => {
+        const unsub = ctx.messages.createTrackersSubscription({ domains: [ctx.domain] }, (data) => {
           send({ type: 'onTrackersUpdated', payload: data })
         })
         return () => {
