@@ -1,5 +1,8 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import styles from './text-editor.module.css'
+import { useMachine } from '@xstate/react'
+import { textEditorMachine } from './text-editor.machine'
+import invariant from 'tiny-invariant'
 
 /**
  * @typedef {import('../remote-resources.machine.types').ContentError} ContentError
@@ -12,79 +15,58 @@ import styles from './text-editor.module.css'
  * @param {(errors: ContentError[]) => void} props.onErrors
  */
 export function TextEditor(props) {
-  const ref = /** @type {import("react").MutableRefObject<null | any>} */ (useRef(null))
   const domRef = /** @type {import("react").MutableRefObject<HTMLElement | any>} */ (useRef(null))
-  const key = 'viewState_text-editor_' + props.resource.id
 
-  // read initial from storage
-  useLayoutEffect(() => {
-    const prev = localStorage.getItem(key)
-    const currentDom = domRef.current
-    if (prev) {
-      const json = JSON.parse(prev)
-      if (json.scrollTop && currentDom) {
-        currentDom.scrollTop = json.scrollTop
-      }
-    }
-  }, [key])
+  const [state, send] = useMachine(() => {
+    return textEditorMachine
+      .withContext({
+        id: props.resource.id,
+        model: props.model,
+      })
+      .withConfig({
+        actions: {
+          setScroll: (_, evt) => {
+            invariant(evt.type === 'done.invoke.readInitial', 'evt.type was not done.invoke.readInitial')
+            invariant(domRef.current, 'domRef.current missing')
 
-  // sync model with DOM node
-  useEffect(() => {
-    const currentDom = domRef.current
-    const sub = props.model.onDidChangeContent(() => {
-      if (currentDom.value !== props.model.getValue()) {
-        currentDom.value = props.model.getValue()
-      }
-    })
-    return () => {
-      sub.dispose()
-    }
-  }, [props.model])
-
-  //
-  useEffect(() => {
-    const current = ref.current
-    const currentDom = domRef.current
-
-    let scrollTimer
-    const handler = (e) => {
-      clearTimeout(scrollTimer)
-      const last = e.target.scrollTop
-      scrollTimer = setTimeout(() => {
-        const json = JSON.stringify({ scrollTop: last })
-        localStorage.setItem(key, json)
-      }, 500)
-    }
-
-    currentDom.addEventListener('scroll', handler)
-    return () => {
-      currentDom.removeEventListener('scroll', handler)
-      clearTimeout(current)
-      clearTimeout(scrollTimer)
-    }
-  }, [key])
-
-  /**
-   * debounce changes
-   * @param {React.ChangeEvent<HTMLTextAreaElement>} event
-   */
-  function onChange(event) {
-    if (ref.current) clearTimeout(ref.current)
-    const value = event.target.value
-    ref.current = setTimeout(() => {
-      props.model.setValue(value)
-      try {
-        JSON.parse(value)
-        props.onErrors([])
-      } catch (e) {
-        props.onErrors([
-          {
-            message: e instanceof Error ? e.message : String(e),
+            // null is a valid value here
+            if (evt.data !== null) {
+              domRef.current.scrollTop = evt.data.scrollTop
+            }
           },
-        ])
-      }
-    }, 300)
-  }
+          clearErrors: (_, evt) => {
+            invariant(evt.type === 'clear-errors')
+            props.onErrors([])
+          },
+          onSetErrors: (_, evt) => {
+            invariant(evt.type === 'set-errors')
+            props.onErrors(evt.payload)
+          },
+          onSetContent: (_, evt) => {
+            invariant(evt.type === 'set-content')
+            invariant(domRef.current, 'domRef.current missing')
+            domRef.current.value = evt.payload.content
+          },
+        },
+      })
+  })
 
-  return <textarea onChange={onChange} className={styles.textArea} ref={domRef} defaultValue={props.model.getValue()} />
+  return (
+    <div className={styles.wrap}>
+      <div>{JSON.stringify(state.value)}</div>
+      <div>
+        <textarea
+          onChange={(e) => {
+            send({ type: 'content-changed', payload: { content: /** @type {any} */ (e.target).value } })
+          }}
+          onScroll={(e) =>
+            send({ type: 'set-scroll', payload: { scrollTop: /** @type {any} */ (e.target).scrollTop } })
+          }
+          className={styles.textArea}
+          ref={domRef}
+          defaultValue={props.model.getValue()}
+        />
+      </div>
+    </div>
+  )
 }
