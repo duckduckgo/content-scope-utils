@@ -66,6 +66,7 @@ export function RemoteResourceEditor(props) {
           <EditorSelection
             model={props.model}
             resource={props.resource}
+            key={props.resource.id}
             additionalButtons={additionalButtons.current}
           />
         </div>
@@ -150,6 +151,7 @@ export function useEditorKinds() {
 /**
  * @param {object} props
  * @param {RemoteResource} props.resource
+ * @param {string} props.key - force the different editors to set-up/tear-down correctly
  * @param {any} props.additionalButtons
  * @param {TextModel} props.model
  */
@@ -211,7 +213,15 @@ function EditorSelection(props) {
     },
     inline: () => {
       if (editorType === 'web') {
-        return <TextEditor model={props.model} resource={props.resource} onErrors={onErrors} />
+        return (
+          <TextEditor
+            defaultValue={props.model.getValue()}
+            model={props.model}
+            key={props.resource.id}
+            id={props.resource.id}
+            onErrors={onErrors}
+          />
+        )
       }
       return (
         <Suspense>

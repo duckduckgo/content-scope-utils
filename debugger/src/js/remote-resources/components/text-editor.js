@@ -12,17 +12,17 @@ import invariant from 'tiny-invariant'
  * A simple text-area editor
  *
  * @param {object} props
- * @param {import('./remote-resources').RemoteResource} props.resource
+ * @param {string} props.id
+ * @param {string} props.defaultValue
  * @param {import('../../models/text-model').TextModel} props.model
  * @param {(errors: ContentError[]) => void} props.onErrors
  */
 export function TextEditor(props) {
   const domRef = /** @type {import("react").MutableRefObject<HTMLElement | any>} */ (useRef(null))
-  const initialValue = props.model.getValue()
 
   const [, send] = useMachine(textEditorMachine, {
     context: {
-      id: props.resource.id,
+      id: props.id,
       model: props.model,
     },
     actions: {
@@ -55,7 +55,7 @@ export function TextEditor(props) {
     <div className={styles.wrap}>
       <textarea
         className={styles.textArea}
-        defaultValue={initialValue}
+        defaultValue={props.defaultValue}
         ref={domRef}
         onChange={(e) => {
           send({
