@@ -18,7 +18,6 @@
     "test-int-x": "npm run test",
     "test-int": "npm run test",
     "serve": "http-server -c-1 --port 3210",
-    "schema": "node schema.mjs",
     "watch": "chokidar 'src' 'schema' 'editor' -i schema/__generated__ -c 'NODE_ENV=development npm run build.dev' --initial",
     "browser-sync": "browser-sync ../"
   },

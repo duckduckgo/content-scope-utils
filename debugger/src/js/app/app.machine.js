@@ -20,6 +20,7 @@ export const appMachine = createMachine(
       'Initial state': {
         invoke: {
           src: 'getFeatures',
+          id: 'getFeatures',
           onDone: [
             {
               target: 'waiting for nav',

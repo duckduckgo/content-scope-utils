@@ -32,6 +32,7 @@ const _remoteResourcesMachine = createMachine({
       description: 'this will try to read from the incoming data',
       invoke: {
         src: 'loadResources',
+        id: 'loadResources',
         onDone: [
           {
             target: 'showing editor',
@@ -59,9 +60,11 @@ const _remoteResourcesMachine = createMachine({
       invoke: [
         {
           src: 'nav-listener',
+          id: 'nav-listener',
         },
         {
           src: 'tab-listener',
+          id: 'tab-listener',
         },
       ],
       on: {
@@ -156,6 +159,7 @@ const _remoteResourcesMachine = createMachine({
             'saving new remote': {
               invoke: {
                 src: 'saveNewRemote',
+                id: 'saveNewRemote',
                 onDone: [
                   {
                     target: 'editor has original content',
@@ -174,6 +178,7 @@ const _remoteResourcesMachine = createMachine({
               description: 'save a resource with content from the editor',
               invoke: {
                 src: 'saveEdited',
+                id: 'saveEdited',
                 onDone: [
                   {
                     target: 'editor has original content',

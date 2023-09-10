@@ -15,6 +15,7 @@ import { buildSync } from 'esbuild'
 import { cwd, parseArgs } from '@duckduckgo/content-scope-scripts/scripts/script-utils.js'
 import { join, relative } from 'node:path'
 import { cpSync, rmSync } from 'node:fs'
+import { execSync } from 'node:child_process'
 
 const args = parseArgs(process.argv.slice(2), [])
 const CWD = cwd(import.meta.url)
@@ -48,6 +49,9 @@ if (NODE_ENV === 'production') {
     dest: join(ROOT, 'docs/debugger', VERSION),
   })
 }
+
+// build schema
+execSync('node schema.mjs', {stdio: 'inherit'});
 
 const buildJob = {
   src: join(CWD, 'src/js/index.js'),
