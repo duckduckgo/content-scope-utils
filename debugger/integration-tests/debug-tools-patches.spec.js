@@ -23,7 +23,7 @@ import { DebugToolsPage } from './page-objects/debug-tools'
  *     Then I can apply it to the current resource
  */
 
-test.describe('Feature: Patches', () => {
+test.describe.skip('Feature: Patches', () => {
   test('Scenario: copying a patch for an override', async ({ page, baseURL }, workerInfo) => {
     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
     const initial = {

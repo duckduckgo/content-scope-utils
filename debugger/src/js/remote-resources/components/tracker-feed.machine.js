@@ -58,7 +58,6 @@ export const trackerFeedMachine = createMachine(
           send({ type: 'onTrackersUpdated', payload: data })
         })
         return () => {
-          console.log('stop!')
           unsub()
         }
       },

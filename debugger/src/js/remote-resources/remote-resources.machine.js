@@ -27,17 +27,6 @@ const _remoteResourcesMachine = createMachine({
   schema: {
     events: /** @type {import("./remote-resources.machine.types").RemoteResourcesEvents} */ ({}),
   },
-  on: {
-    REGISTER_CHILD: {
-      actions: assign({
-        children: (ctx, evt, meta) => {
-          const child = meta._event.origin
-          invariant(typeof child === 'string', 'tried to use meta._event.origin, but it wasnt a string')
-          return (ctx.children || []).concat(child)
-        },
-      }),
-    },
-  },
   states: {
     'loading resource': {
       description: 'this will try to read from the incoming data',

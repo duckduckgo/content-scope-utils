@@ -1,11 +1,17 @@
-/**
- * @typedef{ import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").MessagingTransport} MessagingTransport
- * @typedef{ import("../../schema/__generated__/schema.types").GetFeaturesResponse} GetFeaturesResponse
- */
 import {
   getRemoteResourceParamsSchema,
+  getTrackersResponseSchema,
+  subscribeToTrackersParamsSchema,
   updateResourceParamsSchema,
 } from '../../schema/__generated__/schema.parsers.mjs'
+
+import getTrackersResponse from '../../schema/__fixtures__/__getTrackers__.json'
+
+/**
+ * @typedef {import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").MessagingTransport} MessagingTransport
+ * @typedef {import("../../schema/__generated__/schema.types").GetFeaturesResponse} GetFeaturesResponse
+ * @typedef {import('../../schema/__generated__/schema.types').GetTrackersResponse} GetTrackersResponse
+ */
 
 /** @type {import("../../schema/__generated__/schema.types").GetTabsResponse} */
 const tabData = {
@@ -17,13 +23,29 @@ const tabData = {
 }
 
 // const tabData = { tabs: [] }
+/** @type {Set<string>} */
+const trackerSubscriptions = new Set([])
 
 /**
  * @implements MessagingTransport
  */
 export class MockImpl {
   notify(msg) {
-    console.log(msg)
+    switch (msg.method) {
+      case 'subscribeToTrackers': {
+        const parsed = subscribeToTrackersParamsSchema.parse(msg.params)
+        for (let domain of parsed.domains) {
+          trackerSubscriptions.add(domain)
+        }
+        break
+      }
+      case 'unsubscribeToTrackers': {
+        trackerSubscriptions.clear()
+        break
+      }
+      default:
+        throw new Error('unhandled notification: ' + msg.method)
+    }
   }
 
   /**
@@ -143,10 +165,12 @@ export class MockImpl {
     }
   }
 
+  trackerTimeout = /** @type {any} */ (null)
+
   subscribe(msg, callback) {
-    let interval
-    let count = 0
     if (msg.subscriptionName === 'onTabsUpdated') {
+      let interval
+      let count = 0
       setInterval(() => {
         // const num = count % 3
         const next = {
@@ -155,10 +179,38 @@ export class MockImpl {
         callback(next)
         count = count + 1
       }, 5000)
+      return () => {
+        clearInterval(interval)
+      }
     }
-    return () => {
-      console.log('teardown of onTabsUpdated')
-      clearInterval(interval)
+    if (msg.subscriptionName === 'onTrackersUpdated') {
+      clearTimeout(this.trackerTimeout)
+      /** @type {GetTrackersResponse} */
+      const payload = {
+        requests: [],
+      }
+
+      // always send empty first
+      callback(payload)
+
+      this.trackerTimeout = setTimeout(() => {
+        if (trackerSubscriptions.has('empty.example.com')) {
+          callback(payload)
+        } else if (trackerSubscriptions.has('example.com')) {
+          const output = JSON.parse(JSON.stringify(getTrackersResponse))
+          const domains = Array.from(trackerSubscriptions)
+          getTrackersResponseSchema.parse(output)
+          for (let request of output.requests) {
+            const parsed = new URL(request.pageUrl)
+            parsed.host = domains[0]
+            request.pageUrl = parsed.toString()
+          }
+          callback(output)
+        }
+      }, 1000)
+      return () => {
+        clearTimeout(this.trackerTimeout)
+      }
     }
   }
 }
