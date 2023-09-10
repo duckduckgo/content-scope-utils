@@ -210,7 +210,9 @@ function EditorSelection(props) {
       )
     },
     inline: () => {
-      if (editorType === 'web') return <TextEditor model={props.model} resource={props.resource} onErrors={onErrors} />
+      if (editorType === 'web') {
+        return <TextEditor model={props.model} resource={props.resource} onErrors={onErrors} />
+      }
       return (
         <Suspense>
           <MonacoEditor

@@ -8,14 +8,4 @@
     font-family: monospace;
     font-size: 0.8rem;
     padding: var(--ddg-ui-gutter);
-    border: 1px solid transparent;
-}
-
-.textArea:focus {
-}
-.textArea:active {
-}
-
-.textArea:focus-visible {
-    border-color: green;
 }

@@ -5,17 +5,42 @@ export interface ScrollData {
 }
 
 // prettier-ignore
-export type TextEditorEvents =
-  | { type: 'done.invoke.readInitial'; data: ScrollData | null }
-  | { type: 'set-scroll'; payload: { scrollTop: number } }
-  | { type: 'content-changed'; payload: { content: string } }
-  | { type: 'clear-errors' }
-  | { type: 'set-errors'; payload: ContentError[] }
-  | { type: 'set-content'; payload: { content: string } }
-
-export type Return = Extract<TextEditorEvents, { type: 'done.invoke.readInitial' }>['data']
-
-export interface TextEditorServices {
-  readInitial: Promise<Return>
-  [index: string]: any
+export interface DoneInvokeReadInitialEvent {
+  type: 'done.invoke.readInitial';
+  data: ScrollData | null;
 }
+
+export interface SetScrollEvent {
+  type: 'TextEditor.set-scroll'
+  payload: { scrollTop: number }
+}
+
+export interface ContentChangedEvent {
+  type: 'TextEditor.content-changed'
+  payload: { content: string }
+}
+
+export interface ClearErrorsEvent {
+  type: 'TextEditor.clear-errors'
+}
+
+export interface SetErrorsEvent {
+  type: 'TextEditor.set-errors'
+  payload: ContentError[]
+}
+
+export interface SetContentEvent {
+  type: 'TextEditor.set-content'
+  payload: { content: string }
+}
+
+// Export union of all the interfaces using the original union name
+export type TextEditorEvents =
+  | DoneInvokeReadInitialEvent
+  | SetScrollEvent
+  | ContentChangedEvent
+  | ClearErrorsEvent
+  | SetErrorsEvent
+  | SetContentEvent
+
+export type ReadInitialData = Extract<TextEditorEvents, { type: 'done.invoke.readInitial' }>['data']

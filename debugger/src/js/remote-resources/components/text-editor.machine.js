@@ -1,8 +1,11 @@
-import { createMachine, forwardTo, pure, raise } from 'xstate'
+import { createMachine, forwardTo } from 'xstate'
 
+/**
+ * @typedef {import('./text-editor.types').TextEditorEvents} TextEditorEvents
+ */
 export const textEditorMachine = createMachine(
   {
-    id: 'text-editor',
+    id: 'TextEditor',
     initial: 'reading-initial-state',
     context: {
       /** @type {string} */
@@ -11,32 +14,46 @@ export const textEditorMachine = createMachine(
       model: /** @type {any} */ (null),
     },
     schema: {
-      events: /** @type {import('./text-editor.types').TextEditorEvents} */ ({}),
-      services: /** @type {import('./text-editor.types').TextEditorServices} */ ({}),
+      events: /** @type {TextEditorEvents} */ ({}),
     },
-    on: {
-      'set-scroll': { actions: forwardTo('scroll-listener') },
-      'content-changed': { actions: forwardTo('change-listener') },
-      'clear-errors': { actions: ['clearErrors'] },
-      'set-errors': { actions: ['onSetErrors'] },
-      'set-content': { actions: ['onSetContent'] },
-    },
-    invoke: [
-      { src: 'model-listener', id: 'model-listener' },
-      { src: 'scroll-listener', id: 'scroll-listener' },
-      { src: 'change-listener', id: 'change-listener' },
-    ],
     states: {
       'reading-initial-state': {
         invoke: {
           src: 'readInitial',
           id: 'readInitial',
-          onDone: [{ actions: 'setScroll', cond: 'will-set-scroll' }],
+          onDone: [
+            {
+              cond: 'will-set-scroll',
+              actions: 'setInitialScroll',
+              target: 'listening',
+            },
+            {
+              target: 'listening',
+            },
+          ],
         },
       },
+      listening: {
+        on: {
+          'TextEditor.set-scroll': { actions: forwardTo('scroll-listener') },
+          'TextEditor.content-changed': { actions: forwardTo('change-listener') },
+          'TextEditor.clear-errors': { actions: ['clearErrors'] },
+          'TextEditor.set-errors': { actions: ['onSetErrors'] },
+          'TextEditor.set-content': { actions: ['onSetContent'] },
+        },
+        invoke: [
+          { src: 'model-listener', id: 'model-listener' },
+          { src: 'scroll-listener', id: 'scroll-listener' },
+          { src: 'change-listener', id: 'change-listener' },
+        ],
+      },
     },
+    predictableActionArguments: true,
+    strict: true,
   },
+
   {
+    actions: {},
     guards: {
       'will-set-scroll': (ctx, evt) => {
         if (evt.type === 'done.invoke.readInitial') {
@@ -47,9 +64,9 @@ export const textEditorMachine = createMachine(
       },
     },
     services: {
-      'model-listener': (ctx) => (send, onEvent) => {
+      'model-listener': (ctx) => (send) => {
         const sub = ctx.model.onDidChangeContent(() => {
-          send({ type: 'set-content', payload: { content: ctx.model.getValue() } })
+          send({ type: 'TextEditor.set-content', payload: { content: ctx.model.getValue() } })
         })
         return () => {
           sub.dispose()
@@ -57,36 +74,42 @@ export const textEditorMachine = createMachine(
       },
       'change-listener': (ctx) => (send, onEvent) => {
         let scrollTimer
-        onEvent((evt) => {
-          if (evt.type === 'content-changed') {
+        onEvent((/** @type {TextEditorEvents} */ evt) => {
+          if (evt.type === 'TextEditor.content-changed') {
             clearTimeout(scrollTimer)
             /** @type {string} */
             const value = /** @type {any} */ (evt).payload.content
             scrollTimer = setTimeout(() => {
+              // set the model value to reflect the current value
               ctx.model.setValue(value)
+
+              // now try to validate the content
               try {
                 JSON.parse(value)
-                send({ type: 'clear-errors' })
+                send({ type: 'TextEditor.clear-errors' })
               } catch (e) {
-                send({ type: 'set-errors', payload: [{ message: e instanceof Error ? e.message : String(e) }] })
+                send({
+                  type: 'TextEditor.set-errors',
+                  payload: [{ message: e instanceof Error ? e.message : String(e) }],
+                })
               }
             }, 500)
           }
         })
         return () => {
-          console.log('tear down')
+          console.log('tear down change-listener')
           clearTimeout(scrollTimer)
         }
       },
       'scroll-listener': (ctx) => (a, onEvent) => {
         let scrollTimer
         onEvent((evt) => {
-          if (evt.type === 'set-scroll') {
+          if (evt.type === 'TextEditor.set-scroll') {
             clearTimeout(scrollTimer)
             scrollTimer = setTimeout(() => {
               // @ts-ignore
               const json = JSON.stringify({ scrollTop: evt.payload.scrollTop })
-              const key = 'viewState_text-editor_' + ctx.id
+              const key = computeKey(ctx.id)
               localStorage.setItem(key, json)
             }, 500)
           }
@@ -97,12 +120,11 @@ export const textEditorMachine = createMachine(
         }
       },
       /**
-       * @param ctx
-       * @param evt
-       * @return {import('./text-editor.types').TextEditorServices['readInitial']}
+       * Try to read the initial value
+       * @return {Promise<import('./text-editor.types').ReadInitialData>}
        */
       readInitial: async (ctx) => {
-        const key = 'viewState_text-editor_' + ctx.id
+        const key = computeKey(ctx.id)
         const prev = localStorage.getItem(key)
         if (prev) {
           const json = JSON.parse(prev)
@@ -115,3 +137,11 @@ export const textEditorMachine = createMachine(
     },
   },
 )
+
+/**
+ * @param {string} id
+ * @return {string}
+ */
+function computeKey(id) {
+  return 'viewState_text-editor_' + id
+}
