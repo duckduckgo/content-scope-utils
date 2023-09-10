@@ -9,6 +9,7 @@ import { Button } from '../../components/buttons'
 import { Sidebar } from './sidebar'
 import { TextModelContext } from '../../models/text-model'
 import { DiffViewer } from '../../components/diff-viewer'
+import { TextEditor } from './text-editor'
 
 const MonacoEditor = lazy(() => import('../../components/monaco-editor.js'))
 const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))
@@ -209,11 +210,11 @@ function EditorSelection(props) {
       )
     },
     inline: () => {
-      if (editorType === 'web') return <p>Cannot show rich editor</p>
+      if (editorType === 'web') return <TextEditor model={props.model} resource={props.resource} onErrors={onErrors} />
       return (
         <Suspense>
           <MonacoEditor
-            model={props.model}
+            model={/** @type {import("monaco-editor").editor.ITextModel} */ (props.model)}
             invalid={contentIsInvalid}
             edited={hasEdits}
             pending={savingChanges}

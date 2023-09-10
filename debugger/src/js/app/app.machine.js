@@ -4,7 +4,7 @@ import * as z from 'zod'
 
 export const appMachine = createMachine(
   {
-    id: 'Panel Open',
+    id: 'App',
     initial: 'Initial state',
     context: /** @type {import('./app.machine.types').AppMachineCtx} */ ({}),
     invoke: {

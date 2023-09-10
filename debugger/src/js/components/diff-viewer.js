@@ -17,6 +17,7 @@ export function DiffViewer(props) {
   return (
     <div>
       {props.additionalButtons ? createPortal(portal, props.additionalButtons) : null}
+      {patches.length === 0 && <p>No changes</p>}
       {patches.map((p) => {
         return <DiffCard patch={p} key={p.path + p.op} />
       })}

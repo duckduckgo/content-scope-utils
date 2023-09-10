@@ -12,7 +12,7 @@ import { useMonacoErrors } from '../models/monaco-opt-in'
 
 /**
  * @param {object} props
- * @param {any} props.model
+ * @param {ITextModel} props.model
  * @param {boolean} props.pending
  * @param {boolean} props.edited
  * @param {boolean} props.invalid
