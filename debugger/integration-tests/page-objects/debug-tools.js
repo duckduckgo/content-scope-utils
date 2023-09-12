@@ -79,7 +79,6 @@ export class DebugToolsPage {
     return {
       loaded: () => page.locator('[data-loaded="true"]'),
       remoteFormInput: () => page.getByPlaceholder('enter a url'),
-      remoteFormCancel: () => page.getByRole('button', { name: 'Cancel' }),
       copyOverridePatch: () => page.getByRole('button', { name: 'Copy as Patch' }),
       remoteFormRefresh: () => page.getByRole('button', { name: 'Refresh 🔄' }),
       remoteFormOverride: () => page.getByRole('button', { name: 'Override ✏️' }),
@@ -93,10 +92,8 @@ export class DebugToolsPage {
       togglesButton: () => page.getByRole('button', { name: 'Toggles' }),
       patchesButton: () => page.getByRole('button', { name: 'Patches' }),
       diffEditorButton: () => page.getByRole('button', { name: 'Diff', exact: true }),
-      editorToggle: () => page.getByLabel('Editor kind:'),
       togglesEditor: () => page.getByTestId('TogglesEditor'),
       patchesScreen: () => page.getByTestId('PatchesEditor'),
-      globalToggleList: () => page.getByTestId('FeatureToggleListGlobal'),
       featureToggle: (named) => page.getByLabel(`toggle ${named} globally`),
       domainExceptionContainer: () => page.getByTestId('DomainForm'),
       domainExceptionAddButton: () => page.getByRole('button', { name: 'Add a domain' }),
@@ -104,8 +101,6 @@ export class DebugToolsPage {
       domainExceptionUpdate: () => page.getByTestId('DomainForm').getByRole('button', { name: 'Save' }),
       domainExceptionEdit: () => page.getByRole('button', { name: 'Edit' }),
       domainExceptionNew: () => page.getByRole('button', { name: 'New' }),
-      domainExceptionToggles: () => page.getByTestId('domain-exceptions'),
-      domainExceptionsTab: () => page.locator('label').filter({ hasText: 'Domain Exceptions' }),
       /**
        * @param {string} featureName
        * @param {string} domain

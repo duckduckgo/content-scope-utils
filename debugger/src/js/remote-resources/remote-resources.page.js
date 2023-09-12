@@ -5,11 +5,10 @@ import { GlobalContext } from '../DebugToolsMessages.mjs'
 import { AppMachineContext } from '../app/components/app'
 import { RemoteResources } from './components/remote-resources'
 import invariant from 'tiny-invariant'
-import { patchesMachine } from './patches-machine'
-import { TrackerFeedProvider } from './components/tracker-feed.machine'
+import { PatchesProvider } from './patches-machine.react'
+import { TrackerFeedProvider } from './components/tracker-feed.machine.react'
 
 export const RemoteResourcesContext = createActorContext(remoteResourcesMachine, { devTools: true })
-export const PatchesContext = createActorContext(patchesMachine, { devTools: true })
 
 export function RemoteResourcesPage() {
   // give access to the global messages instance
@@ -38,25 +37,6 @@ function RemoteResourcesLoader() {
     return <RemoteResources />
   }
   return null
-}
-
-function PatchesProvider(props) {
-  const parent = RemoteResourcesContext.useActorRef()
-  return (
-    <PatchesContext.Provider
-      options={{
-        // @ts-ignore
-        parent,
-      }}
-    >
-      {props.children}
-    </PatchesContext.Provider>
-  )
-}
-
-export function usePatches() {
-  const actor = PatchesContext.useActor()
-  return actor
 }
 
 export default RemoteResourcesPage

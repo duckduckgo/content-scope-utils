@@ -1,11 +1,11 @@
 import { parse } from 'tldts'
-import { useTrackerFeed } from './tracker-feed.machine'
 import { handler } from '../../transforms'
 import invariant from 'tiny-invariant'
 import { MicroButton } from '../../components/buttons'
 import { DD, DT, InlineDL } from '../../components/definition-list'
 import styles from './tracker-feed.module.css'
 import classnames from 'classnames'
+import { useTrackerFeed } from './tracker-feed.machine.react'
 
 // @ts-expect-error - debugging;
 window._parse = parse

@@ -36,7 +36,6 @@ export interface RemoteResourcesCtx {
   error?: string | null
   editorKind?: EditorKind
   currentDomain?: string
-  resourceKey?: number
   resources?: RemoteResource[]
   currentResource?: CurrentResource
   contentErrors?: ContentError[]

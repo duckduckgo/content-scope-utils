@@ -408,9 +408,6 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
     }),
     raiseUpdated: pure(() => {
       return [
-        assign({
-          resourceKey: (ctx) => (ctx.resourceKey ?? 0) + 1,
-        }),
         // on any successful save, put the UI back into a 'clean state'
         raise({ type: 'content was reverted' }),
         raise({ type: 'hide url editor' }),

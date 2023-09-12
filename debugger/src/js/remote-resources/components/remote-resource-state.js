@@ -2,8 +2,9 @@ import * as z from 'zod'
 import { DD, DT, InlineDL } from '../../components/definition-list.js'
 import { MicroButton } from '../../components/buttons'
 import { URLEditor } from '../../components/url-editor'
-import { RemoteResourcesContext, usePatches } from '../remote-resources.page'
+import { RemoteResourcesContext } from '../remote-resources.page'
 import { useEditorKinds } from './remote-resource-editor'
+import { usePatches } from '../patches-machine.react'
 
 /**
  * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -245,12 +246,13 @@ function Override(props) {
 function PatchCopyButton() {
   const [state, send] = usePatches()
 
+  const key = /** @type {any} */ (state.value).stored
+
   const text = {
     patchAvailable: 'Copy as Patch',
     patchPreSuccess: '⌛️ generating',
     patchSuccess: '✅ copied',
-    // @ts-expect-error - a bug in xstate?
-  }[state.value.stored]
+  }[key]
 
   if (state.matches({ stored: 'idle' })) return null
 
