@@ -346,6 +346,7 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         const matchingId = match ? match.id : resources[0].id
 
         if (!matchingId) throw new Error('unreachable - must have valid resource ID by this point')
+        invariant(match)
 
         // matching, or default
         const capabilties = resourceCapabilities[matchingId] || resourceCapabilities.default
@@ -353,6 +354,7 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         return {
           id: matchingId,
           editorKinds: capabilties.editorKinds,
+          lastValue: match.current.contents,
         }
       },
     }),
@@ -514,6 +516,7 @@ async function minDuration(cb, minTime = 500) {
 export const EditorKind = z.enum(['inline', 'diff', 'toggles', 'patches'])
 export const CurrentResource = z.object({
   id: z.string(),
+  lastValue: z.string(),
   editorKinds: z.array(EditorKind),
 })
 export const PrivacyConfig = z.object({

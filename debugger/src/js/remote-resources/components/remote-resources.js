@@ -18,7 +18,7 @@ import { TextModelContext } from '../../models/text-model'
 export function RemoteResources() {
   const { createTextModel } = useContext(TextModelContext)
   const [state, send] = RemoteResourcesContext.useActor()
-  const { resource, nav } = RemoteResourcesContext.useSelector((state) => {
+  const { resource, nav, currentResource } = RemoteResourcesContext.useSelector((state) => {
     const schema = z.object({
       currentResource: CurrentResource,
       resources: z.array(remoteResourceSchema),
@@ -31,6 +31,7 @@ export function RemoteResources() {
 
     return {
       resource: match,
+      currentResource: parsed.currentResource,
       nav: parsed.resources.map((r) => {
         return {
           name: r.name,
@@ -41,7 +42,7 @@ export function RemoteResources() {
     }
   })
 
-  const originalTextContent = resource.current.contents
+  const lastKnownValue = currentResource.lastValue
 
   /**
    * Share a text model between the views
@@ -49,35 +50,34 @@ export function RemoteResources() {
    */
   const sharedTextModel = useMemo(() => {
     invariant(typeof createTextModel === 'function', 'createTextModel required')
-    const model = createTextModel?.({ content: resource.current.contents, contentType: resource.current.contentType })
+    const model = createTextModel?.({ content: lastKnownValue, contentType: resource.current.contentType })
 
     window._test_editor_value = () => model.getValue()
     window._test_editor_set_value = (value) => {
       model.setValue(value)
     }
     return model
-  }, [resource.id, resource.current.contents, resource.current.contentType])
+  }, [lastKnownValue])
 
   // ensure the monaco model stays in sync
   // in xstate we update the `resourceKey` to indicate that the UI should consider
   // the resource 'updated'
-  useEffect(() => {
-    sharedTextModel.setValue(originalTextContent)
-  }, [originalTextContent, sharedTextModel])
 
   // subscribe to the shared model and publish events back to xstate
   useEffect(() => {
     // normally this logic would live inside xstate, but I want to prevent chatty messages
     // on every key stroke
     const sub = sharedTextModel.onDidChangeContent(() => {
-      if (sharedTextModel.getValue() !== originalTextContent) {
+      if (sharedTextModel.getValue() !== lastKnownValue) {
         send({ type: 'content was edited' })
       } else {
         send({ type: 'content was reverted' })
       }
     })
-    return () => sub.dispose()
-  }, [sharedTextModel, originalTextContent, send])
+    return () => {
+      sub.dispose()
+    }
+  }, [sharedTextModel, lastKnownValue, send])
 
   if (!state.matches(['showing editor', 'editing'])) return null
 
