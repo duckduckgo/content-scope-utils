@@ -6,6 +6,7 @@ import {
 } from '../../schema/__generated__/schema.parsers.mjs'
 
 import getTrackersResponse from '../../schema/__fixtures__/__getTrackers__.json'
+import invariant from 'tiny-invariant'
 
 /**
  * @typedef {import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").MessagingTransport} MessagingTransport
@@ -25,6 +26,19 @@ const tabData = {
 // const tabData = { tabs: [] }
 /** @type {Set<string>} */
 const trackerSubscriptions = new Set([])
+
+const defaults = {
+  'privacy-configuration': {
+    id: 'privacy-configuration',
+    url: 'fixtures/macos-config.json',
+    name: 'Privacy Config',
+  },
+  'privacy-configuration-alt': {
+    id: 'privacy-configuration-alt',
+    url: 'fixtures/minimal-config.json',
+    name: 'Privacy Config (alt)',
+  },
+}
 
 /**
  * @implements MessagingTransport
@@ -63,18 +77,7 @@ export class MockImpl {
               scripts: [],
             },
             remoteResources: {
-              resources: [
-                {
-                  id: 'privacy-configuration',
-                  url: '/macos-config.json',
-                  name: 'Privacy Config',
-                },
-                {
-                  id: 'privacy-configuration-alt',
-                  url: '/minimal-config.json',
-                  name: 'Privacy Config (alt)',
-                },
-              ],
+              resources: [defaults['privacy-configuration'], defaults['privacy-configuration-alt']],
             },
           },
         }
@@ -82,76 +85,54 @@ export class MockImpl {
       }
       case 'getRemoteResource': {
         const parsed = getRemoteResourceParamsSchema.parse(msg.params)
-        const remote = await fetch('fixtures/macos-config.json').then((x) => x.text())
-        const remote2 = await fetch('fixtures/minimal-config.json').then((x) => x.text())
-        const responses = {
-          'privacy-configuration': {
-            id: 'privacy-configuration',
-            url: '/macos-config.json',
-            name: 'Privacy Config',
-            current: {
-              source: {
-                remote: {
-                  url: '/macos-config.json',
-                  fetchedAt: formattedDate,
-                },
+        invariant(parsed.id in defaults, 'can only update resources we know about')
+        let content
+        if (parsed.id === 'privacy-configuration') {
+          content = await fetch('fixtures/macos-config.json').then((x) => x.text())
+        } else if (parsed.id === 'privacy-configuration-alt') {
+          content = await fetch('fixtures/minimal-config.json').then((x) => x.text())
+        }
+        return {
+          ...defaults[parsed.id],
+          current: {
+            source: {
+              remote: {
+                url: defaults[parsed.id].url,
+                fetchedAt: formattedDate,
               },
-              contents: remote,
-              contentType: 'application/json',
             },
-          },
-          'privacy-configuration-alt': {
-            id: 'privacy-configuration-alt',
-            url: '/minimal-config.json',
-            name: 'Privacy Config (alt)',
-            current: {
-              source: {
-                remote: {
-                  url: '/minimal-config.json',
-                  fetchedAt: formattedDate,
-                },
-              },
-              contents: remote2,
-              contentType: 'application/json',
-            },
+            contents: content,
+            contentType: 'application/json',
           },
         }
-        const match = responses[parsed.id]
-        if (!match) throw new Error('resource not found')
-        return match
       }
       case 'updateResource': {
         const parsed = updateResourceParamsSchema.parse(msg.params)
         /** @type {import("../../schema/__generated__/schema.types").RemoteResource} */
+
+        invariant(parsed.id in defaults, 'can only update resources we know about')
         const next = {
-          id: 'privacy-configuration',
-          url: '/macos-config.json',
-          name: 'Privacy Config',
-          current: {
-            source: {
-              debugTools: {
-                modifiedAt: formattedDate,
-              },
-            },
-            contents: '',
-            contentType: 'application/json',
-          },
+          ...defaults[parsed.id],
         }
+
         if ('remote' in parsed.source) {
-          // await new Promise((resolve) => setTimeout(resolve, 1000))
-          const remote = await fetch(parsed.source.remote.url).then((x) => x.text())
-          next.current.source = {
-            remote: { url: parsed.source.remote.url, fetchedAt: formattedDate },
+          const remoteContent = await fetch(parsed.source.remote.url).then((x) => x.text())
+          next.current = {
+            source: {
+              remote: { url: parsed.source.remote.url, fetchedAt: formattedDate },
+            },
+            contents: remoteContent,
+            contentType: 'application/json',
           }
-          next.current.contents = remote
         }
         if ('debugTools' in parsed.source) {
-          // await new Promise((resolve) => setTimeout(resolve, 1000))
-          // return Promise.reject(new Error('nooooo'))
-          next.current.source = {
-            debugTools: { modifiedAt: formattedDate },
+          next.current = {
+            source: {
+              debugTools: { modifiedAt: formattedDate },
+            },
+            contents: parsed.source.debugTools.content,
+            contentType: 'application/json',
           }
-          next.current.contents = parsed.source.debugTools.content
         }
         return next
       }
