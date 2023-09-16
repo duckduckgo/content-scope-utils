@@ -36,7 +36,7 @@ export function RemoteResourceEditor(props) {
   /** @type {(kind: EditorKind) => void} */
   const revertEdited = () => props.model.setValue(props.resource.current.contents)
 
-  /** this is used to allow editors to participate in the footer (eg: adding extra buttons) */
+  /** this is used to allow editors to participate in the $footer (eg: adding extra buttons) */
   const additionalButtons = useRef(null)
 
   return (

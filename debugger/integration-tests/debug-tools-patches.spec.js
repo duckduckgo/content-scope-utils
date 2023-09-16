@@ -59,21 +59,21 @@ test.describe.skip('Feature: Patches', () => {
       await dt.enabled()
       await dt.withPrivacyConfig(initial)
       await dt.openRemoteResourceEditor()
-      await dt.hasLoadedWithFeature('abc')
+      await dt.features.canToggle('abc')
       await dt.switchesTo('inline')
-      await dt.setsEditorValueTo(editedString)
+      await dt.editor.setsEditorValueTo(editedString)
     })
 
     await test.step('When I save + apply it', async () => {
-      await dt.submitsEditorSave()
+      await dt.editor.clicksSave()
     })
 
     await test.step('Then I can copy the patch to my clipboard', async () => {
-      await dt.copyPatchFromOverride(initial, edited)
+      await dt.patches.copyPatchFromOverride(initial, edited)
     })
 
     await test.step('And it will be saved in localStorage', async () => {
-      await dt.patchIsStoredInLocalStorage('privacy-configuration', initial, edited)
+      await dt.patches.patchIsStoredInLocalStorage('privacy-configuration', initial, edited)
     })
   })
   test('Scenario: restoring a patch', async ({ page, baseURL }, workerInfo) => {
@@ -107,18 +107,18 @@ test.describe.skip('Feature: Patches', () => {
     }
 
     await test.step('Given I have previously saved an edit', async () => {
-      await dt.withExistingPatches()
+      await dt.patches.withExistingPatches()
       await dt.enabled()
       await dt.withEditedPrivacyConfig(edited)
     })
 
     await test.step('When I load the page', async () => {
       await dt.openRemoteResourceEditor()
-      await dt.hasLoadedWithFeature('abc')
+      await dt.features.canToggle('abc')
     })
 
     await test.step('Then I can still copy the patch to my clipboard', async () => {
-      await dt.copyPatchFromOverride(initial, edited)
+      await dt.patches.copyPatchFromOverride(initial, edited)
     })
   })
 })
