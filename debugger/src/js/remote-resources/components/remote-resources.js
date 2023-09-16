@@ -2,7 +2,7 @@ import * as z from 'zod'
 import { remoteResourceSchema } from '../../../../schema/__generated__/schema.parsers.mjs'
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { RemoteResourceEditor } from './remote-resource-editor'
-import { useContext, useEffect, useMemo } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { CurrentResource } from '../remote-resources.machine'
 import invariant from 'tiny-invariant'
 import { TextModelContext } from '../../models/text-model'
@@ -43,6 +43,7 @@ export function RemoteResources() {
   })
 
   const lastKnownValue = currentResource.lastValue
+  const [key, setKey] = useState(0)
 
   /**
    * Share a text model between the views
@@ -58,6 +59,10 @@ export function RemoteResources() {
     }
     return model
   }, [lastKnownValue])
+
+  useEffect(() => {
+    setKey((prev) => prev + 1)
+  }, [sharedTextModel])
 
   // ensure the monaco model stays in sync
   // in xstate we update the `resourceKey` to indicate that the UI should consider
@@ -81,5 +86,5 @@ export function RemoteResources() {
 
   if (!state.matches(['showing editor', 'editing'])) return null
 
-  return <RemoteResourceEditor key={resource.id} resource={resource} model={sharedTextModel} nav={nav} />
+  return <RemoteResourceEditor key={`${resource.id} + ${key}`} resource={resource} model={sharedTextModel} nav={nav} />
 }

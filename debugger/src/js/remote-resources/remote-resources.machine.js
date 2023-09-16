@@ -163,7 +163,7 @@ const _remoteResourcesMachine = createMachine({
                 onDone: [
                   {
                     target: 'editor has original content',
-                    actions: ['updateCurrentResource', 'clearErrors', 'raiseUpdated'],
+                    actions: ['updateCurrentResource', 'assignCurrentResource', 'clearErrors', 'raiseUpdated'],
                   },
                 ],
                 onError: [
@@ -185,6 +185,7 @@ const _remoteResourcesMachine = createMachine({
                     actions: [
                       'broadcastPreUpdate',
                       'updateCurrentResource',
+                      'assignCurrentResource',
                       'clearErrors',
                       'raiseUpdated',
                       'broadcastPostUpdate',
@@ -340,9 +341,10 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
       currentResource: (ctx) => {
         // otherwise select the first
         const resources = z.array(remoteResourceSchema).parse(ctx.resources)
+        invariant(resources.length > 0, 'must have resources here')
         const parentState = ctx.parent?.state?.context.history.location.pathname
-        const id = parentState.split('/')[2] || 'privacy-configuration' // default
-        const match = resources.find((x) => x.id === id)
+        const id = parentState.split('/')[2] || resources[0].id // default
+        const match = resources.find((x) => x.id === id) || resources[0]
         const matchingId = match ? match.id : resources[0].id
 
         if (!matchingId) throw new Error('unreachable - must have valid resource ID by this point')
