@@ -17,8 +17,8 @@ import {
 import { ResourcePatches, STORAGE_KEY } from '../../src/js/remote-resources/patches-machine'
 import invariant from 'tiny-invariant'
 
-const DEFAULT_BASE_VALUE = '{ "foo": "bar" }'
-const DEFAULT_EDIT_VALUE = '{ "foo": "baz" }'
+export const DEFAULT_BASE_VALUE = '{ "foo": "bar" }'
+export const DEFAULT_EDIT_VALUE = '{ "foo": "baz" }'
 
 /**
  * @typedef {import('../../src/js/remote-resources/remote-resources.machine').EditorKind} EditorKind
@@ -77,17 +77,21 @@ export class DebugToolsPage {
   get locators() {
     const page = this.page
     return {
+      footer: () => page.getByTestId('Footer'),
       loaded: () => page.locator('[data-loaded="true"]'),
       remoteFormInput: () => page.getByPlaceholder('enter a url'),
       copyOverridePatch: () => page.getByRole('button', { name: 'Copy as Patch' }),
       remoteFormRefresh: () => page.getByRole('button', { name: 'Refresh 🔄' }),
+      revertButton: () => page.getByRole('button', { name: 'Revert' }),
+      popupErrors: () => page.getByTestId('FloatingErrors'),
       remoteFormOverride: () => page.getByRole('button', { name: 'Override ✏️' }),
       remoteFormCopy: () => page.getByRole('button', { name: 'Copy 📄' }),
       remoteFormSave: () => page.getByRole('button', { name: 'Save', exact: true }),
       editorSave: () => page.getByRole('button', { name: 'Save + Apply' }),
       errorDismiss: () => page.getByRole('button', { name: '↩️ Dismiss' }),
       diffEditorModified: () => page.locator('.editor.modified'),
-      inlineEditor: () => page.locator('.monaco-editor'),
+      inlineMonacoEditor: () => page.locator('.monaco-editor'),
+      simpleEditor: () => page.locator('textarea[name="simple-editor"]'),
       inlineEditorButton: () => page.getByRole('button', { name: 'Inline' }),
       togglesButton: () => page.getByRole('button', { name: 'Toggles' }),
       patchesButton: () => page.getByRole('button', { name: 'Patches' }),
@@ -198,6 +202,9 @@ export class DebugToolsPage {
   async openPage(urlParams, pathname = '/remoteResources') {
     const url = new URL(this.basePath, this.baseURL)
     url.searchParams.set('platform', this.build.name)
+    if (this.simpleEditor) {
+      url.searchParams.set('simple', 'true')
+    }
     url.hash = pathname + '?' + urlParams.toString()
     await this.page.goto(url.href)
   }
@@ -252,7 +259,7 @@ export class DebugToolsPage {
   /**
    *
    */
-  async editsPreview(value = DEFAULT_EDIT_VALUE) {
+  async setsEditorValueTo(value = DEFAULT_EDIT_VALUE) {
     // this makes sure the JS is compiled/loaded
     await this.page.evaluate(({ value }) => window._test_editor_set_value(value), { value })
   }
@@ -419,7 +426,11 @@ export class DebugToolsPage {
       await this.locators.diffEditorModified().waitFor()
     } else if (kind === 'inline') {
       await this.locators.inlineEditorButton().click()
-      await this.locators.inlineEditor().waitFor()
+      if (this.simpleEditor) {
+        await this.locators.simpleEditor().waitFor()
+      } else {
+        await this.locators.inlineMonacoEditor().waitFor()
+      }
     } else if (kind === 'toggles') {
       await this.locators.togglesButton().click()
       await this.locators.togglesEditor().waitFor()
@@ -712,5 +723,17 @@ export class DebugToolsPage {
   async showsEmptyDomainsState() {
     const text = await this.locators.domainExceptionContainer().textContent()
     expect(text).toContain('CURRENT DOMAIN:NONE')
+  }
+
+  async revertsErrorFromPopup() {
+    await this.locators.popupErrors().locator(this.locators.revertButton()).click()
+  }
+
+  async withSimpleEditor() {
+    this.simpleEditor = true
+  }
+
+  async revertEditorContent() {
+    await this.locators.footer().locator(this.locators.revertButton()).click()
   }
 }

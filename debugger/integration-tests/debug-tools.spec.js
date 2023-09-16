@@ -1,5 +1,5 @@
 import { test } from '@playwright/test'
-import { DebugToolsPage } from './page-objects/debug-tools.js'
+import { DebugToolsPage, DEFAULT_BASE_VALUE } from './page-objects/debug-tools.js'
 
 test.describe('debug tools', () => {
   test.describe('navigation', () => {
@@ -58,8 +58,30 @@ test.describe('debug tools', () => {
       await dt.withTestResources()
       await dt.openRemoteResourceEditor()
       await dt.switchesTo('inline')
-      await dt.editsPreview()
+      await dt.setsEditorValueTo()
       await dt.saves('test-resource')
+    })
+    test('shows editor error and allows it to be reverted (simple)', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
+      await dt.enabled()
+      await dt.withTestResources()
+      await dt.withSimpleEditor()
+      await dt.openRemoteResourceEditor()
+      await dt.switchesTo('inline')
+      await dt.setsEditorValueTo('shane')
+      await dt.revertsErrorFromPopup()
+      await dt.waitForEditorToHaveValue(JSON.stringify(JSON.parse(DEFAULT_BASE_VALUE), null, 4))
+    })
+    test('reverts editor content (simple)', async ({ page, baseURL }, workerInfo) => {
+      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
+      await dt.enabled()
+      await dt.withTestResources()
+      await dt.withSimpleEditor()
+      await dt.openRemoteResourceEditor()
+      await dt.switchesTo('inline')
+      await dt.setsEditorValueTo('[]') // valid json
+      await dt.revertEditorContent()
+      await dt.waitForEditorToHaveValue(JSON.stringify(JSON.parse(DEFAULT_BASE_VALUE), null, 4))
     })
     test('handles when input cannot be used with toggles (because of edits)', async ({ page, baseURL }, workerInfo) => {
       const dt = DebugToolsPage.create(page, baseURL, workerInfo)
@@ -67,7 +89,7 @@ test.describe('debug tools', () => {
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
       await dt.switchesTo('inline')
-      await dt.editsPreview('[]') // <- completely invalid type for this resource
+      await dt.setsEditorValueTo('[]') // <- completely invalid type for this resource
       await dt.switchesTo('toggles')
       await dt.showsErrorText('Cannot use toggles because the format was invalidated (probably because of edits)')
     })
@@ -114,8 +136,6 @@ test.describe('debug tools', () => {
         // ensure we saved the correctly modified JSON
         const saved = await dt.savedWithValue()
         dt.featureWasDisabledForDomain(saved.source.debugTools.content, 'autofill', 'example.com')
-
-        // todo(Shane): add hash check here
       })
     })
     test('edits the current domain in domain exceptions', async ({ page, baseURL }, workerInfo) => {
@@ -196,11 +216,11 @@ test.describe('debug tools', () => {
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature()
       await dt.switchesTo('inline')
-      await dt.editsPreview()
+      await dt.setsEditorValueTo()
 
       await test.step('switches to diff view + makes an edit', async () => {
         await dt.switchesTo('diff')
-        await dt.editsPreview('[]')
+        await dt.setsEditorValueTo('[]')
       })
 
       await test.step('switches back to inline view, edits should remain', async () => {

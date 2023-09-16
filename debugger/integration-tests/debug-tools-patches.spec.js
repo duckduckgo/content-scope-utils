@@ -61,7 +61,7 @@ test.describe.skip('Feature: Patches', () => {
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature('abc')
       await dt.switchesTo('inline')
-      await dt.editsPreview(editedString)
+      await dt.setsEditorValueTo(editedString)
     })
 
     await test.step('When I save + apply it', async () => {

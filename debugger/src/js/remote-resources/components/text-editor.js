@@ -54,6 +54,7 @@ export function TextEditor(props) {
   return (
     <div className={styles.wrap}>
       <textarea
+        name="simple-editor"
         className={styles.textArea}
         defaultValue={props.defaultValue}
         ref={domRef}

@@ -41,7 +41,7 @@ test.describe('debug tools privacy config', () => {
       await dt.openRemoteResourceEditor()
       await dt.hasLoadedWithFeature('abc')
       await dt.switchesTo('inline')
-      await dt.editsPreview(editedString)
+      await dt.setsEditorValueTo(editedString)
       await dt.submitsEditorSave()
       const saved = await dt.savedWithValue()
       dt.featureHasUpdatedHash(saved.source.debugTools.content, 'abc')

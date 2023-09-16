@@ -66,7 +66,10 @@ export const textEditorMachine = createMachine(
     services: {
       'model-listener': (ctx) => (send) => {
         const sub = ctx.model.onDidChangeContent(() => {
-          send({ type: 'TextEditor.set-content', payload: { content: ctx.model.getValue() } })
+          const value = ctx.model.getValue()
+          send({ type: 'TextEditor.set-content', payload: { content: value } })
+          const next = errorsFor(value)
+          send({ type: 'TextEditor.set-errors', payload: next })
         })
         return () => {
           sub.dispose()
@@ -80,19 +83,7 @@ export const textEditorMachine = createMachine(
             /** @type {string} */
             const value = /** @type {any} */ (evt).payload.content
             scrollTimer = setTimeout(() => {
-              // set the model value to reflect the current value
               ctx.model.setValue(value)
-
-              // now try to validate the content
-              try {
-                JSON.parse(value)
-                send({ type: 'TextEditor.clear-errors' })
-              } catch (e) {
-                send({
-                  type: 'TextEditor.set-errors',
-                  payload: [{ message: e instanceof Error ? e.message : String(e) }],
-                })
-              }
             }, 500)
           }
         })
@@ -137,6 +128,15 @@ export const textEditorMachine = createMachine(
     },
   },
 )
+
+function errorsFor(value) {
+  try {
+    JSON.parse(value)
+    return []
+  } catch (e) {
+    return [{ message: e instanceof Error ? e.message : String(e) }]
+  }
+}
 
 /**
  * @param {string} id

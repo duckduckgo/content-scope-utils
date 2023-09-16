@@ -120,7 +120,7 @@ function Footer(props) {
     </>
   )
   return (
-    <div className="flex column-gap">
+    <div className="flex column-gap" data-testid="Footer">
       <div className="flex column-gap" ref={props.additionalButtons} />
       <div className="flex column-gap ml-auto">{buttons}</div>
     </div>
@@ -304,7 +304,7 @@ function SavingErrors(props) {
  */
 function FloatingErrors(props) {
   return (
-    <div className="row error floating">
+    <div className="row error floating" data-testid="FloatingErrors">
       <div className="font-bold">
         {props.errors.length} error{props.errors.length === 1 ? '' : 's'} occurred.{' '}
       </div>
