@@ -87,12 +87,7 @@ export function RemoteResourceEditor(props) {
 function Footer(props) {
   const [state, send] = RemoteResourcesContext.useActor()
 
-  /** @type {(kind: EditorKind) => void} */
-  // const setEditorKind = (kind) => send({ type: 'set editor kind', payload: kind })
   const revertEdited = () => props.model.setValue(props.resource.current.contents)
-
-  // get the current editor kind + all available ones
-  // const { editorKind, values } = useEditorKinds()
 
   function saveDebugContent() {
     send({
