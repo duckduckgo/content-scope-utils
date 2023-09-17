@@ -10,6 +10,12 @@ export interface DoneInvokeReadInitialEvent {
   data: ScrollData | null;
 }
 
+// prettier-ignore
+export interface ErrorInvokeReadInitialEvent {
+  type: 'error.platform.readInitial';
+  data: Error;
+}
+
 export interface SetScrollEvent {
   type: 'TextEditor.set-scroll'
   payload: { scrollTop: number }
@@ -37,10 +43,14 @@ export interface SetContentEvent {
 // Export union of all the interfaces using the original union name
 export type TextEditorEvents =
   | DoneInvokeReadInitialEvent
+  | ErrorInvokeReadInitialEvent
   | SetScrollEvent
   | ContentChangedEvent
   | ClearErrorsEvent
   | SetErrorsEvent
   | SetContentEvent
 
-export type ReadInitialData = Extract<TextEditorEvents, { type: 'done.invoke.readInitial' }>['data']
+export type ReadInitialData = Extract<
+  TextEditorEvents,
+  { type: 'done.invoke.readInitial' } | { type: 'error.platform.readInitial' }
+>['data']

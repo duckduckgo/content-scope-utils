@@ -1,4 +1,5 @@
 import { createMachine, forwardTo } from 'xstate'
+import invariant from 'tiny-invariant'
 
 /**
  * @typedef {import('./text-editor.types').TextEditorEvents} TextEditorEvents
@@ -24,13 +25,17 @@ export const textEditorMachine = createMachine(
           onDone: [
             {
               cond: 'will-set-scroll',
-              actions: 'setInitialScroll',
               target: 'listening',
+              actions: { type: 'setInitialScroll' },
             },
             {
               target: 'listening',
             },
           ],
+          onError: {
+            actions: { type: 'log-error' },
+            target: 'listening',
+          },
         },
       },
       listening: {
@@ -49,11 +54,20 @@ export const textEditorMachine = createMachine(
       },
     },
     predictableActionArguments: true,
+    preserveActionOrder: true,
     strict: true,
   },
 
   {
-    actions: {},
+    actions: {
+      'log-error': (ctx, evt) => {
+        if (evt.type === 'error.platform.readInitial') {
+          console.error('error from text-editor machine', evt.data)
+        } else {
+          console.error('unknown error from text-editor machine', evt)
+        }
+      },
+    },
     guards: {
       'will-set-scroll': (ctx, evt) => {
         if (evt.type === 'done.invoke.readInitial') {
@@ -78,44 +92,40 @@ export const textEditorMachine = createMachine(
       'change-listener': (ctx) => (send, onEvent) => {
         let scrollTimer
         onEvent((/** @type {TextEditorEvents} */ evt) => {
-          if (evt.type === 'TextEditor.content-changed') {
-            clearTimeout(scrollTimer)
-            /** @type {string} */
-            const value = /** @type {any} */ (evt).payload.content
-            scrollTimer = setTimeout(() => {
-              ctx.model.setValue(value)
-            }, 500)
-          }
+          invariant(evt.type === 'TextEditor.content-changed', 'should only receive content-changed here')
+          clearTimeout(scrollTimer)
+          /** @type {string} */
+          const value = /** @type {any} */ (evt).payload.content
+          scrollTimer = setTimeout(() => {
+            ctx.model.setValue(value)
+          }, 500)
         })
         return () => {
-          console.log('tear down change-listener')
           clearTimeout(scrollTimer)
         }
       },
       'scroll-listener': (ctx) => (a, onEvent) => {
         let scrollTimer
         onEvent((evt) => {
-          if (evt.type === 'TextEditor.set-scroll') {
-            clearTimeout(scrollTimer)
-            scrollTimer = setTimeout(() => {
-              // @ts-ignore
-              const json = JSON.stringify({ scrollTop: evt.payload.scrollTop })
-              const key = computeKey(ctx.id)
-              localStorage.setItem(key, json)
-            }, 500)
-          }
+          invariant(evt.type === 'TextEditor.set-scroll', 'should only receive on-scroll here')
+          clearTimeout(scrollTimer)
+          scrollTimer = setTimeout(() => {
+            // @ts-ignore
+            const json = JSON.stringify({ scrollTop: evt.payload.scrollTop })
+            const key = storageKeyForId(ctx.id)
+            localStorage.setItem(key, json)
+          }, 500)
         })
         return () => {
-          console.log('tear down scroll-listener')
           clearTimeout(scrollTimer)
         }
       },
       /**
-       * Try to read the initial value
+       * Try to read the initial value from storage
        * @return {Promise<import('./text-editor.types').ReadInitialData>}
        */
       readInitial: async (ctx) => {
-        const key = computeKey(ctx.id)
+        const key = storageKeyForId(ctx.id)
         const prev = localStorage.getItem(key)
         if (prev) {
           const json = JSON.parse(prev)
@@ -142,6 +152,6 @@ function errorsFor(value) {
  * @param {string} id
  * @return {string}
  */
-function computeKey(id) {
+function storageKeyForId(id) {
   return 'viewState_text-editor_' + id
 }
