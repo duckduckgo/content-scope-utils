@@ -3,7 +3,80 @@ import { parse } from 'tldts'
 
 /**
  * @typedef {import("./remote-resources/remote-resources.machine").PrivacyConfig} PrivacyConfig
+ * @typedef {import("./transforms.types").PrivacyConfigurationTransform} PrivacyConfigurationTransform
  */
+
+/**
+ * @implements {PrivacyConfigurationTransform}
+ */
+export class ToggleFeatureDomain {
+  static type = /** @type {const} */ ('PrivacyConfig.toggleFeatureDomain')
+  static subject = 'privacy-configuration'
+  static description = 'Toggles a feature for a given domain'
+  description = () => ToggleFeatureDomain.description
+
+  /**
+   * @param {object} params
+   * @param {string} params.feature
+   * @param {string} params.domain
+   */
+  constructor(params) {
+    this.params = params
+  }
+
+  /**
+   * @param {PrivacyConfig} config
+   * @return {PrivacyConfig}
+   */
+  transform(config) {
+    return toggleException(config, this.params.feature, this.params.domain)
+  }
+}
+
+/**
+ * @implements {PrivacyConfigurationTransform}
+ */
+export class ToggleFeature {
+  static type = /** @type {const} */ ('PrivacyConfig.toggleFeature')
+  static subject = 'privacy-configuration'
+  static description = 'Toggles a feature for all domains'
+  description = () => ToggleFeatureDomain.description
+
+  /**
+   * @param {object} params
+   * @param {string} params.feature - the name of the feature
+   */
+  constructor(params) {
+    this.params = params
+  }
+
+  /**
+   * @param {PrivacyConfig} config
+   * @return {PrivacyConfig}
+   */
+  transform(config) {
+    return toggleFeature(config, this.params.feature)
+  }
+}
+
+export const lookup = {
+  [ToggleFeatureDomain.type]: ToggleFeatureDomain,
+  [ToggleFeature.type]: ToggleFeature,
+}
+
+/**
+ * @param {PrivacyConfig} config
+ * @param {import('./transforms.types').Lookup<typeof lookup>} command
+ * @returns {import('./transforms.types').TransformResult<Record<string, any>>}
+ */
+export function handler2(config, command) {
+  if (lookup[command.type]) {
+    // @ts-ignore
+    const instance = new lookup[command.type](command.args)
+    return tryCatch(() => instance.transform(config))
+  }
+  throw new Error('unreachable')
+}
 
 /**
  * @param {PrivacyConfig} config
@@ -12,13 +85,6 @@ import { parse } from 'tldts'
  */
 export function handler(config, command) {
   switch (command.kind) {
-    case 'PrivacyConfig.toggleFeatureDomain': {
-      // toggle a feature + domain exception
-      return tryCatch(() => toggleException(config, command.feature, command.domain))
-    }
-    case 'PrivacyConfig.toggleFeature': {
-      return tryCatch(() => toggleFeature(config, command.feature))
-    }
     case 'PrivacyConfig.toggleUnprotectedDomain': {
       return tryCatch(() => toggleUnprotected(config, command.domain))
     }
@@ -43,9 +109,10 @@ function tryCatch(fn) {
 }
 
 /**
- * @param {Record<string, any>} config
+ * @param {PrivacyConfig} config
  * @param {string} featureName
  * @param {string} domain
+ * @return {PrivacyConfig}
  */
 export function toggleException(config, featureName, domain) {
   // sanity check on the structure
@@ -59,12 +126,14 @@ export function toggleException(config, featureName, domain) {
   } else {
     exceptions.splice(prev, 1)
   }
+  console.log(exceptions)
   return config
 }
 
 /**
- * @param {Record<string, any>} config
+ * @param {PrivacyConfig} config
  * @param {string} featureName
+ * @returns {PrivacyConfig}
  */
 export function toggleFeature(config, featureName) {
   const feature = config.features?.[featureName]

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ToggleList } from './toggle-list'
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { parse } from 'tldts'
-import { handler } from '../../transforms'
+import { handler2 } from '../../transforms'
 
 // @ts-expect-error - debugging;
 window._parse = parse
@@ -45,7 +45,12 @@ export function FeatureToggleListGlobal(props) {
    */
   function toggleFeatureGlobally(featureName) {
     const parsed = JSON.parse(props.model.getValue())
-    const result = handler(parsed, { kind: 'PrivacyConfig.toggleFeature', feature: featureName })
+    const result = handler2(parsed, {
+      type: 'PrivacyConfig.toggleFeature',
+      args: {
+        feature: featureName,
+      },
+    })
     if (result.ok) {
       const asString = JSON.stringify(result.success, null, 4)
       props.model.setValue(asString)
@@ -61,7 +66,13 @@ export function FeatureToggleListGlobal(props) {
    */
   function toggleDomain(featureName, domain) {
     const parsed = JSON.parse(props.model.getValue())
-    const result = handler(parsed, { kind: 'PrivacyConfig.toggleFeatureDomain', feature: featureName, domain })
+    const result = handler2(parsed, {
+      type: 'PrivacyConfig.toggleFeatureDomain',
+      args: {
+        feature: featureName,
+        domain,
+      },
+    })
     if (result.ok) {
       const asString = JSON.stringify(result.success, null, 4)
       props.model.setValue(asString)

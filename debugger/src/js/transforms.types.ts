@@ -5,6 +5,28 @@
  *
  * The actions that can be invoked onto a remote resource
  */
+
+import { PrivacyConfig } from './remote-resources/remote-resources.machine'
+import { ToggleFeature, ToggleFeatureDomain } from './transforms.js'
+export { ToggleFeature, ToggleFeatureDomain }
+
+interface Transform<T> {
+  transform(t: T): T
+}
+
+/**
+ * Implement this
+ */
+export interface PrivacyConfigurationTransform extends Transform<PrivacyConfig> {}
+
+type E2<T> = {
+  [K in keyof T]: {
+    type: K
+    args: T[K] extends (abstract new (...args: any) => any) & { type: string } ? ConstructorParameters<T[K]>[0] : never
+  }
+}
+export type Lookup<T> = E2<T>[keyof E2<T>]
+
 /**
  * Override The current remote url. This is useful
  * for loading a resource that you serve yourself, or for trying a new/beta resource
@@ -39,17 +61,6 @@ export interface ToggleUnprotectedDomain {
   domain: string
 }
 
-export interface ToggleFeatureDomain {
-  kind: 'PrivacyConfig.toggleFeatureDomain'
-  feature: string
-  domain: string
-}
-
-export interface ToggleFeature {
-  kind: 'PrivacyConfig.toggleFeature'
-  feature: string
-}
-
 export interface ToggleAllowlistedTracker {
   kind: 'PrivacyConfig.toggleAllowlistedTrackerUrl'
   trackerUrl: string
@@ -65,8 +76,6 @@ export interface ToggleAllowlistedTrackerDomain {
 // prettier-ignore
 export type PrivacyConfigTransformMethods =
     | ToggleUnprotectedDomain
-    | ToggleFeatureDomain
-    | ToggleFeature
     | ToggleAllowlistedTracker
     | ToggleAllowlistedTrackerDomain
     ;
