@@ -54,6 +54,12 @@ export class DebugToolsPage {
     this.remote = new Remote(this.page, this.mocks, this.editor)
     this.patches = new Patches(this.page, this.editor)
 
+    /** @type {import("../../src/js/global-config").GlobalConfig} */
+    this.globalConfig = {
+      editor: 'monaco',
+      platform: this.build.name,
+    }
+
     this.$ = new (class Selectors {
       revertButton = () => page.getByRole('button', { name: 'Revert' })
       popupErrors = () => page.getByTestId('FloatingErrors')
@@ -109,9 +115,10 @@ export class DebugToolsPage {
    */
   async openPage(urlParams, pathname = '/remoteResources') {
     const url = new URL(this.basePath, this.baseURL)
-    url.searchParams.set('platform', this.build.name)
-    if (this.simpleEditor) {
-      url.searchParams.set('simple', 'true')
+
+    // assign global config elements
+    for (let [key, value] of Object.entries(this.globalConfig)) {
+      url.searchParams.append(key, value)
     }
     url.hash = pathname + '?' + urlParams.toString()
     await this.page.goto(url.href)
@@ -244,7 +251,7 @@ export class DebugToolsPage {
       await this.$.diffEditorModified().waitFor()
     } else if (kind === 'inline') {
       await this.$.inlineEditorButton().click()
-      if (this.simpleEditor) {
+      if (this.globalConfig.editor === 'simple') {
         await this.$.simpleEditor().waitFor()
       } else {
         await this.$.inlineMonacoEditor().waitFor()
@@ -345,7 +352,13 @@ export class DebugToolsPage {
     await this.$.popupErrors().locator(this.$.revertButton()).click()
   }
 
-  async withSimpleEditor() {
-    this.simpleEditor = true
+  /**
+   * @param {Partial<import("../../src/js/global-config.js").GlobalConfig>} globalConfig
+   */
+  async withGlobalConfig(globalConfig) {
+    this.globalConfig = {
+      ...this.globalConfig,
+      ...globalConfig,
+    }
   }
 }

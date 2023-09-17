@@ -61,10 +61,8 @@ export class PlainTextModel {
 }
 
 export const TextModelContext = createContext({
-  /** @type {((params: { content: string; contentType: string }) => TextModel) | null} */
-  createTextModel: null,
-  /** @type {"monaco" | "web"} */
-  editorType: 'web',
+  /** @type {((params: { content: string; contentType: string }) => TextModel)} */
+  createTextModel: /** @type {any} */ (null),
 })
 
 /**

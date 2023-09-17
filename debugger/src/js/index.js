@@ -19,8 +19,10 @@ import { MockImpl } from './mock-transport'
 import { App, AppMachineContext } from './app/components/app'
 import { createHashHistory } from 'history'
 import { TextModelContext } from './models/text-model'
+import { configAwareFactory, GlobalConfig } from './global-config'
 
 const params = new URLSearchParams(window.location.search)
+
 /**
  * xstate debugging - add the `?inspect` param
  */
@@ -136,9 +138,11 @@ const withContext = appMachine.withContext({
 })
 
 ;(async () => {
-  const useRichEditor = !params.has('simple')
-  const model = useRichEditor ? 'monaco-opt-in.js' : 'text-model.js'
-  const { createTextModel } = await import(`./models/${model}`)
+  const globalConfig = GlobalConfig.parse(Object.fromEntries(params))
+  const factory = configAwareFactory(globalConfig)
+
+  // factory for text models
+  const createTextModelFactory = await factory.createTextModelFactory()
 
   /**
    * Now try to render
@@ -147,12 +151,12 @@ const withContext = appMachine.withContext({
   const root = createRoot(appNode)
 
   root.render(
-    <TextModelContext.Provider value={{ createTextModel, editorType: useRichEditor ? 'monaco' : 'web' }}>
-      <GlobalContext.Provider value={{ messages, history }}>
+    <GlobalContext.Provider value={{ messages, history, globalConfig }}>
+      <TextModelContext.Provider value={{ createTextModel: createTextModelFactory }}>
         <AppMachineContext.Provider machine={withContext}>
           <App />
         </AppMachineContext.Provider>
-      </GlobalContext.Provider>
-    </TextModelContext.Provider>,
+      </TextModelContext.Provider>
+    </GlobalContext.Provider>,
   )
 })()

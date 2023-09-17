@@ -25,6 +25,7 @@ import {
 } from '../../schema/__generated__/schema.parsers.mjs'
 import { createContext } from 'react'
 import * as z from 'zod'
+import { GlobalConfig } from './global-config.js'
 
 /**
  * @typedef {import("../../schema/__generated__/schema.types").RemoteResource} RemoteResource
@@ -265,4 +266,6 @@ export const GlobalContext = createContext({
   messages: null,
   /** @type {import("history").History | null} */
   history: null,
+  /** @type {import("./global-config.js").GlobalConfig} */
+  globalConfig: GlobalConfig.parse({})
 })

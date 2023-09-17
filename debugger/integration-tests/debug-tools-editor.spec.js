@@ -15,7 +15,7 @@ test.describe('editor', () => {
     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
     await dt.enabled()
     await dt.withTestResources()
-    await dt.withSimpleEditor()
+    await dt.withGlobalConfig({ editor: 'simple' })
     await dt.openRemoteResourceEditor()
     await dt.switchesTo('inline')
     await dt.editor.setsEditorValueTo('shane')
@@ -26,7 +26,7 @@ test.describe('editor', () => {
     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
     await dt.enabled()
     await dt.withTestResources()
-    await dt.withSimpleEditor()
+    await dt.withGlobalConfig({ editor: 'simple' })
     await dt.openRemoteResourceEditor()
     await dt.switchesTo('inline')
     await dt.editor.setsEditorValueTo('[]') // valid json

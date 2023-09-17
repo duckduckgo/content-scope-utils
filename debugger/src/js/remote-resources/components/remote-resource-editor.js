@@ -7,9 +7,9 @@ import { SubNav } from '../../app/components/feature-nav'
 import { lazy, Suspense, useContext, useRef } from 'react'
 import { Button } from '../../components/buttons'
 import { Sidebar } from './sidebar'
-import { TextModelContext } from '../../models/text-model'
 import { DiffViewer } from '../../components/diff-viewer'
 import { TextEditor } from './text-editor'
+import { GlobalContext } from '../../DebugToolsMessages.mjs'
 
 const MonacoEditor = lazy(() => import('../../components/monaco-editor.js'))
 const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))
@@ -88,11 +88,11 @@ function Footer(props) {
   const [state, send] = RemoteResourcesContext.useActor()
 
   /** @type {(kind: EditorKind) => void} */
-  const setEditorKind = (kind) => send({ type: 'set editor kind', payload: kind })
+  // const setEditorKind = (kind) => send({ type: 'set editor kind', payload: kind })
   const revertEdited = () => props.model.setValue(props.resource.current.contents)
 
   // get the current editor kind + all available ones
-  const { editorKind, values } = useEditorKinds()
+  // const { editorKind, values } = useEditorKinds()
 
   function saveDebugContent() {
     send({
@@ -157,7 +157,7 @@ export function useEditorKinds() {
  */
 function EditorSelection(props) {
   const [state, send] = RemoteResourcesContext.useActor()
-  const { editorType } = useContext(TextModelContext)
+  const { globalConfig } = useContext(GlobalContext)
   const { editorKind } = useEditorKinds()
   const originalContents = props.resource.current.contents
 
@@ -187,7 +187,7 @@ function EditorSelection(props) {
       />
     ),
     diff: () => {
-      if (editorType === 'web') {
+      if (globalConfig.editor === 'simple') {
         return (
           <DiffViewer
             before={originalContents}
@@ -212,7 +212,7 @@ function EditorSelection(props) {
       )
     },
     inline: () => {
-      if (editorType === 'web') {
+      if (globalConfig.editor === 'simple') {
         return (
           <TextEditor
             defaultValue={props.model.getValue()}
@@ -237,7 +237,7 @@ function EditorSelection(props) {
       )
     },
     patches: () => {
-      if (editorType === 'web') return <p>Cannot show rich editor</p>
+      if (globalConfig.editor === 'simple') return <p>Cannot show rich editor</p>
       return (
         <Suspense>
           <PatchesEditor

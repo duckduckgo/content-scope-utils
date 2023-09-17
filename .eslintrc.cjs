@@ -5,6 +5,7 @@ module.exports = {
   root: true,
   globals: {
     it: true,
+    Proxy: true,
   },
   env: {
     browser: true,

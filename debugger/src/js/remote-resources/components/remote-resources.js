@@ -58,7 +58,7 @@ export function RemoteResources() {
       model.setValue(value)
     }
     return model
-  }, [lastKnownValue])
+  }, [lastKnownValue, createTextModel])
 
   useEffect(() => {
     setKey((prev) => prev + 1)
