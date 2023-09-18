@@ -19,13 +19,23 @@ interface Transform<T> {
  */
 export interface PrivacyConfigurationTransform extends Transform<PrivacyConfig> {}
 
-type E2<T> = {
+interface StaticTransformProps {
+  type: string
+  description: string
+  subject: string
+}
+
+type LookupMap<T> = {
   [K in keyof T]: {
     type: K
-    args: T[K] extends (abstract new (...args: any) => any) & { type: string } ? ConstructorParameters<T[K]>[0] : never
+    args: T[K] extends { props: StaticTransformProps }
+      ? T[K] extends abstract new (...args: any) => any
+        ? ConstructorParameters<T[K]>[0]
+        : never
+      : `StaticTransformProps incorrect, check: ${K extends string ? K : never}`
   }
 }
-export type Lookup<T> = E2<T>[keyof E2<T>]
+export type Lookup<T> = LookupMap<T>[keyof LookupMap<T>]
 
 /**
  * Override The current remote url. This is useful

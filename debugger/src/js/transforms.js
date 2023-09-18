@@ -4,16 +4,19 @@ import { parse } from 'tldts'
 /**
  * @typedef {import("./remote-resources/remote-resources.machine").PrivacyConfig} PrivacyConfig
  * @typedef {import("./transforms.types").PrivacyConfigurationTransform} PrivacyConfigurationTransform
+ * @typedef {string} FeatureName
  */
 
 /**
  * @implements {PrivacyConfigurationTransform}
  */
 export class ToggleFeatureDomain {
-  static type = /** @type {const} */ ('PrivacyConfig.toggleFeatureDomain')
-  static subject = 'privacy-configuration'
-  static description = 'Toggles a feature for a given domain'
-  description = () => ToggleFeatureDomain.description
+  static props = /** @type {const} */ ({
+    type: 'PrivacyConfig.toggleFeatureDomain',
+    subject: 'privacy-configuration',
+    description: 'Toggles a feature for a given domain',
+  })
+  description = () => ToggleFeatureDomain.props.description
 
   /**
    * @param {object} params
@@ -21,7 +24,8 @@ export class ToggleFeatureDomain {
    * @param {string} params.domain
    */
   constructor(params) {
-    this.params = params
+    this.feature = params.feature
+    this.domain = params.domain
   }
 
   /**
@@ -29,7 +33,7 @@ export class ToggleFeatureDomain {
    * @return {PrivacyConfig}
    */
   transform(config) {
-    return toggleException(config, this.params.feature, this.params.domain)
+    return toggleException(config, this.feature, this.domain)
   }
 }
 
@@ -37,17 +41,20 @@ export class ToggleFeatureDomain {
  * @implements {PrivacyConfigurationTransform}
  */
 export class ToggleFeature {
-  static type = /** @type {const} */ ('PrivacyConfig.toggleFeature')
-  static subject = 'privacy-configuration'
-  static description = 'Toggles a feature for all domains'
-  description = () => ToggleFeatureDomain.description
+  static props = /** @type {const} */ ({
+    type: 'PrivacyConfig.toggleFeature',
+    subject: 'privacy-configuration',
+    description: 'Toggles a feature for all domains',
+  })
+
+  description = () => ToggleFeature.props.description
 
   /**
    * @param {object} params
    * @param {string} params.feature - the name of the feature
    */
   constructor(params) {
-    this.params = params
+    this.feature = params.feature
   }
 
   /**
@@ -55,13 +62,13 @@ export class ToggleFeature {
    * @return {PrivacyConfig}
    */
   transform(config) {
-    return toggleFeature(config, this.params.feature)
+    return toggleFeature(config, this.feature)
   }
 }
 
 export const lookup = {
-  [ToggleFeatureDomain.type]: ToggleFeatureDomain,
-  [ToggleFeature.type]: ToggleFeature,
+  [ToggleFeatureDomain.props.type]: ToggleFeatureDomain,
+  [ToggleFeature.props.type]: ToggleFeature,
 }
 
 /**
