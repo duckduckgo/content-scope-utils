@@ -16,7 +16,6 @@
  */
 
 import {
-  detectedRequestSchema,
   getFeaturesResponseSchema,
   getRemoteResourceParamsSchema,
   getTabsResponseSchema, getTrackersParamsSchema, getTrackersResponseSchema,
@@ -24,8 +23,7 @@ import {
   updateResourceParamsSchema
 } from '../../schema/__generated__/schema.parsers.mjs'
 import { createContext } from 'react'
-import * as z from 'zod'
-import { GlobalConfig } from './global-config.js'
+import { GlobalConfig } from './global-config.mjs'
 
 /**
  * @typedef {import("../../schema/__generated__/schema.types").RemoteResource} RemoteResource
@@ -266,6 +264,6 @@ export const GlobalContext = createContext({
   messages: null,
   /** @type {import("history").History | null} */
   history: null,
-  /** @type {import("./global-config.js").GlobalConfig} */
+  /** @type {import("./global-config.mjs").GlobalConfig} */
   globalConfig: GlobalConfig.parse({})
 })

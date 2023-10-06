@@ -54,7 +54,7 @@ export class DebugToolsPage {
     this.remote = new Remote(this.page, this.mocks, this.editor)
     this.patches = new Patches(this.page, this.editor)
 
-    /** @type {import("../../src/js/global-config").GlobalConfig} */
+    /** @type {import("../../src/js/global-config.mjs").GlobalConfig} */
     this.globalConfig = {
       editor: 'monaco',
       platform: this.build.name,
@@ -353,7 +353,7 @@ export class DebugToolsPage {
   }
 
   /**
-   * @param {Partial<import("../../src/js/global-config.js").GlobalConfig>} globalConfig
+   * @param {Partial<import("../../src/js/global-config.mjs").GlobalConfig>} globalConfig
    */
   async withGlobalConfig(globalConfig) {
     this.globalConfig = {

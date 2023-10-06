@@ -19,7 +19,7 @@ import { MockImpl } from './mock-transport'
 import { App, AppMachineContext } from './app/components/app'
 import { createHashHistory } from 'history'
 import { TextModelContext } from './models/text-model'
-import { configAwareFactory, GlobalConfig } from './global-config'
+import { configAwareFactory, GlobalConfig } from './global-config.mjs'
 
 const params = new URLSearchParams(window.location.search)
 
