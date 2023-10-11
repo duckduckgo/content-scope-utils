@@ -3,7 +3,7 @@ import { DebugToolsPage } from './page-objects/debug-tools.js'
 
 test.describe('debug tools privacy config', () => {
   test.describe('transforms', () => {
-    test('updates the hash', async ({ page, baseURL }, workerInfo) => {
+    test('updates the hash and version', async ({ page, baseURL }, workerInfo) => {
       const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       const initial = {
         unprotectedTemporary: [],
@@ -45,6 +45,7 @@ test.describe('debug tools privacy config', () => {
       await dt.editor.clicksSave()
       const saved = await dt.savedWithValue()
       dt.features.featureHasUpdatedHash(saved.source.debugTools.content, 'abc')
+      dt.features.configHasUpdatedVersion(saved.source.debugTools.content)
     })
   })
 })

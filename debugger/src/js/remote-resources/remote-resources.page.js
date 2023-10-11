@@ -31,7 +31,16 @@ export function RemoteResourcesPage() {
 function RemoteResourcesLoader() {
   const [state] = RemoteResourcesContext.useActor()
   if (state.matches(['invalid resource'])) {
-    return <div className="main row">Error loading that resource</div>
+    return (
+      <>
+        <div className="main px-4">
+          <p className="row">Error loading that resource</p>
+          <pre className="row">
+            <code>{JSON.stringify(state.context.error)}</code>
+          </pre>
+        </div>
+      </>
+    )
   }
   if (state.matches(['showing editor'])) {
     return <RemoteResources />

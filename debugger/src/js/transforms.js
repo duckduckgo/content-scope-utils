@@ -279,10 +279,14 @@ export function isAllowlisted(config, trackerUrl, domain) {
 }
 
 /**
- * @param {import("fast-json-patch").Operation[]} patches
  * @param {PrivacyConfig} config
  * @returns {Promise<PrivacyConfig>}
  */
+export async function updateVersion(config) {
+  config.version = Date.now()
+  return config
+}
+
 export async function updateFeatureHash(patches, config) {
   const changedFeatures = new Set()
 

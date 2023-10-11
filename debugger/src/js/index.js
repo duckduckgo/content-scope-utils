@@ -20,6 +20,7 @@ import { App, AppMachineContext } from './app/components/app'
 import { createHashHistory } from 'history'
 import { TextModelContext } from './models/text-model'
 import { configAwareFactory, GlobalConfig } from './global-config.mjs'
+import { HttpImpl } from './http-transport'
 
 const params = new URLSearchParams(window.location.search)
 
@@ -46,6 +47,7 @@ const messagingInstance = createSpecialPagesMessaging({
   env: import.meta.env,
   featureName: 'debugToolsPage',
   mockImpl: () => new MockImpl(),
+  httpImpl: (ctx) => new HttpImpl(ctx),
 })
 
 function createDebugProxy(instance) {

@@ -67,6 +67,11 @@ export class Features {
     expect(json.features[featureName].hash).not.toBe('abc')
   }
 
+  configHasUpdatedVersion(contents) {
+    const json = typeof contents === 'string' ? JSON.parse(contents) : contents
+    expect(json.version).toBeGreaterThan(0)
+  }
+
   /**
    * @param {object} params
    * @param {string} params.feature

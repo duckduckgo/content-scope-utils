@@ -3,7 +3,7 @@ import { remoteResourceSchema } from '../../../schema/__generated__/schema.parse
 import * as z from 'zod'
 import { DebugToolsMessages } from '../DebugToolsMessages.mjs'
 import invariant from 'tiny-invariant'
-import { updateFeatureHash } from '../transforms'
+import { updateFeatureHash, updateVersion } from '../transforms'
 import jsonpatch from 'fast-json-patch'
 
 /**
@@ -49,7 +49,7 @@ const _remoteResourcesMachine = createMachine({
         onError: [
           {
             target: 'invalid resource',
-            actions: ['assignError'],
+            actions: ['serviceError'],
           },
         ],
       },
@@ -285,7 +285,8 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         }
 
         const patches = jsonpatch.compare(original, nextJson)
-        const nextConfig = await updateFeatureHash(patches, nextJson)
+        let nextConfig = await updateFeatureHash(patches, nextJson)
+        nextConfig = await updateVersion(nextConfig)
         content = JSON.stringify(nextConfig)
       }
 
@@ -523,6 +524,7 @@ export const CurrentResource = z.object({
 })
 export const PrivacyConfig = z.object({
   unprotectedTemporary: z.array(z.any()),
+  version: z.number().default(0),
   features: z.record(
     z.object({
       settings: z.record(z.any()).optional(),

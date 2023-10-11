@@ -9,9 +9,10 @@ import {
 /**
  * @param {object} opts
  * @param {ImportMeta["env"]} opts.env
- * @param {ImportMeta["injectName"]} opts.injectName
+ * @param {ImportMeta["injectName"] | 'http'} opts.injectName
  * @param {string} opts.featureName
  * @param {() => import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").MessagingTransport} [opts.mockImpl]
+ * @param {(ctx: MessagingContext) => import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").MessagingTransport} [opts.httpImpl]
  */
 export function createSpecialPagesMessaging(opts) {
   const messageContext = new MessagingContext({
@@ -40,6 +41,9 @@ export function createSpecialPagesMessaging(opts) {
     return new Messaging(messageContext, opts)
   } else if (opts.injectName === 'integration' && opts.mockImpl) {
     const config = new TestTransportConfig(opts.mockImpl())
+    return new Messaging(messageContext, config)
+  } else if (opts.injectName === 'http' && opts.httpImpl) {
+    const config = new TestTransportConfig(opts.httpImpl(messageContext))
     return new Messaging(messageContext, config)
   }
   throw new Error('unreachable - platform not supported')
