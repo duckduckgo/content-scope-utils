@@ -3,9 +3,15 @@
 DuckDuckGo Content Scope Utils is distributed under the Apache 2.0
 [License](LICENSE.md).
 
-This is a library of JavaScript modules that are used by DuckDuckGo's apps and extensions.
+This is a library of JavaScript modules/tools that are used by DuckDuckGo's apps and extensions.
 
-We currently support the following:
+## Debugger
 
-- [Messaging](modules/Messaging)
-  - [Webkit Messaging](modules/Webkit_Messaging)
+To run the debugger panel:
+
+```bash
+npm start
+```
+
+Then, in a supported browser like macOS, open the page like
+- http://localhost:3210/?platform=apple#/remoteResources
