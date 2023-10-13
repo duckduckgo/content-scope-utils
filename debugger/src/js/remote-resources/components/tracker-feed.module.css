@@ -26,11 +26,15 @@
 .urlCell {
     position: relative;
     overflow: auto;
-    white-space: nowrap
+    white-space: nowrap;
+    padding-top: .2rem;
+    padding-bottom: .2rem;
 }
 
 .trackerUrl {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: var(--ddg-ui-gutter)
 }
 .pageUrl {
     display: block;

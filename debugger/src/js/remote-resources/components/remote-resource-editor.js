@@ -10,6 +10,7 @@ import { Sidebar } from './sidebar'
 import { DiffViewer } from '../../components/diff-viewer'
 import { TextEditor } from './text-editor'
 import { GlobalContext } from '../../DebugToolsMessages.mjs'
+import { TrackersEditor } from '../../components/trackers-editor'
 
 const MonacoEditor = lazy(() => import('../../components/monaco-editor.js'))
 const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))
@@ -227,6 +228,19 @@ function EditorSelection(props) {
             pending={savingChanges}
             id={props.resource.id}
             onErrors={onErrors}
+          />
+        </Suspense>
+      )
+    },
+    trackers: () => {
+      return (
+        <Suspense>
+          <TrackersEditor
+            model={props.model}
+            invalid={contentIsInvalid}
+            edited={hasEdits}
+            pending={savingChanges}
+            resource={props.resource}
           />
         </Suspense>
       )

@@ -21,6 +21,9 @@ export const trackerFeedMachine = createMachine(
           target: 'waiting for domain selection',
         },
       ],
+      'add match-all entries': { actions: ['assignManualEntries'] },
+      'reset manual entries': { actions: ['clearManualEntries'] },
+      'delete manual entries': { actions: ['deleteManualEntries'] },
     },
     states: {
       idle: {
@@ -68,6 +71,25 @@ export const trackerFeedMachine = createMachine(
       },
     },
     actions: {
+      assignManualEntries: assign({
+        manualEntries: (ctx, evt) => {
+          invariant(evt.type === 'add match-all entries', "evt.type === 'add match-all entries'")
+          const inout = ctx.manualEntries.concat(evt.payload).map((x) => x.requestUrl)
+          return [...new Set(inout)].map((x) => {
+            return { requestUrl: x }
+          })
+        },
+      }),
+      clearManualEntries: assign({
+        manualEntries: [],
+      }),
+      deleteManualEntries: assign({
+        manualEntries: (ctx, evt) => {
+          invariant(evt.type === 'delete manual entries', "evt.type === 'add match-all entries'")
+          const deleteList = evt.payload.map((x) => x.requestUrl)
+          return ctx.manualEntries.filter((entry) => !deleteList.includes(entry.requestUrl))
+        },
+      }),
       clearSubscription: (ctx) => {
         ctx.messages.unsubscribeToTrackers()
       },

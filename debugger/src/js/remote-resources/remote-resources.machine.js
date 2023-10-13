@@ -13,7 +13,7 @@ import jsonpatch from 'fast-json-patch'
 /** @type {Record<string, {editorKinds: EditorKind[]}>} */
 const resourceCapabilities = {
   'privacy-configuration': {
-    editorKinds: ['toggles', 'inline', 'diff', 'patches'],
+    editorKinds: ['toggles', 'inline', 'diff', 'trackers', 'patches'],
   },
   default: {
     editorKinds: ['inline', 'diff'],
@@ -119,6 +119,33 @@ const _remoteResourcesMachine = createMachine({
             },
           },
         },
+        originalDiff: {
+          initial: 'idle',
+          id: 'originalDiff',
+          on: {
+            'show original diff': {
+              actions: ['pushToRoute'],
+            },
+            'close original diff': {
+              actions: ['pushToRoute'],
+            },
+          },
+          states: {
+            idle: {
+              always: [{ cond: 'hasOriginalDiffParam', target: 'fetching' }],
+            },
+            fetching: {
+              invoke: {
+                src: 'fetchOriginal',
+                id: 'fetchOriginal',
+                onDone: { actions: 'assignOriginalResource', target: 'showing' },
+              },
+            },
+            showing: {
+              on: { nav_resource: 'idle' },
+            },
+          },
+        },
         editing: {
           initial: 'editor has original content',
           on: {
@@ -213,6 +240,9 @@ const _remoteResourcesMachine = createMachine({
 
 export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
   services: {
+    fetchOriginal: async (ctx) => {
+      return ctx.messages.getRemoteResource({ id: 'privacy-configuration', original: true })
+    },
     'nav-listener': (ctx) => (send) => {
       const sub = ctx.parent.subscribe((evt) => {
         if (evt.event.type === 'NAV_INTERNAL') {
@@ -310,6 +340,15 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
     }),
     removeContentMarkers: assign({
       contentErrors: () => [],
+    }),
+    assignOriginalResource: assign({
+      originalResources: (ctx, evt) => {
+        invariant(evt.type === 'done.invoke.fetchOriginal', 'must be done.invoke.fetchOriginal')
+        return {
+          ...ctx.originalResources,
+          [evt.data.id]: evt.data,
+        }
+      },
     }),
     assignTabs: assign({
       tabs: (ctx, evt) => {
@@ -476,9 +515,13 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
       if (evt.type === 'set editor kind') {
         next.set('editorKind', evt.payload)
       } else if (evt.type === 'set current domain') {
-        next.set('currentDomain', evt.payload) // setting the toggle kind
+        next.set('currentDomain', evt.payload)
       } else if (evt.type === 'clear current domain') {
         next.delete('currentDomain')
+      } else if (evt.type === 'show original diff') {
+        next.set('originalDiff', 'true')
+      } else if (evt.type === 'close original diff') {
+        next.delete('originalDiff')
       }
 
       ctx.parent.state.context.history.push({
@@ -500,6 +543,11 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
       if (ctx.contentErrors && ctx.contentErrors?.length > 0) return false
       return true
     },
+    hasOriginalDiffParam: (ctx) => {
+      const parentState = ctx.parent?.state?.context
+      const search = parentState.search
+      return Boolean(search?.get('originalDiff'))
+    },
   },
 })
 
@@ -516,7 +564,7 @@ async function minDuration(cb, minTime = 500) {
   throw new Error('unreachable')
 }
 
-export const EditorKind = z.enum(['inline', 'diff', 'toggles', 'patches'])
+export const EditorKind = z.enum(['inline', 'diff', 'toggles', 'patches', 'trackers'])
 export const CurrentResource = z.object({
   id: z.string(),
   lastValue: z.string(),
@@ -534,9 +582,23 @@ export const PrivacyConfig = z.object({
     }),
   ),
 })
+
+export const AllowlistedTrackers = z.record(
+  z.object({
+    rules: z.array(
+      z.object({
+        rule: z.string(),
+        domains: z.array(z.string()),
+        reason: z.string().optional(),
+      }),
+    ),
+  }),
+)
+
 /** @typedef {import("zod").infer<typeof EditorKind>} EditorKind */
 /** @typedef {import("zod").infer<typeof CurrentResource>} CurrentResource */
 /** @typedef {import("zod").infer<typeof PrivacyConfig>} PrivacyConfig */
+/** @typedef {import("zod").infer<typeof AllowlistedTrackers>} AllowlistedTrackers */
 
 /**
  * @param {unknown} input

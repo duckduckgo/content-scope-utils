@@ -8,6 +8,8 @@ import { RemoteResourceMethods } from '../transforms.types'
 export type RemoteResourcesEvents =
   | { type: 'set editor kind'; payload: EditorKind }
   | { type: 'set current domain'; payload: string }
+  | { type: 'show original diff' }
+  | { type: 'close original diff' }
   | { type: 'clear current domain' }
   | { type: 'error' }
   | { type: 'nav_resource' }
@@ -25,6 +27,7 @@ export type RemoteResourcesEvents =
   | { type: 'content was edited' }
   | { type: 'content is invalid'; errors: ContentError[] }
   | { type: 'content is valid' }
+  | { type: 'done.invoke.fetchOriginal'; data: RemoteResource }
 
 export interface ContentError {
   message: string
@@ -38,6 +41,7 @@ export interface RemoteResourcesCtx {
   currentDomain?: string
   resources?: RemoteResource[]
   currentResource?: CurrentResource
+  originalResources: Record<string, RemoteResource>
   contentErrors?: ContentError[]
   tabs: TabWithHostname[]
   // children?: ActorRef<any>[]

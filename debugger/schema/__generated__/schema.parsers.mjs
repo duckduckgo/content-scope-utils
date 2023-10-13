@@ -12,7 +12,8 @@ export const adClickAttributionReasonSchema = z.literal("adClickAttribution");
 export const otherThirdPartyRequestReasonSchema = z.literal("otherThirdPartyRequest");
 
 export const getRemoteResourceParamsSchema = z.object({
-    id: z.string()
+    id: z.string(),
+    original: z.boolean().optional()
 });
 
 export const getTrackersParamsSchema = z.object({

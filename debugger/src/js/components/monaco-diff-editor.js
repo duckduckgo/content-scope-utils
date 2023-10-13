@@ -18,7 +18,7 @@ import { useMonacoErrors } from '../models/monaco-opt-in'
  * @param {boolean} props.edited
  * @param {boolean} props.invalid
  * @param {string} props.id
- * @param {any} props.additionalButtons
+ * @param {any} [props.additionalButtons]
  * @param {(errors: ContentError[]) => void} props.onErrors
  */
 export function MonacoDiffEditor(props) {

@@ -5,6 +5,7 @@ import { URLEditor } from '../../components/url-editor'
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { useEditorKinds } from './remote-resource-editor'
 import { usePatches } from '../patches-machine.react'
+import { OriginalDiff } from './original-diff'
 
 /**
  * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -136,6 +137,7 @@ export function RemoteResourceState(props) {
           />
         </div>
       )}
+      <OriginalDiff resource={props.resource} model={props.model} />
       <Override resource={props.resource} model={props.model} />
     </div>
   )
@@ -155,6 +157,7 @@ function Override(props) {
 
   // events
   const showDiff = () => send({ type: 'set editor kind', payload: 'diff' })
+  const showDiffWithOriginal = () => send({ type: 'show original diff' })
   const revertEdited = () => props.model.setValue(props.resource.current.contents)
 
   /** @type {(url: string) => void} */
@@ -193,6 +196,9 @@ function Override(props) {
             <MicroButton className="ml-3.5" onClick={() => setUrl(props.resource.url)}>
               {savingRemote ? 'removing...' : 'remove ❌'}
             </MicroButton>
+            <MicroButton className="ml-3.5" onClick={showDiffWithOriginal}>
+              Show Diff with Original
+            </MicroButton>
           </DD>
         </InlineDL>
         <InlineDL>
@@ -218,6 +224,9 @@ function Override(props) {
           {date(source.debugTools.modifiedAt)}
           <MicroButton className="ml-3.5" onClick={() => setUrl(props.resource.url)}>
             {savingRemote ? 'removing...' : 'remove ❌'}
+          </MicroButton>
+          <MicroButton className="ml-3.5" onClick={showDiffWithOriginal}>
+            Show Diff with Original
           </MicroButton>
           <PatchCopyButton />
         </DD>

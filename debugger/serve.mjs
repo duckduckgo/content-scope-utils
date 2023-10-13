@@ -98,17 +98,40 @@ class HttpBackend {
     async getRemoteResource(params) {
         if (!(params.id in this.remoteResourceRefs)) return { error: { message: `resource not supported ${params.id}` } }
 
-        // use stored if available...
-        if (this.remoteResources[params.id]) return { value: this.remoteResources[params.id] }
+        // just return the value, don't store it
+        if (params.original) {
+            return await this._fetchRemote(params);
+        }
 
-        // otherwise, get and store
-        const url = this.remoteResourceRefs[params.id].url;
+        // use stored if available...
+        if (this.remoteResources[params.id]) {
+            return { value: this.remoteResources[params.id] }
+        }
+
+        // now fetch the asset
+        const next = await this._fetchRemote(params);
+
+        if ('value' in next) {
+            this.remoteResources[params.id] = next.value;
+            return next;
+        }
+
+        return { error: { message: next.error.message } }
+    }
+
+    /**
+     * @param {GetRemoteResourceParams} params
+     * @return {Promise<{value: RemoteResource} | { error: {message:  string} }>}
+     */
+    async _fetchRemote(params) {
+        const ref = this.remoteResourceRefs[params.id];
+        const url = ref.url;
         const content = await fetch(url).then(r => r.text());
         const now = new Date()
         const formattedDate = now.toISOString()
 
-        this.remoteResources[params.id] = {
-            ...this.remoteResourceRefs[params.id],
+        const resource = {
+            ...ref,
             current: {
                 source: {
                     remote: { url: url, fetchedAt: formattedDate }
@@ -117,7 +140,7 @@ class HttpBackend {
                 contents: content
             }
         }
-        return this.getRemoteResource(params)
+        return { value: resource }
     }
 
     /**
@@ -169,7 +192,7 @@ const http = new HttpBackend({
     remoteResourceRefs: {
         'privacy-configuration': {
             id: 'privacy-configuration',
-            url: 'https://staticcdn.duckduckgo.com/trackerblocking/config/v4/android-config.json',
+            url: 'https://staticcdn.duckduckgo.com/trackerblocking/config/v3/android-config.json',
             name: 'Privacy Config'
         },
     }
@@ -196,6 +219,7 @@ router.post('/specialPages/debugToolsPage', async function(req, res) {
 })
 
 router.get('/rr/:id', async function(req, res) {
+    console.log(`FETCH [get] /rr/${req.params.id}`)
     const v = await http.getRemoteResource({ id: req.params.id })
     if ('value' in v) {
         const parsed = JSON.parse(v.value.current.contents);

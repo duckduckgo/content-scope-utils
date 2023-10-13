@@ -21,7 +21,7 @@
     "test-int": "npm run test",
     "serve": "http-server -c-1 --port 3210",
     "watch": "chokidar 'src' 'schema' 'editor' -i schema/__generated__ -c 'NODE_ENV=development npm run build.dev' --initial",
-    "browser-sync": "browser-sync ../"
+    "browser-sync": "browser-sync dist"
   },
   "keywords": [],
   "author": "",

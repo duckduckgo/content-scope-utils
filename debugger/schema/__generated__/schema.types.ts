@@ -77,6 +77,7 @@ export interface UserScript {
  */
 export interface GetRemoteResourceParams {
   id: string;
+  original?: boolean;
 }
 export interface UpdateResourceParams {
   id: string;

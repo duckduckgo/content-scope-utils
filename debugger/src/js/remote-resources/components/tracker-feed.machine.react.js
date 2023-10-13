@@ -22,6 +22,7 @@ export function TrackerFeedProvider(props) {
           messages,
           domain: null,
           requests: [],
+          manualEntries: [],
         })
       }
     >

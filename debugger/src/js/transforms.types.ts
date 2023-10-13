@@ -71,16 +71,21 @@ export interface ToggleUnprotectedDomain {
   domain: string
 }
 
+// prettier-ignore
+export type ApplyTarget =
+  | { domain: string }
+  | { all: true }
+
 export interface ToggleAllowlistedTracker {
   kind: 'PrivacyConfig.toggleAllowlistedTrackerUrl'
   trackerUrl: string
-  domains: string[]
+  applyTo: ApplyTarget[]
 }
 
 export interface ToggleAllowlistedTrackerDomain {
   kind: 'PrivacyConfig.toggleAllowlistedTrackerDomain'
   trackerUrl: string
-  domains: string[]
+  applyTo: ApplyTarget[]
 }
 
 // prettier-ignore

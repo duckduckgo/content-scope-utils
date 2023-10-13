@@ -7,6 +7,9 @@
   "properties": {
     "id": {
       "type": "string"
+    },
+    "original": {
+      "type": "boolean"
     }
   },
   "required": ["id"]

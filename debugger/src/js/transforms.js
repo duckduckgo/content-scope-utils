@@ -3,7 +3,9 @@ import { parse } from 'tldts'
 
 /**
  * @typedef {import("./remote-resources/remote-resources.machine").PrivacyConfig} PrivacyConfig
+ * @typedef {import("./remote-resources/remote-resources.machine").AllowlistedTrackers} AllowlistedTrackers
  * @typedef {import("./transforms.types").PrivacyConfigurationTransform} PrivacyConfigurationTransform
+ * @typedef {import('./transforms.types').ApplyTarget} ApplyTarget
  * @typedef {string} FeatureName
  */
 
@@ -96,10 +98,18 @@ export function handler(config, command) {
       return tryCatch(() => toggleUnprotected(config, command.domain))
     }
     case 'PrivacyConfig.toggleAllowlistedTrackerUrl': {
-      return tryCatch(() => toggleAllowlistedTrackerUrl(config, command.trackerUrl, command.domains))
+      const allowList = config.features?.trackerAllowlist?.settings?.allowlistedTrackers
+      return tryCatch(() => {
+        toggleAllowlistedTrackerUrl(allowList, command.trackerUrl, command.applyTo, { includePath: true })
+        return config
+      })
     }
     case 'PrivacyConfig.toggleAllowlistedTrackerDomain': {
-      return tryCatch(() => toggleAllowlistedTrackerUrl(config, command.trackerUrl, command.domains, false))
+      const allowList = config.features?.trackerAllowlist?.settings?.allowlistedTrackers
+      return tryCatch(() => {
+        toggleAllowlistedTrackerUrl(allowList, command.trackerUrl, command.applyTo, { includePath: false })
+        return config
+      })
     }
   }
   return { error: { message: 'command not handled' }, ok: false }
@@ -133,7 +143,6 @@ export function toggleException(config, featureName, domain) {
   } else {
     exceptions.splice(prev, 1)
   }
-  console.log(exceptions)
   return config
 }
 
@@ -165,22 +174,31 @@ export function toggleUnprotected(config, domain) {
 }
 
 /**
- * @param {PrivacyConfig} config
+ * @param {AllowlistedTrackers} allowList
  * @param {string} trackerUrl
- * @param {string[]} domains
- * @returns {PrivacyConfig}
+ * @param {ApplyTarget[]} applyTargets
+ * @param {{includePath: boolean}} opts
+ * @returns {AllowlistedTrackers}
  */
-export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains, includePath = true) {
-  const allowList = config.features?.trackerAllowlist?.settings?.allowlistedTrackers
+export function toggleAllowlistedTrackerUrl(allowList, trackerUrl, applyTargets, opts) {
   invariant(allowList, 'allowlistedTrackers must be present on setttings of trackerAllowlist')
   const parsed = parse(trackerUrl)
-  const url = new URL(trackerUrl)
+  let url
+  try {
+    url = new URL(trackerUrl)
+  } catch (e) {
+    if (parsed.hostname) {
+      url = new URL('https://' + parsed.hostname)
+    } else {
+      throw new Error('invalid URL input')
+    }
+  }
   invariant(parsed.domain, 'must have domain')
   allowList[parsed.domain] ??= { rules: [] }
 
   // format is like example.com/a/b.js
   let nextRule = `${url.hostname}`
-  if (includePath) {
+  if (opts.includePath) {
     nextRule += url.pathname
   }
 
@@ -188,19 +206,21 @@ export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains, include
   const matchingRule = allowList[parsed.domain].rules.find((x) => x.rule === nextRule)
 
   if (matchingRule) {
+    /** @type {string[]} */
     const addOps = []
+    /** @type {string[]} */
     const removeOps = []
-    for (let incomingDomain of domains) {
-      if (incomingDomain === '<all>' && matchingRule.domains.includes('<all>')) {
+    for (let applyTarget of applyTargets) {
+      if ('all' in applyTarget && matchingRule.domains.includes('<all>')) {
         removeOps.push('<all>')
-      } else {
-        const parsed = parse(incomingDomain)
-        if (matchingRule.domains.includes(parsed.hostname)) {
+      } else if ('domain' in applyTarget) {
+        const parsed = parse(applyTarget.domain)
+        if (parsed.hostname && matchingRule.domains.includes(parsed.hostname)) {
           removeOps.push(parsed.hostname)
-        } else if (matchingRule.domains.includes(parsed.domain)) {
+        } else if (parsed.domain && matchingRule.domains.includes(parsed.domain)) {
           removeOps.push(parsed.domain)
         } else {
-          addOps.push(incomingDomain)
+          addOps.push(applyTarget.domain)
         }
       }
     }
@@ -220,12 +240,12 @@ export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains, include
   } else {
     const rule = {
       rule: nextRule,
-      domains: domains,
+      domains: applyTargets.map((x) => ('domain' in x ? x.domain : '<all>')),
       reason: 'debug tools',
     }
 
     const rule_domain_score = nextRule.split('.').length
-    const rule_path_score = url.pathname.split('.').length
+    const rule_path_score = url.pathname.split('/').length
     const insert = allowList[parsed.domain].rules.findIndex((r) => {
       const [a_domain, ...a_path] = r.rule.split(/\//g)
       const domain_score = a_domain.split('.').length
@@ -247,9 +267,8 @@ export function toggleAllowlistedTrackerUrl(config, trackerUrl, domains, include
       allowList[parsed.domain].rules.splice(insert, 0, rule)
     }
   }
-  if (!allowList[parsed.domain]) return config
 
-  return config
+  return allowList
 }
 
 /**
@@ -326,4 +345,37 @@ async function sha256(s) {
   return Array.from(new Uint8Array(hash))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
+}
+
+/**
+ * @param input
+ */
+export function extractUrls(input) {
+  const lines = input.trim().split(/\n\r/g)
+  const segments = lines.map((line) => line.split(' ').filter(Boolean)).flat()
+
+  // parse urls and wipe out the search param
+  const urls = /** @type {URL[]} */ (
+    segments
+      .map((seg) => {
+        try {
+          const url = new URL(seg)
+          return url
+        } catch {
+          return false
+        }
+      })
+      .filter(Boolean)
+  )
+
+  const comparables = urls.map((x) => {
+    const clone = new URL(x)
+    clone.search = ''
+    clone.hash = ''
+    return clone
+  })
+
+  const unique = /** @type {URL[]} */ ([...new Set(comparables.map((url) => url.href))].map((x) => new URL(x)))
+
+  return { urls, unique }
 }

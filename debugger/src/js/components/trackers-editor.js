@@ -1,6 +1,6 @@
-import { FeatureToggleListGlobal } from '../remote-resources/components/feature-toggle-list-global'
 import { CurrentDomainManagement } from '../remote-resources/components/current-domain-management'
-import styles from './toggles-editor.module.css'
+import styles from './trackers-editor.module.css'
+import { TrackerFeed } from '../remote-resources/components/tracker-feed'
 
 /**
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -23,14 +23,14 @@ import styles from './toggles-editor.module.css'
  * @param {boolean} props.invalid
  * @param {RemoteResource} props.resource
  */
-export function TogglesEditor(props) {
+export function TrackersEditor(props) {
   return (
     <div data-testid="TogglesEditor">
       {/*<div className="row">{components[props.toggleKind](props)}</div>*/}
       <CurrentDomainManagement {...props} />
-      <div className={styles.togglesGrid}>
-        <div className={styles.featureList}>
-          <FeatureToggleListGlobal {...props} />
+      <div className={styles.trackersGrid}>
+        <div className={styles.trackerFeed}>
+          <TrackerFeed {...props} />
         </div>
       </div>
     </div>

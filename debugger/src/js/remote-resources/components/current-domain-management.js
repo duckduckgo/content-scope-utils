@@ -11,7 +11,7 @@ import { DomainForm } from './domain-form'
  */
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function FeatureToggleListDomainExceptions(props) {
+export function CurrentDomainManagement(props) {
   // xstate stuff
   const [state, send] = RemoteResourcesContext.useActor()
   const current = state.context.currentDomain || ''
