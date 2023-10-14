@@ -3,8 +3,8 @@ import { remoteResourceSchema } from '../../../schema/__generated__/schema.parse
 import * as z from 'zod'
 import { DebugToolsMessages } from '../DebugToolsMessages.mjs'
 import invariant from 'tiny-invariant'
-import { updateFeatureHash, updateVersion } from '../transforms'
-import jsonpatch from 'fast-json-patch'
+import { UpdateVersion } from '../transforms/update-version'
+import { UpdateFeatureHash } from '../transforms/feature-hash'
 
 /**
  * @typedef {import("./remote-resources.machine.types").RemoteResourcesBroadcastEvents} RemoteResourcesBroadcastEvents
@@ -314,9 +314,11 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
           throw new Error('NEXT json format doesnt conform to privacy config. see console for more info')
         }
 
-        const patches = jsonpatch.compare(original, nextJson)
-        let nextConfig = await updateFeatureHash(patches, nextJson)
-        nextConfig = await updateVersion(nextConfig)
+        const withHashes = await new UpdateFeatureHash({
+          original: original,
+        }).transform(nextJson)
+
+        const nextConfig = await new UpdateVersion(Date.now()).transform(withHashes)
         content = JSON.stringify(nextConfig)
       }
 

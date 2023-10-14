@@ -4,6 +4,11 @@ import { ActorRefFrom } from 'xstate'
 import { appMachine } from '../app/app.machine'
 import { TabWithHostname } from '../types'
 import { RemoteResourceMethods } from '../transforms.types'
+import { ToggleFeatureDomain } from '../transforms/toggle-feature-domain'
+import { ToggleFeature } from '../transforms/toggle-feature'
+import { UpdateVersion } from '../transforms/update-version'
+import { ToggleUnprotected } from '../transforms/toggle-unprotected'
+import { ToggleAllowlistedTracker } from '../transforms/allow-list'
 
 export type RemoteResourcesEvents =
   | { type: 'set editor kind'; payload: EditorKind }
@@ -28,6 +33,7 @@ export type RemoteResourcesEvents =
   | { type: 'content is invalid'; errors: ContentError[] }
   | { type: 'content is valid' }
   | { type: 'done.invoke.fetchOriginal'; data: RemoteResource }
+  | Commands
 
 export interface ContentError {
   message: string
@@ -53,3 +59,21 @@ export type RemoteResourcesBroadcastEvents =
   | { type: 'broadcastResourceSelected'; payload: { currentResource: CurrentResource } }
   | { type: 'broadcastPostResourceUpdated'; payload: { currentResource: CurrentResource; resource: RemoteResource } }
   | { type: 'broadcastPreResourceUpdated'; payload: { currentResource: CurrentResource; resource: RemoteResource } }
+
+// prettier-ignore
+export type Commands =
+  | Serialized<typeof UpdateVersion>
+  | Serialized<typeof ToggleFeatureDomain>
+  | Serialized<typeof ToggleFeature>
+  | Serialized<typeof ToggleUnprotected>
+  | Serialized<typeof ToggleAllowlistedTracker>
+
+type Serialized<T, K extends string = string> = T extends abstract new (...args: any) => any
+  ? InstanceType<T> extends Serializable<K>
+    ? { type: InstanceType<T>['type']; payload: ConstructorParameters<T>[0] }
+    : never
+  : never
+
+export interface Serializable<K extends string> {
+  type: K
+}

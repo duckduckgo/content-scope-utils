@@ -23,7 +23,7 @@ window._parse = parse
  */
 export function FeatureToggleListGlobal(props) {
   // some local state not stored in xstate (yet)
-  const [state] = RemoteResourcesContext.useActor()
+  const [state, send] = RemoteResourcesContext.useActor()
   const current = state.context.currentDomain || ''
   const [globalList, setJsonGlobalList] = useState(() => itemListFromJsonString(props.model.getValue(), current))
 
@@ -43,11 +43,11 @@ export function FeatureToggleListGlobal(props) {
   /**
    * @param {string} featureName - a feature name, like `duckPlayer`
    */
-  function toggleFeatureGlobally(featureName) {
+  async function toggleFeatureGlobally(featureName) {
     const parsed = JSON.parse(props.model.getValue())
-    const result = handler2(parsed, {
+    const result = await handler2(parsed, {
       type: 'PrivacyConfig.toggleFeature',
-      args: {
+      payload: {
         feature: featureName,
       },
     })
@@ -64,11 +64,11 @@ export function FeatureToggleListGlobal(props) {
    * @param {string} featureName - a feature name, like `duckPlayer`
    * @param {string} domain - the domain to toggle
    */
-  function toggleDomain(featureName, domain) {
+  async function toggleDomain(featureName, domain) {
     const parsed = JSON.parse(props.model.getValue())
-    const result = handler2(parsed, {
+    const result = await handler2(parsed, {
       type: 'PrivacyConfig.toggleFeatureDomain',
-      args: {
+      payload: {
         feature: featureName,
         domain,
       },

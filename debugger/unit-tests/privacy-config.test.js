@@ -1,13 +1,10 @@
 import { expect } from '@esm-bundle/chai'
 import jsonpatch from 'fast-json-patch'
-import {
-  isAllowlisted,
-  toggleAllowlistedTrackerUrl,
-  toggleException,
-  toggleFeature,
-  toggleUnprotected,
-  updateFeatureHash,
-} from '../src/js/transforms'
+import { toggleException } from '../src/js/transforms/toggle-feature-domain'
+import { toggleFeature } from '../src/js/transforms/toggle-feature'
+import { isAllowlisted, toggleAllowlistedTrackerUrl } from '../src/js/transforms/allow-list'
+import { updateFeatureHash } from '../src/js/transforms/feature-hash'
+import { toggleUnprotected } from '../src/js/transforms/toggle-unprotected'
 
 const minimal = new URL('../schema/__fixtures__/minimal-config.json', import.meta.url)
 

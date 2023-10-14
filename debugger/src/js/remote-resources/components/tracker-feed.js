@@ -1,5 +1,5 @@
 import { parse } from 'tldts'
-import { handler } from '../../transforms'
+import { handler2 } from '../../transforms'
 import invariant from 'tiny-invariant'
 import { MicroButton } from '../../components/buttons'
 import { DD, DT, InlineDL } from '../../components/definition-list'
@@ -33,12 +33,17 @@ export function TrackerFeed(props) {
    * @param {string} trackerUrl
    * @param {import('../../transforms.types').ApplyTarget[]} applyTo
    */
-  function toggleTrackerUrl(trackerUrl, applyTo) {
+  async function toggleTrackerUrl(trackerUrl, applyTo) {
     const parsed = JSON.parse(props.model.getValue())
-    const result = handler(parsed, {
-      kind: 'PrivacyConfig.toggleAllowlistedTrackerUrl',
-      trackerUrl: trackerUrl,
-      applyTo: applyTo,
+    const result = await handler2(parsed, {
+      type: 'PrivacyConfig.toggleAllowlistedTracker',
+      payload: {
+        trackerUrl: trackerUrl,
+        applyTo: applyTo,
+        opts: {
+          includePath: true,
+        },
+      },
     })
     if (result.ok) {
       const asString = JSON.stringify(result.success, null, 4)
@@ -53,12 +58,17 @@ export function TrackerFeed(props) {
    * @param {string} trackerUrl
    * @param {import('../../transforms.types').ApplyTarget[]} applyTo
    */
-  function toggleDomain(trackerUrl, applyTo) {
+  async function toggleDomain(trackerUrl, applyTo) {
     const parsed = JSON.parse(props.model.getValue())
-    const result = handler(parsed, {
-      kind: 'PrivacyConfig.toggleAllowlistedTrackerDomain',
-      trackerUrl: trackerUrl,
-      applyTo: applyTo,
+    const result = await handler2(parsed, {
+      type: 'PrivacyConfig.toggleAllowlistedTracker',
+      payload: {
+        trackerUrl: trackerUrl,
+        applyTo: applyTo,
+        opts: {
+          includePath: false,
+        },
+      },
     })
     if (result.ok) {
       const asString = JSON.stringify(result.success, null, 4)

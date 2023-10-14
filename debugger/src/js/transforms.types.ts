@@ -7,35 +7,15 @@
  */
 
 import { PrivacyConfig } from './remote-resources/remote-resources.machine'
-import { ToggleFeature, ToggleFeatureDomain } from './transforms.js'
-export { ToggleFeature, ToggleFeatureDomain }
 
 interface Transform<T> {
-  transform(t: T): T
+  transform(t: T): Promise<T>
 }
 
 /**
- * Implement this
+ * Implement this to perform operations on privacy configuration
  */
 export interface PrivacyConfigurationTransform extends Transform<PrivacyConfig> {}
-
-interface StaticTransformProps {
-  type: string
-  description: string
-  subject: string
-}
-
-type LookupMap<T> = {
-  [K in keyof T]: {
-    type: K
-    args: T[K] extends { props: StaticTransformProps }
-      ? T[K] extends abstract new (...args: any) => any
-        ? ConstructorParameters<T[K]>[0]
-        : never
-      : `StaticTransformProps incorrect, check: ${K extends string ? K : never}`
-  }
-}
-export type Lookup<T> = LookupMap<T>[keyof LookupMap<T>]
 
 /**
  * Override The current remote url. This is useful
@@ -66,34 +46,10 @@ export type RemoteResourceMethods =
     | SetDebugContent
     ;
 
-export interface ToggleUnprotectedDomain {
-  kind: 'PrivacyConfig.toggleUnprotectedDomain'
-  domain: string
-}
-
 // prettier-ignore
 export type ApplyTarget =
   | { domain: string }
   | { all: true }
-
-export interface ToggleAllowlistedTracker {
-  kind: 'PrivacyConfig.toggleAllowlistedTrackerUrl'
-  trackerUrl: string
-  applyTo: ApplyTarget[]
-}
-
-export interface ToggleAllowlistedTrackerDomain {
-  kind: 'PrivacyConfig.toggleAllowlistedTrackerDomain'
-  trackerUrl: string
-  applyTo: ApplyTarget[]
-}
-
-// prettier-ignore
-export type PrivacyConfigTransformMethods =
-    | ToggleUnprotectedDomain
-    | ToggleAllowlistedTracker
-    | ToggleAllowlistedTrackerDomain
-    ;
 
 // export type Transforms = PrivacyConfigTransforms
 // prettier-ignore
