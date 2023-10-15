@@ -1,8 +1,9 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import styles from './text-editor.module.css'
 import { useMachine } from '@xstate/react'
 import { textEditorMachine } from './text-editor.machine'
 import invariant from 'tiny-invariant'
+import * as monaco from 'monaco-editor'
 
 /**
  * @typedef {import('../remote-resources.machine.types').ContentError} ContentError
@@ -14,16 +15,17 @@ import invariant from 'tiny-invariant'
  * @param {object} props
  * @param {string} props.id
  * @param {string} props.defaultValue
- * @param {import('../../models/text-model').TextModel} props.model
+ * @param {string} props.lastValue
  * @param {(errors: ContentError[]) => void} props.onErrors
  */
 export function TextEditor(props) {
   const domRef = /** @type {import("react").MutableRefObject<HTMLElement | any>} */ (useRef(null))
+  const [model] = useState(() => monaco.editor.createModel(props.lastValue, 'application/json'))
 
   const [, send] = useMachine(textEditorMachine, {
     context: {
       id: props.id,
-      model: props.model,
+      model: model,
     },
     actions: {
       setInitialScroll: (_, evt) => {

@@ -1,26 +1,31 @@
 import * as monaco from 'monaco-editor'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import invariant from 'tiny-invariant'
 import { useMonacoErrors } from '../models/monaco-opt-in'
+import { RemoteResourcesContext } from '../remote-resources/remote-resources.page'
 
 /**
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
  * @typedef {import('../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
  * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
+ * @typedef {import('monaco-editor').editor.IStandaloneCodeEditor} IStandaloneCodeEditor
  * @typedef {import('../remote-resources/remote-resources.machine.types').ContentError} ContentError
  */
 
 /**
  * @param {object} props
- * @param {ITextModel} props.model
  * @param {boolean} props.pending
  * @param {boolean} props.edited
  * @param {boolean} props.invalid
+ * @param {string} props.lastValue
  * @param {(errors: ContentError[]) => void} props.onErrors
  * @param {string} props.id
  */
 export function MonacoEditor(props) {
   const ref = useRef(null)
+  /** @type {import("react").MutableRefObject<IStandaloneCodeEditor | null>} */
+  const editorRef = useRef(null)
+  const [model] = useState(() => monaco.editor.createModel(props.lastValue, 'application/json'))
 
   // propagate errors
   useMonacoErrors(props.onErrors)
@@ -29,7 +34,7 @@ export function MonacoEditor(props) {
     invariant(ref.current, 'ref must exist here')
 
     const editor = monaco.editor.create(ref.current, {
-      model: props.model,
+      model: model,
       automaticLayout: false,
     })
 
@@ -43,11 +48,13 @@ export function MonacoEditor(props) {
       localStorage.setItem('viewState_' + props.id, JSON.stringify(editor.saveViewState()))
     }, 1000)
 
+    editorRef.current = editor
+
     return () => {
       clearInterval(int)
       editor?.dispose()
     }
-  }, [props.model])
+  }, [model])
 
   return <div ref={ref} style={{ height: '100%', width: '100%' }}></div>
 }

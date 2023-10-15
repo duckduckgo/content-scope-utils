@@ -14,7 +14,7 @@ import { ToggleUnprotected } from './transforms/toggle-unprotected'
  */
 
 /**
- * @param {import('./remote-resources/remote-resources.machine.types').Commands} input
+ * @param {import('./remote-resources/remote-resources.machine.types').TransformCommands} input
  * @returns {PrivacyConfigurationTransform}
  */
 function deserializeCommand(input) {
@@ -36,7 +36,7 @@ function deserializeCommand(input) {
 
 /**
  * @param {PrivacyConfig} config
- * @param {import('./remote-resources/remote-resources.machine.types').Commands} command
+ * @param {import('./remote-resources/remote-resources.machine.types').TransformCommands} command
  * @returns {Promise<import('./transforms.types').TransformResult<Record<string, any>>>}
  */
 export async function handler2(config, command) {

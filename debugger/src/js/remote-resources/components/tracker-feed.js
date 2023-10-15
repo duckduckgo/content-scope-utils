@@ -1,5 +1,4 @@
 import { parse } from 'tldts'
-import { handler2 } from '../../transforms'
 import invariant from 'tiny-invariant'
 import { MicroButton } from '../../components/buttons'
 import { DD, DT, InlineDL } from '../../components/definition-list'
@@ -7,6 +6,7 @@ import styles from './tracker-feed.module.css'
 import classnames from 'classnames'
 import { useTrackerFeed } from './tracker-feed.machine.react'
 import { TrackerFeedManual } from './tracker-feed-manual'
+import { RemoteResourcesContext } from '../remote-resources.page'
 
 // @ts-expect-error - debugging;
 window._parse = parse
@@ -23,19 +23,18 @@ window._parse = parse
 
 /**
  * @param {object} props
- * @param {TextModel} props.model
  * @param {RemoteResource} props.resource
  */
 export function TrackerFeed(props) {
-  // some local state not stored in xstate (yet)
   const [state, send] = useTrackerFeed()
+  const actor = RemoteResourcesContext.useActorRef()
+
   /**
    * @param {string} trackerUrl
    * @param {import('../../transforms.types').ApplyTarget[]} applyTo
    */
   async function toggleTrackerUrl(trackerUrl, applyTo) {
-    const parsed = JSON.parse(props.model.getValue())
-    const result = await handler2(parsed, {
+    actor.send({
       type: 'PrivacyConfig.toggleAllowlistedTracker',
       payload: {
         trackerUrl: trackerUrl,
@@ -45,13 +44,6 @@ export function TrackerFeed(props) {
         },
       },
     })
-    if (result.ok) {
-      const asString = JSON.stringify(result.success, null, 4)
-      props.model.setValue(asString)
-    } else {
-      console.log(result.error)
-      alert('allow failed..., check console')
-    }
   }
 
   /**
@@ -59,8 +51,7 @@ export function TrackerFeed(props) {
    * @param {import('../../transforms.types').ApplyTarget[]} applyTo
    */
   async function toggleDomain(trackerUrl, applyTo) {
-    const parsed = JSON.parse(props.model.getValue())
-    const result = await handler2(parsed, {
+    actor.send({
       type: 'PrivacyConfig.toggleAllowlistedTracker',
       payload: {
         trackerUrl: trackerUrl,
@@ -70,13 +61,6 @@ export function TrackerFeed(props) {
         },
       },
     })
-    if (result.ok) {
-      const asString = JSON.stringify(result.success, null, 4)
-      props.model.setValue(asString)
-    } else {
-      console.log(result.error)
-      alert('allow failed..., check console')
-    }
   }
 
   function refresh() {
@@ -86,12 +70,7 @@ export function TrackerFeed(props) {
   return (
     <>
       <div className="row">
-        <TrackerFeedManual
-          resource={props.resource}
-          model={props.model}
-          toggleDomain={toggleDomain}
-          toggleTrackerUrl={toggleTrackerUrl}
-        />
+        <TrackerFeedManual resource={props.resource} toggleDomain={toggleDomain} toggleTrackerUrl={toggleTrackerUrl} />
       </div>
       {state.matches(['subscribing']) && state.context.requests.length > 0 && (
         <FeedTable refresh={refresh} toggleDomain={toggleDomain} toggleTrackerUrl={toggleTrackerUrl} />

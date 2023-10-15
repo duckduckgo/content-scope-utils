@@ -4,13 +4,14 @@ import invariant from 'tiny-invariant'
 import { TogglesEditor } from '../../components/toggles-editor'
 import styles from '../../app/components/app.module.css'
 import { SubNav } from '../../app/components/feature-nav'
-import { lazy, Suspense, useContext, useRef } from 'react'
+import { lazy, Suspense, useContext, useRef, useState } from 'react'
 import { Button } from '../../components/buttons'
 import { Sidebar } from './sidebar'
 import { DiffViewer } from '../../components/diff-viewer'
 import { TextEditor } from './text-editor'
 import { GlobalContext } from '../../DebugToolsMessages.mjs'
 import { TrackersEditor } from '../../components/trackers-editor'
+import * as monaco from 'monaco-editor'
 
 const MonacoEditor = lazy(() => import('../../components/monaco-editor.js'))
 const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))
@@ -28,14 +29,16 @@ const PatchesEditor = lazy(() => import('../../components/patches-editor.js'))
 /**
  * @param {object} props
  * @param {RemoteResource} props.resource
- * @param {TextModel} props.model
  * @param {SubNavItem[]} props.nav
  */
 export function RemoteResourceEditor(props) {
   const actor = RemoteResourcesContext.useActorRef()
 
   /** @type {(kind: EditorKind) => void} */
-  const revertEdited = () => props.model.setValue(props.resource.current.contents)
+  const revertEdited = () => {
+    throw new Error('todo: impl revertEdited')
+    //props.model.setValue(props.resource.current.contents)
+  }
 
   /** this is used to allow editors to participate in the $footer (eg: adding extra buttons) */
   const additionalButtons = useRef(null)
@@ -54,7 +57,7 @@ export function RemoteResourceEditor(props) {
             </div>
           ) : null}
 
-          <RemoteResourceState resource={props.resource} model={props.model} />
+          <RemoteResourceState resource={props.resource} />
         </div>
 
         <div className={styles.sidebar}>
@@ -65,7 +68,6 @@ export function RemoteResourceEditor(props) {
 
         <div className={styles.mainContent}>
           <EditorSelection
-            model={props.model}
             resource={props.resource}
             key={props.resource.id}
             additionalButtons={additionalButtons.current}
@@ -73,7 +75,7 @@ export function RemoteResourceEditor(props) {
         </div>
       </main>
       <footer className={styles.appFooter}>
-        <Footer additionalButtons={additionalButtons} resource={props.resource} model={props.model} />
+        <Footer additionalButtons={additionalButtons} resource={props.resource} />
       </footer>
     </>
   )
@@ -83,19 +85,22 @@ export function RemoteResourceEditor(props) {
  * @param {object} props
  * @param {RemoteResource} props.resource
  * @param {any} props.additionalButtons
- * @param {TextModel} props.model
  */
 function Footer(props) {
   const [state, send] = RemoteResourcesContext.useActor()
 
-  const revertEdited = () => props.model.setValue(props.resource.current.contents)
+  const revertEdited = () => {
+    throw new Error('todo: impl revertEdited')
+    // return props.model.setValue(props.resource.current.contents)
+  }
 
   function saveDebugContent() {
-    send({
-      type: 'RemoteResource.setDebugContent',
-      id: props.resource.id,
-      content: props.model.getValue(),
-    })
+    throw new Error('todo: impl saveDebugContent')
+    // send({
+    //   type: 'RemoteResource.setDebugContent',
+    //   id: props.resource.id,
+    //   content: props.model.getValue(),
+    // })
   }
 
   const savingChanges = state.matches(['showing editor', 'editing', 'saving edited'])
@@ -149,13 +154,14 @@ export function useEditorKinds() {
  * @param {RemoteResource} props.resource
  * @param {string} props.key - force the different editors to set-up/tear-down correctly
  * @param {any} props.additionalButtons
- * @param {TextModel} props.model
  */
 function EditorSelection(props) {
   const [state, send] = RemoteResourcesContext.useActor()
   const { globalConfig } = useContext(GlobalContext)
   const { editorKind } = useEditorKinds()
   const originalContents = props.resource.current.contents
+  const lastValue = state.context.currentResource?.lastValue || ''
+  const [model] = useState(() => monaco.editor.createModel(lastValue, 'application/json'))
 
   const savingChanges = state.matches(['showing editor', 'editing', 'saving edited'])
   const hasEdits = state.matches(['showing editor', 'editing', 'editor has edited content'])
@@ -174,28 +180,18 @@ function EditorSelection(props) {
 
   const editors = {
     toggles: () => (
-      <TogglesEditor
-        model={props.model}
-        invalid={contentIsInvalid}
-        edited={hasEdits}
-        pending={savingChanges}
-        resource={props.resource}
-      />
+      <TogglesEditor invalid={contentIsInvalid} edited={hasEdits} pending={savingChanges} resource={props.resource} />
     ),
     diff: () => {
       if (globalConfig.editor === 'simple') {
         return (
-          <DiffViewer
-            before={originalContents}
-            after={props.model.getValue()}
-            additionalButtons={props.additionalButtons}
-          />
+          <DiffViewer before={originalContents} after={model.getValue()} additionalButtons={props.additionalButtons} />
         )
       }
       return (
         <Suspense>
           <MonacoDiffEditor
-            model={props.model}
+            lastValue={lastValue}
             original={originalContents}
             edited={hasEdits}
             invalid={contentIsInvalid}
@@ -211,8 +207,8 @@ function EditorSelection(props) {
       if (globalConfig.editor === 'simple') {
         return (
           <TextEditor
-            defaultValue={props.model.getValue()}
-            model={props.model}
+            defaultValue={lastValue}
+            lastValue={lastValue}
             key={props.resource.id}
             id={props.resource.id}
             onErrors={onErrors}
@@ -222,12 +218,12 @@ function EditorSelection(props) {
       return (
         <Suspense>
           <MonacoEditor
-            model={/** @type {import("monaco-editor").editor.ITextModel} */ (props.model)}
             invalid={contentIsInvalid}
             edited={hasEdits}
             pending={savingChanges}
             id={props.resource.id}
             onErrors={onErrors}
+            lastValue={lastValue}
           />
         </Suspense>
       )
@@ -236,7 +232,6 @@ function EditorSelection(props) {
       return (
         <Suspense>
           <TrackersEditor
-            model={props.model}
             invalid={contentIsInvalid}
             edited={hasEdits}
             pending={savingChanges}
@@ -250,7 +245,7 @@ function EditorSelection(props) {
       return (
         <Suspense>
           <PatchesEditor
-            model={props.model}
+            model={model}
             pending={savingChanges}
             edited={hasEdits}
             invalid={contentIsInvalid}

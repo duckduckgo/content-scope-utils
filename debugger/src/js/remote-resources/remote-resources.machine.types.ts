@@ -13,6 +13,7 @@ import { ToggleAllowlistedTracker } from '../transforms/allow-list'
 export type RemoteResourcesEvents =
   | { type: 'set editor kind'; payload: EditorKind }
   | { type: 'set current domain'; payload: string }
+  | { type: 'set current resource content'; payload: string }
   | { type: 'show original diff' }
   | { type: 'close original diff' }
   | { type: 'clear current domain' }
@@ -33,7 +34,8 @@ export type RemoteResourcesEvents =
   | { type: 'content is invalid'; errors: ContentError[] }
   | { type: 'content is valid' }
   | { type: 'done.invoke.fetchOriginal'; data: RemoteResource }
-  | Commands
+  | TransformCommands
+  | { type: 'transform-proxy'; original: TransformCommands; subject: { contents: string } }
 
 export interface ContentError {
   message: string
@@ -61,7 +63,7 @@ export type RemoteResourcesBroadcastEvents =
   | { type: 'broadcastPreResourceUpdated'; payload: { currentResource: CurrentResource; resource: RemoteResource } }
 
 // prettier-ignore
-export type Commands =
+export type TransformCommands =
   | Serialized<typeof UpdateVersion>
   | Serialized<typeof ToggleFeatureDomain>
   | Serialized<typeof ToggleFeature>

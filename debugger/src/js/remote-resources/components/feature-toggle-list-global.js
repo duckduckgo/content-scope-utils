@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react'
 import { ToggleList } from './toggle-list'
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { parse } from 'tldts'
-import { handler2 } from '../../transforms'
 
 // @ts-expect-error - debugging;
 window._parse = parse
@@ -18,46 +16,25 @@ window._parse = parse
 
 /**
  * @param {object} props
- * @param {TextModel} props.model
  * @param {RemoteResource} props.resource
  */
 export function FeatureToggleListGlobal(props) {
   // some local state not stored in xstate (yet)
   const [state, send] = RemoteResourcesContext.useActor()
   const current = state.context.currentDomain || ''
-  const [globalList, setJsonGlobalList] = useState(() => itemListFromJsonString(props.model.getValue(), current))
-
-  useEffect(() => {
-    // this could occur from the toggles changes, or from another thing, like the revert action
-    const sub = props.model.onDidChangeContent(() => {
-      setJsonGlobalList(itemListFromJsonString(props.model.getValue(), current))
-    })
-    return () => sub.dispose()
-  }, [props.model, current])
-
-  useEffect(() => {
-    // this could occur from the toggles changes, or from another thing, like the revert action
-    setJsonGlobalList(itemListFromJsonString(props.model.getValue(), current))
-  }, [current])
+  const lastValue = state.context.currentResource?.lastValue || ''
+  const globalList = itemListFromJsonString(lastValue, current)
 
   /**
    * @param {string} featureName - a feature name, like `duckPlayer`
    */
   async function toggleFeatureGlobally(featureName) {
-    const parsed = JSON.parse(props.model.getValue())
-    const result = await handler2(parsed, {
+    send({
       type: 'PrivacyConfig.toggleFeature',
       payload: {
         feature: featureName,
       },
     })
-    if (result.ok) {
-      const asString = JSON.stringify(result.success, null, 4)
-      props.model.setValue(asString)
-    } else {
-      console.log(result.error)
-      alert('toggleDomain failed..., check console')
-    }
   }
 
   /**
@@ -65,21 +42,13 @@ export function FeatureToggleListGlobal(props) {
    * @param {string} domain - the domain to toggle
    */
   async function toggleDomain(featureName, domain) {
-    const parsed = JSON.parse(props.model.getValue())
-    const result = await handler2(parsed, {
+    send({
       type: 'PrivacyConfig.toggleFeatureDomain',
       payload: {
         feature: featureName,
-        domain,
+        domain: domain,
       },
     })
-    if (result.ok) {
-      const asString = JSON.stringify(result.success, null, 4)
-      props.model.setValue(asString)
-    } else {
-      console.log(result.error)
-      alert('toggleDomain failed..., check console')
-    }
   }
 
   if ('value' in globalList) {

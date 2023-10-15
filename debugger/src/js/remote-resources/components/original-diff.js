@@ -17,7 +17,6 @@ import style from './original-diff.module.css'
 /**
  * @param {object} props
  * @param {RemoteResource} props.resource
- * @param {TextModel} props.model
  */
 export function OriginalDiff(props) {
   const [state, send] = RemoteResourcesContext.useActor()
@@ -36,9 +35,7 @@ export function OriginalDiff(props) {
           <button onClick={closeDiff}>Close plx</button>
         </div>
         <div className={style.main}>
-          {showingRemote && (
-            <OriginalDiffEditor buttons={buttons.current} model={props.model} resource={props.resource} />
-          )}
+          {showingRemote && <OriginalDiffEditor buttons={buttons.current} resource={props.resource} />}
         </div>
         <div className={style.footer}>
           <div className="flex column-gap" data-testid="OriginalDiffEditorFooter">
@@ -54,18 +51,16 @@ export function OriginalDiff(props) {
  * @param {object} props
  * @param {RemoteResource} props.resource
  * @param {ReactNode} props.buttons
- * @param {TextModel} props.model
  */
 export function OriginalDiffEditor(props) {
   const [state, send] = RemoteResourcesContext.useActor()
-  const [model] = useState(() => monaco.editor.createModel(props.resource.current.contents, 'application/json'))
   invariant(state.context.currentResource?.id, 'must have currentResource?.id')
 
   return (
     <MonacoDiffEditor
       original={state.context.originalResources[state.context.currentResource.id].current.contents}
       additionalButtons={props.buttons}
-      model={model}
+      lastValue={props.resource.current.contents}
       id={props.resource.id + '__original_diff'}
       onErrors={(e) => console.log('todo: onErrors', e)}
       edited={true}

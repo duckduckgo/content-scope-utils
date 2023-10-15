@@ -21,7 +21,6 @@ window._parse = parse
 
 /**
  * @param {object} props
- * @param {TextModel} props.model
  * @param {RemoteResource} props.resource
  * @param {(url: string, applyTo: ApplyTarget[]) => void} props.toggleTrackerUrl
  * @param {(url: string, applyTo: ApplyTarget[]) => void} props.toggleDomain

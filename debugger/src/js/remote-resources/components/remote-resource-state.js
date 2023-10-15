@@ -18,7 +18,6 @@ import { OriginalDiff } from './original-diff'
 /**
  * @param {{
  *   resource: RemoteResource;
- *   model: TextModel;
  * }} props
  */
 export function RemoteResourceState(props) {
@@ -32,7 +31,10 @@ export function RemoteResourceState(props) {
   // events
   const showDiff = () => send({ type: 'set editor kind', payload: 'diff' })
   const showOverrideForm = () => send({ type: 'show url editor' })
-  const revertEdited = () => props.model.setValue(props.resource.current.contents)
+  const revertEdited = () => {
+    throw new Error('todo: impl revertEdited')
+    // return props.model.setValue(props.resource.current.contents)
+  }
 
   /** @type {(url: string) => void} */
   function setUrl(url) {
@@ -137,8 +139,8 @@ export function RemoteResourceState(props) {
           />
         </div>
       )}
-      <OriginalDiff resource={props.resource} model={props.model} />
-      <Override resource={props.resource} model={props.model} />
+      <OriginalDiff resource={props.resource} />
+      <Override resource={props.resource} />
     </div>
   )
 }
@@ -146,7 +148,6 @@ export function RemoteResourceState(props) {
 /**
  * @param {object} props
  * @param {RemoteResource} props.resource
- * @param {TextModel} props.model
  */
 function Override(props) {
   const [state, send] = RemoteResourcesContext.useActor()
@@ -158,7 +159,10 @@ function Override(props) {
   // events
   const showDiff = () => send({ type: 'set editor kind', payload: 'diff' })
   const showDiffWithOriginal = () => send({ type: 'show original diff' })
-  const revertEdited = () => props.model.setValue(props.resource.current.contents)
+  const revertEdited = () => {
+    throw new Error('todo: impl revertEdited')
+    // return props.model.setValue(props.resource.current.contents)
+  }
 
   /** @type {(url: string) => void} */
   function setUrl(url) {

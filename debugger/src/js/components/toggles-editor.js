@@ -17,7 +17,6 @@ import styles from './toggles-editor.module.css'
 
 /**
  * @param {object} props
- * @param {TextModel} props.model
  * @param {boolean} props.pending
  * @param {boolean} props.edited
  * @param {boolean} props.invalid

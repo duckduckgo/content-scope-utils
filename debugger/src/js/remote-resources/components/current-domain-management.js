@@ -2,12 +2,7 @@ import { RemoteResourcesContext } from '../remote-resources.page'
 import { DomainForm } from './domain-form'
 
 /**
- * @typedef {import('../../models/text-model').TextModel} TextModel
- */
-
-/**
  * @param {object} props
- * @param {TextModel} props.model
  */
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

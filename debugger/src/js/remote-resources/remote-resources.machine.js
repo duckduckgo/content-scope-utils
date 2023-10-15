@@ -1,10 +1,12 @@
-import { assign, createMachine, pure, raise, send } from 'xstate'
+import { assign, createMachine, forwardTo, pure, raise, send, sendTo } from 'xstate'
 import { remoteResourceSchema } from '../../../schema/__generated__/schema.parsers.mjs'
 import * as z from 'zod'
 import { DebugToolsMessages } from '../DebugToolsMessages.mjs'
 import invariant from 'tiny-invariant'
 import { UpdateVersion } from '../transforms/update-version'
 import { UpdateFeatureHash } from '../transforms/feature-hash'
+import { handler2 } from '../transforms'
+import { ToggleFeature } from '../transforms/toggle-feature'
 
 /**
  * @typedef {import("./remote-resources.machine.types").RemoteResourcesBroadcastEvents} RemoteResourcesBroadcastEvents
@@ -65,6 +67,10 @@ const _remoteResourcesMachine = createMachine({
         {
           src: 'tab-listener',
           id: 'tab-listener',
+        },
+        {
+          src: 'transform-listener',
+          id: 'transform-listener',
         },
       ],
       on: {
@@ -158,8 +164,16 @@ const _remoteResourcesMachine = createMachine({
             'clear current domain': {
               actions: ['pushToRoute'],
             },
-            'RemoteResource.setRemoteUrl': {
-              target: '.saving new remote',
+            'RemoteResource.setRemoteUrl': { target: '.saving new remote' },
+
+            // privacy config mods
+            'PrivacyConfig.toggleFeature': { actions: 'forwardToTransformer' },
+            'PrivacyConfig.toggleFeatureDomain': { actions: 'forwardToTransformer' },
+            'PrivacyConfig.toggleAllowlistedTracker': { actions: 'forwardToTransformer' },
+
+            // other
+            'set current resource content': {
+              actions: ['assignCurrentContent', 'markEdited'],
             },
           },
           states: {
@@ -264,6 +278,27 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         unsub()
       }
     },
+    'transform-listener': () => (send, onReceive) => {
+      onReceive(
+        async (
+          /** @type {Extract<import('./remote-resources.machine.types').RemoteResourcesEvents, {type: 'transform-proxy'}>} */ evt,
+        ) => {
+          invariant(evt.type === 'transform-proxy', 'must be transform-proxy')
+          const parsed = JSON.parse(evt.subject.contents)
+          const result = await handler2(parsed, evt.original)
+          if (result.ok) {
+            const asString = JSON.stringify(result.success, null, 4)
+            send({ type: 'set current resource content', payload: asString })
+          } else {
+            console.log(result.error)
+            alert('toggleDomain failed..., check console')
+          }
+        },
+      )
+      return () => {
+        console.log('teardown of transform-listener')
+      }
+    },
     // eslint-disable-next-line require-await
     loadResources: async (ctx) => {
       const parsed = z.object({ messages: z.instanceof(DebugToolsMessages) }).parse(ctx)
@@ -332,6 +367,52 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
     },
   },
   actions: {
+    markEdited: pure((ctx) => {
+      invariant(ctx.currentResource, 'ctx.currentResource must be set here')
+      invariant(Array.isArray(ctx.resources), 'ctx.resources must be set here')
+      let match = ctx.resources.find((x) => x.id === ctx.currentResource?.id)
+      invariant(match, 'ctx.currentResource must match')
+
+      if (ctx.currentResource.lastValue === match.current.contents) {
+        return raise({ type: 'content was reverted' })
+      }
+      return raise({ type: 'content was edited' })
+    }),
+    forwardToTransformer: pure((ctx, evt) => {
+      invariant(ctx.currentResource, 'ctx.currentResource must be set here')
+
+      /** @type {(import('./remote-resources.machine.types').TransformCommands['type'])[] } */
+      let supported = [
+        'PrivacyConfig.toggleFeature',
+        'PrivacyConfig.toggleUnprotected',
+        'PrivacyConfig.updateVersion',
+        'PrivacyConfig.toggleFeatureDomain',
+        'PrivacyConfig.toggleAllowlistedTracker',
+      ]
+
+      invariant(supported.includes(/** @type {any} */ (evt.type)), 'must be a supported transform event')
+
+      /** @type {import('./remote-resources.machine.types').RemoteResourcesEvents} */
+      const proxy = {
+        type: 'transform-proxy',
+        original: /** @type {any} */ (evt),
+        subject: {
+          contents: ctx.currentResource.lastValue,
+        },
+      }
+      return sendTo('transform-listener', proxy)
+    }),
+    assignCurrentContent: assign({
+      currentResource: (ctx, evt) => {
+        invariant(ctx.currentResource, 'ctx.currentResource must be set here')
+        invariant(evt.type === 'set current resource content', 'only accepting from "set current resource content"')
+        // invariant(evt.payload === 'set current resource content', 'only accepting from "set current resource content"')
+        return {
+          ...ctx.currentResource,
+          lastValue: evt.payload,
+        }
+      },
+    }),
     assignContentMarkers: assign({
       contentErrors: (ctx, evt) => {
         if (evt.type === 'content is invalid') {
@@ -398,7 +479,7 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         return {
           id: matchingId,
           editorKinds: capabilties.editorKinds,
-          lastValue: match.current.contents,
+          lastValue: ctx.currentResource?.id === matchingId ? ctx.currentResource?.lastValue : match.current.contents,
         }
       },
     }),

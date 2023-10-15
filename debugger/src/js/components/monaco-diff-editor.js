@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as monaco from 'monaco-editor'
 import { createPortal } from 'react-dom'
 import { Button } from './buttons'
@@ -13,10 +13,10 @@ import { useMonacoErrors } from '../models/monaco-opt-in'
 /**
  * @param {object} props
  * @param {string} props.original
- * @param {TextModel} props.model
  * @param {boolean} props.pending
  * @param {boolean} props.edited
  * @param {boolean} props.invalid
+ * @param {string} props.lastValue
  * @param {string} props.id
  * @param {any} [props.additionalButtons]
  * @param {(errors: ContentError[]) => void} props.onErrors
@@ -24,6 +24,8 @@ import { useMonacoErrors } from '../models/monaco-opt-in'
 export function MonacoDiffEditor(props) {
   const ref = useRef(null)
   const editorRefs = /** @type {import('react').MutableRefObject} */ (useRef({}))
+  const [model] = useState(() => monaco.editor.createModel(props.lastValue, 'application/json'))
+  const [originalModel] = useState(() => monaco.editor.createModel(props.original, 'application/json'))
 
   useMonacoErrors(props.onErrors)
 
@@ -38,7 +40,7 @@ export function MonacoDiffEditor(props) {
 
     diffEditor.setModel({
       original: originalModel,
-      modified: /** @type {ITextModel} */ (props.model),
+      modified: /** @type {ITextModel} */ (model),
     })
 
     editorRefs.current.navi = monaco.editor.createDiffNavigator(diffEditor, {
@@ -65,7 +67,7 @@ export function MonacoDiffEditor(props) {
       diffEditor.dispose()
       editorRefs.current.navi.dispose()
     }
-  }, [props.model, props.original])
+  }, [model, originalModel])
 
   function prevDiff() {
     editorRefs.current.navi.previous()

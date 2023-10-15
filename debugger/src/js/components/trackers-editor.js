@@ -17,7 +17,6 @@ import { TrackerFeed } from '../remote-resources/components/tracker-feed'
 
 /**
  * @param {object} props
- * @param {TextModel} props.model
  * @param {boolean} props.pending
  * @param {boolean} props.edited
  * @param {boolean} props.invalid
