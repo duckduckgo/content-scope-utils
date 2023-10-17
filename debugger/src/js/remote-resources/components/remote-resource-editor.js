@@ -36,8 +36,7 @@ export function RemoteResourceEditor(props) {
 
   /** @type {(kind: EditorKind) => void} */
   const revertEdited = () => {
-    throw new Error('todo: impl revertEdited')
-    //props.model.setValue(props.resource.current.contents)
+    actor.send({ type: 'revert current content' })
   }
 
   /** this is used to allow editors to participate in the $footer (eg: adding extra buttons) */
@@ -90,17 +89,14 @@ function Footer(props) {
   const [state, send] = RemoteResourcesContext.useActor()
 
   const revertEdited = () => {
-    throw new Error('todo: impl revertEdited')
-    // return props.model.setValue(props.resource.current.contents)
+    send({ type: 'revert current content' })
   }
 
   function saveDebugContent() {
-    throw new Error('todo: impl saveDebugContent')
-    // send({
-    //   type: 'RemoteResource.setDebugContent',
-    //   id: props.resource.id,
-    //   content: props.model.getValue(),
-    // })
+    send({
+      type: 'RemoteResource.setDebugContent',
+      id: props.resource.id,
+    })
   }
 
   const savingChanges = state.matches(['showing editor', 'editing', 'saving edited'])
@@ -178,6 +174,13 @@ function EditorSelection(props) {
     }
   }
 
+  /**
+   * @param {string} content
+   */
+  function onContentChanged(content) {
+    send({ type: 'set current resource content', payload: content })
+  }
+
   const editors = {
     toggles: () => (
       <TogglesEditor invalid={contentIsInvalid} edited={hasEdits} pending={savingChanges} resource={props.resource} />
@@ -191,7 +194,6 @@ function EditorSelection(props) {
       return (
         <Suspense>
           <MonacoDiffEditor
-            lastValue={lastValue}
             original={originalContents}
             edited={hasEdits}
             invalid={contentIsInvalid}
@@ -199,6 +201,8 @@ function EditorSelection(props) {
             id={props.resource.id}
             additionalButtons={props.additionalButtons}
             onErrors={onErrors}
+            onContentChanged={onContentChanged}
+            lastValue={lastValue}
           />
         </Suspense>
       )
@@ -212,6 +216,7 @@ function EditorSelection(props) {
             key={props.resource.id}
             id={props.resource.id}
             onErrors={onErrors}
+            onContentChanged={onContentChanged}
           />
         )
       }
@@ -223,6 +228,7 @@ function EditorSelection(props) {
             pending={savingChanges}
             id={props.resource.id}
             onErrors={onErrors}
+            onContentChanged={onContentChanged}
             lastValue={lastValue}
           />
         </Suspense>

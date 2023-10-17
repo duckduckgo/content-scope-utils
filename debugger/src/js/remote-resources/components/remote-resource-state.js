@@ -32,8 +32,7 @@ export function RemoteResourceState(props) {
   const showDiff = () => send({ type: 'set editor kind', payload: 'diff' })
   const showOverrideForm = () => send({ type: 'show url editor' })
   const revertEdited = () => {
-    throw new Error('todo: impl revertEdited')
-    // return props.model.setValue(props.resource.current.contents)
+    send({ type: 'revert current content' })
   }
 
   /** @type {(url: string) => void} */
@@ -159,10 +158,7 @@ function Override(props) {
   // events
   const showDiff = () => send({ type: 'set editor kind', payload: 'diff' })
   const showDiffWithOriginal = () => send({ type: 'show original diff' })
-  const revertEdited = () => {
-    throw new Error('todo: impl revertEdited')
-    // return props.model.setValue(props.resource.current.contents)
-  }
+  const revertEdited = () => send({ type: 'revert current content' })
 
   /** @type {(url: string) => void} */
   function setUrl(url) {

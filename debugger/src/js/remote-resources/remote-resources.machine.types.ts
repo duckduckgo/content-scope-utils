@@ -14,6 +14,7 @@ export type RemoteResourcesEvents =
   | { type: 'set editor kind'; payload: EditorKind }
   | { type: 'set current domain'; payload: string }
   | { type: 'set current resource content'; payload: string }
+  | { type: 'revert current content' }
   | { type: 'show original diff' }
   | { type: 'close original diff' }
   | { type: 'clear current domain' }

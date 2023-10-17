@@ -29,7 +29,7 @@ export function TogglesEditor(props) {
       <CurrentDomainManagement {...props} />
       <div className={styles.togglesGrid}>
         <div className={styles.featureList}>
-          <FeatureToggleListGlobal {...props} />
+          <FeatureToggleListGlobal />
         </div>
       </div>
     </div>

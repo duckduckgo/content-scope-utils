@@ -1,9 +1,8 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import styles from './text-editor.module.css'
 import { useMachine } from '@xstate/react'
 import { textEditorMachine } from './text-editor.machine'
 import invariant from 'tiny-invariant'
-import * as monaco from 'monaco-editor'
 
 /**
  * @typedef {import('../remote-resources.machine.types').ContentError} ContentError
@@ -17,15 +16,26 @@ import * as monaco from 'monaco-editor'
  * @param {string} props.defaultValue
  * @param {string} props.lastValue
  * @param {(errors: ContentError[]) => void} props.onErrors
+ * @param {(content: string) => void} props.onContentChanged
  */
 export function TextEditor(props) {
   const domRef = /** @type {import("react").MutableRefObject<HTMLElement | any>} */ (useRef(null))
-  const [model] = useState(() => monaco.editor.createModel(props.lastValue, 'application/json'))
+
+  useEffect(() => {
+    if (props.lastValue === domRef.current.value) {
+      // do nothing
+    } else {
+      domRef.current.value = props.lastValue
+      send({
+        type: 'TextEditor.content-changed',
+        payload: { content: /** @type {any} */ props.lastValue },
+      })
+    }
+  }, [props.lastValue])
 
   const [, send] = useMachine(textEditorMachine, {
     context: {
       id: props.id,
-      model: model,
     },
     actions: {
       setInitialScroll: (_, evt) => {
@@ -43,14 +53,15 @@ export function TextEditor(props) {
       },
       onSetErrors: (_, evt) => {
         invariant(evt.type === 'TextEditor.set-errors')
+        // todo: make errors derived
         props.onErrors(evt.payload)
       },
-      onSetContent: (_, evt) => {
-        invariant(evt.type === 'TextEditor.set-content')
-        invariant(domRef.current, 'domRef.current missing')
-        domRef.current.value = evt.payload.content
+      onUpdateContent: (_, evt) => {
+        invariant(evt.type === 'TextEditor.update-content')
+        props.onContentChanged(evt.payload.content)
       },
     },
+    devTools: true,
   })
 
   return (

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as monaco from 'monaco-editor'
 import { createPortal } from 'react-dom'
 import { Button } from './buttons'
-import { useMonacoErrors } from '../models/monaco-opt-in'
+import { useMonacoContentChanged, useMonacoErrors, useMonacoLastValue } from '../models/monaco-opt-in'
 
 /**
  * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
@@ -19,6 +19,7 @@ import { useMonacoErrors } from '../models/monaco-opt-in'
  * @param {string} props.lastValue
  * @param {string} props.id
  * @param {any} [props.additionalButtons]
+ * @param {(contents: string) => void} props.onContentChanged
  * @param {(errors: ContentError[]) => void} props.onErrors
  */
 export function MonacoDiffEditor(props) {
@@ -28,6 +29,8 @@ export function MonacoDiffEditor(props) {
   const [originalModel] = useState(() => monaco.editor.createModel(props.original, 'application/json'))
 
   useMonacoErrors(props.onErrors)
+  useMonacoContentChanged(props.onContentChanged, model)
+  useMonacoLastValue(props.lastValue, model)
 
   useEffect(() => {
     if (!ref.current) throw new Error('unreachable')

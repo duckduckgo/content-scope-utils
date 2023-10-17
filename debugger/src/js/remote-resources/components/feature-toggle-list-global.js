@@ -15,10 +15,8 @@ window._parse = parse
  */
 
 /**
- * @param {object} props
- * @param {RemoteResource} props.resource
  */
-export function FeatureToggleListGlobal(props) {
+export function FeatureToggleListGlobal() {
   // some local state not stored in xstate (yet)
   const [state, send] = RemoteResourcesContext.useActor()
   const current = state.context.currentDomain || ''

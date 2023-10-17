@@ -1,4 +1,4 @@
-import { assign, createMachine, forwardTo, pure, raise, send, sendTo } from 'xstate'
+import { assign, createMachine, pure, raise, send, sendTo } from 'xstate'
 import { remoteResourceSchema } from '../../../schema/__generated__/schema.parsers.mjs'
 import * as z from 'zod'
 import { DebugToolsMessages } from '../DebugToolsMessages.mjs'
@@ -6,7 +6,6 @@ import invariant from 'tiny-invariant'
 import { UpdateVersion } from '../transforms/update-version'
 import { UpdateFeatureHash } from '../transforms/feature-hash'
 import { handler2 } from '../transforms'
-import { ToggleFeature } from '../transforms/toggle-feature'
 
 /**
  * @typedef {import("./remote-resources.machine.types").RemoteResourcesBroadcastEvents} RemoteResourcesBroadcastEvents
@@ -175,6 +174,9 @@ const _remoteResourcesMachine = createMachine({
             'set current resource content': {
               actions: ['assignCurrentContent', 'markEdited'],
             },
+            'revert current content': {
+              actions: ['revertCurrentContent', 'markEdited'],
+            },
           },
           states: {
             'editor has original content': {
@@ -325,14 +327,15 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
 
       const match = ctx.resources?.find((res) => res.id === ctx.currentResource?.id)
       invariant(match, 'must be referring to a local resource')
+      invariant(ctx.currentResource, 'must have reference to a a current resource')
 
       // any pre-processing to do?
-      let content = evt.content // string
+      let content = ctx.currentResource.lastValue // string
 
       // apply privacy-configuration pre-processing
       if (evt.id === 'privacy-configuration') {
         const original = JSON.parse(match.current.contents)
-        const nextJson = JSON.parse(evt.content)
+        const nextJson = JSON.parse(content)
 
         // to apply hash, both must conform to basic structure
         try {
@@ -410,6 +413,19 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         return {
           ...ctx.currentResource,
           lastValue: evt.payload,
+        }
+      },
+    }),
+    revertCurrentContent: assign({
+      currentResource: (ctx) => {
+        invariant(ctx.currentResource && ctx.currentResource.id, 'ctx.currentResource must be set here')
+        let id = ctx.currentResource.id
+        invariant(ctx.resources, 'ctx.currentResource must be set here')
+        const match = ctx.resources.find((r) => r.id === id)
+        invariant(match, 'must find original source')
+        return {
+          ...ctx.currentResource,
+          lastValue: match.current.contents,
         }
       },
     }),

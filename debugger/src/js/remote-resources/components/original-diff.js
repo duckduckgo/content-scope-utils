@@ -1,6 +1,5 @@
 import { RemoteResourcesContext } from '../remote-resources.page'
-import { useRef, useState } from 'react'
-import * as monaco from 'monaco-editor'
+import { useRef } from 'react'
 import invariant from 'tiny-invariant'
 import MonacoDiffEditor from '../../components/monaco-diff-editor'
 import style from './original-diff.module.css'
@@ -51,9 +50,10 @@ export function OriginalDiff(props) {
  * @param {object} props
  * @param {RemoteResource} props.resource
  * @param {ReactNode} props.buttons
+ * todo: fix this
  */
 export function OriginalDiffEditor(props) {
-  const [state, send] = RemoteResourcesContext.useActor()
+  const [state] = RemoteResourcesContext.useActor()
   invariant(state.context.currentResource?.id, 'must have currentResource?.id')
 
   return (
@@ -63,6 +63,7 @@ export function OriginalDiffEditor(props) {
       lastValue={props.resource.current.contents}
       id={props.resource.id + '__original_diff'}
       onErrors={(e) => console.log('todo: onErrors', e)}
+      onContentChanged={(e) => console.log('todo: onContentChanged', e)}
       edited={true}
       invalid={false}
       pending={false}

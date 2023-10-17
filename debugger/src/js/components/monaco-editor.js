@@ -1,8 +1,7 @@
 import * as monaco from 'monaco-editor'
 import { useEffect, useRef, useState } from 'react'
 import invariant from 'tiny-invariant'
-import { useMonacoErrors } from '../models/monaco-opt-in'
-import { RemoteResourcesContext } from '../remote-resources/remote-resources.page'
+import { useMonacoContentChanged, useMonacoErrors, useMonacoLastValue } from '../models/monaco-opt-in'
 
 /**
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -19,6 +18,7 @@ import { RemoteResourcesContext } from '../remote-resources/remote-resources.pag
  * @param {boolean} props.invalid
  * @param {string} props.lastValue
  * @param {(errors: ContentError[]) => void} props.onErrors
+ * @param {(contents: string) => void} props.onContentChanged
  * @param {string} props.id
  */
 export function MonacoEditor(props) {
@@ -29,6 +29,8 @@ export function MonacoEditor(props) {
 
   // propagate errors
   useMonacoErrors(props.onErrors)
+  useMonacoContentChanged(props.onContentChanged, model)
+  useMonacoLastValue(props.lastValue, model)
 
   useEffect(() => {
     invariant(ref.current, 'ref must exist here')

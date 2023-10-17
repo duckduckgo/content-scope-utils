@@ -37,7 +37,6 @@ export interface SetRemoteUrl {
 export interface SetDebugContent {
   type: 'RemoteResource.setDebugContent'
   id: string
-  content: string
 }
 
 // prettier-ignore

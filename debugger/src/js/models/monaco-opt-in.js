@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 
 /**
  * @typedef {import('../remote-resources/remote-resources.machine.types').ContentError} ContentError
+ * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
  */
 
 /**
@@ -46,4 +47,40 @@ export function useMonacoErrors(onErrors) {
     })
     return () => sub.dispose()
   }, [onErrors])
+}
+
+/**
+ * @param {(content: string) => void} onContentChanged
+ * @param {ITextModel} model
+ */
+export function useMonacoContentChanged(onContentChanged, model) {
+  // listen to local model changes and propagate
+  useEffect(() => {
+    let t
+    const sub = model.onDidChangeContent(() => {
+      clearTimeout(t)
+      t = setTimeout(() => {
+        onContentChanged(model.getValue())
+      }, 500)
+    })
+
+    return () => {
+      sub.dispose()
+      clearTimeout(t)
+    }
+  }, [model])
+}
+
+/**
+ * @param {string} lastValue
+ * @param {ITextModel} model
+ */
+export function useMonacoLastValue(lastValue, model) {
+  useEffect(() => {
+    if (lastValue === model.getValue()) {
+      // do nothing
+    } else {
+      model.setValue(lastValue)
+    }
+  }, [lastValue])
 }

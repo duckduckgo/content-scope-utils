@@ -43,11 +43,11 @@ export const textEditorMachine = createMachine(
           'TextEditor.set-scroll': { actions: forwardTo('scroll-listener') },
           'TextEditor.content-changed': { actions: forwardTo('change-listener') },
           'TextEditor.clear-errors': { actions: ['clearErrors'] },
+          // todo: make errors derived
           'TextEditor.set-errors': { actions: ['onSetErrors'] },
-          'TextEditor.set-content': { actions: ['onSetContent'] },
+          'TextEditor.update-content': { actions: ['onUpdateContent'] },
         },
         invoke: [
-          { src: 'model-listener', id: 'model-listener' },
           { src: 'scroll-listener', id: 'scroll-listener' },
           { src: 'change-listener', id: 'change-listener' },
         ],
@@ -78,30 +78,22 @@ export const textEditorMachine = createMachine(
       },
     },
     services: {
-      'model-listener': (ctx) => (send) => {
-        const sub = ctx.model.onDidChangeContent(() => {
-          const value = ctx.model.getValue()
-          send({ type: 'TextEditor.set-content', payload: { content: value } })
-          const next = errorsFor(value)
-          send({ type: 'TextEditor.set-errors', payload: next })
-        })
-        return () => {
-          sub.dispose()
-        }
-      },
-      'change-listener': (ctx) => (send, onEvent) => {
-        let scrollTimer
+      'change-listener': () => (send, onEvent) => {
+        let debounceTimer
         onEvent((/** @type {TextEditorEvents} */ evt) => {
           invariant(evt.type === 'TextEditor.content-changed', 'should only receive content-changed here')
-          clearTimeout(scrollTimer)
+          clearTimeout(debounceTimer)
           /** @type {string} */
           const value = /** @type {any} */ (evt).payload.content
-          scrollTimer = setTimeout(() => {
-            ctx.model.setValue(value)
+          debounceTimer = setTimeout(() => {
+            send({ type: 'TextEditor.update-content', payload: { content: value } })
+            // todo: make errors derived
+            const next = errorsFor(value)
+            send({ type: 'TextEditor.set-errors', payload: next })
           }, 500)
         })
         return () => {
-          clearTimeout(scrollTimer)
+          clearTimeout(debounceTimer)
         }
       },
       'scroll-listener': (ctx) => (a, onEvent) => {
@@ -139,7 +131,7 @@ export const textEditorMachine = createMachine(
   },
 )
 
-function errorsFor(value) {
+export function errorsFor(value) {
   try {
     JSON.parse(value)
     return []

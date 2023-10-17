@@ -10,6 +10,7 @@ import { RemoteResourcesContext } from '../remote-resources.page'
 /**
  * @param {object} props
  * @param {ITextModel} props.model
+ * todo: reinstate unprotected domains
  */
 export function UnprotectedDomains(props) {
   const parsed = unprotectedFromJsonString(props.model.getValue())

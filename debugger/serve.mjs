@@ -62,9 +62,7 @@ class HttpBackend {
         const response = {
             features: {
                 remoteResources: {
-                    resources: [
-                        this.remoteResourceRefs['privacy-configuration'],
-                    ]
+                    resources: Object.values(this.remoteResourceRefs)
                 }
             }
         }
@@ -194,6 +192,11 @@ const http = new HttpBackend({
             id: 'privacy-configuration',
             url: 'https://staticcdn.duckduckgo.com/trackerblocking/config/v3/android-config.json',
             name: 'Privacy Config'
+        },
+        'tds': {
+            id: 'tds',
+            url: 'https://staticcdn.duckduckgo.com/trackerblocking/v4/tds.json',
+            name: 'Tracker Data Set'
         },
     }
 })

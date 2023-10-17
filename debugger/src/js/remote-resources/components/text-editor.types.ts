@@ -35,8 +35,8 @@ export interface SetErrorsEvent {
   payload: ContentError[]
 }
 
-export interface SetContentEvent {
-  type: 'TextEditor.set-content'
+export interface UpdateContentEvent {
+  type: 'TextEditor.update-content'
   payload: { content: string }
 }
 
@@ -48,7 +48,7 @@ export type TextEditorEvents =
   | ContentChangedEvent
   | ClearErrorsEvent
   | SetErrorsEvent
-  | SetContentEvent
+  | UpdateContentEvent
 
 export type ReadInitialData = Extract<
   TextEditorEvents,
