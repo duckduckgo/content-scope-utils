@@ -38,7 +38,7 @@ function Inner() {
     return state.context.currentDomain
   })
   useEffect(() => {
-    ref.send({ type: 'broadcastCurrentDomain', payload: { domain } })
+    ref.send({ type: 'domain changed', payload: { domain } })
   }, [domain])
   return null
 }

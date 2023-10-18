@@ -1,4 +1,4 @@
-import { assign, createMachine, pure, raise, send, sendTo } from 'xstate'
+import { assign, createMachine, pure, raise, sendTo } from 'xstate'
 import { remoteResourceSchema } from '../../../schema/__generated__/schema.parsers.mjs'
 import * as z from 'zod'
 import { DebugToolsMessages } from '../DebugToolsMessages.mjs'
@@ -6,10 +6,6 @@ import invariant from 'tiny-invariant'
 import { UpdateVersion } from '../transforms/update-version'
 import { UpdateFeatureHash } from '../transforms/feature-hash'
 import { handler2 } from '../transforms'
-
-/**
- * @typedef {import("./remote-resources.machine.types").RemoteResourcesBroadcastEvents} RemoteResourcesBroadcastEvents
- */
 
 /** @type {Record<string, {editorKinds: EditorKind[]}>} */
 const resourceCapabilities = {
@@ -555,53 +551,6 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         raise({ type: 'content was reverted' }),
         raise({ type: 'hide url editor' }),
       ]
-    }),
-    broadcastResourceSelected: pure((ctx) => {
-      return (ctx.children || []).map((child) => {
-        invariant(ctx.currentResource, 'ctx.currentResource absent')
-        /** @type {RemoteResourcesBroadcastEvents} */
-        const event = {
-          type: 'broadcastResourceSelected',
-          payload: {
-            currentResource: ctx.currentResource,
-          },
-        }
-        return send(event, { to: child })
-      })
-    }),
-    broadcastPreUpdate: pure((ctx) => {
-      return (ctx.children || []).map((child) => {
-        invariant(ctx.currentResource, 'ctx.currentResource absent')
-        const resource = ctx.resources?.find((r) => r.id === ctx.currentResource?.id)
-        if (!resource) throw new Error('unreachable')
-        /** @type {RemoteResourcesBroadcastEvents} */
-        const evt = {
-          type: 'broadcastPreResourceUpdated',
-          payload: {
-            currentResource: ctx.currentResource,
-            resource,
-          },
-        }
-        return send(evt, {
-          to: child,
-        })
-      })
-    }),
-    broadcastPostUpdate: pure((ctx) => {
-      return (ctx.children || []).map((child) => {
-        invariant(ctx.currentResource, 'ctx.currentResource absent')
-        const resource = ctx.resources?.find((r) => r.id === ctx.currentResource?.id)
-        if (!resource) throw new Error('unreachable')
-        /** @type {RemoteResourcesBroadcastEvents} */
-        const evt = {
-          type: 'broadcastPostResourceUpdated',
-          payload: {
-            currentResource: ctx.currentResource,
-            resource,
-          },
-        }
-        return send(evt, { to: child })
-      })
     }),
     pushToRoute: (ctx, evt) => {
       const search = z.string().parse(ctx.parent.state?.context?.history?.location?.search)

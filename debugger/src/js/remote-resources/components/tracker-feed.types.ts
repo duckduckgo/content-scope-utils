@@ -17,7 +17,6 @@ export type TrackerFeedEvents =
   | { type: 'add domain entries'; payload: Array<{ requestUrl: string; domain: string }> }
   | { type: 'add match-all entries'; payload: Array<UrlRequestEntry> }
   | { type: 'delete manual entries'; payload: Array<UrlRequestEntry> }
-  | { type: 'subscribeToDomain' }
-  | { type: 'broadcastCurrentDomain'; payload: { domain: string | undefined } }
+  | { type: 'domain changed'; payload: { domain: string | undefined } }
   | { type: 'refresh' }
   | { type: 'reset manual entries' }

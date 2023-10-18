@@ -10,7 +10,7 @@ export const trackerFeedMachine = createMachine(
     },
     initial: 'idle',
     on: {
-      broadcastCurrentDomain: [
+      'domain changed': [
         {
           actions: ['assignDomain'],
           target: 'subscribing',
@@ -63,7 +63,7 @@ export const trackerFeedMachine = createMachine(
     },
     guards: {
       'will-set-domain': (ctx, evt) => {
-        invariant(evt.type === 'broadcastCurrentDomain', `evt.type === 'broadcastCurrentDomain'`)
+        invariant(evt.type === 'domain changed', `evt.type === 'broadcastCurrentDomain'`)
         return typeof evt.payload.domain === 'string'
       },
       'has domain': (ctx) => {
@@ -95,7 +95,7 @@ export const trackerFeedMachine = createMachine(
       },
       assignDomain: assign({
         domain: (ctx, evt) => {
-          invariant(evt.type === 'broadcastCurrentDomain', `evt.type === 'broadcastCurrentDomain'`)
+          invariant(evt.type === 'domain changed', `evt.type === 'broadcastCurrentDomain'`)
           // this could be undefined, that's a valid situation (it means no domain was selected in the UI)
           return evt.payload.domain
         },

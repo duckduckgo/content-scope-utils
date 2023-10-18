@@ -107,28 +107,7 @@ export const patchesMachine = createMachine(
         states: {
           idle: {
             entry: ['raise-if-available'],
-            on: {
-              broadcastPreResourceUpdated: {
-                actions: {
-                  type: 'assignBefore',
-                },
-                internal: true,
-              },
-              broadcastPostResourceUpdated: {
-                target: 'processing',
-                actions: {
-                  type: 'assignAfter',
-                },
-              },
-              broadcastResourceSelected: {
-                target: 'restorePatches',
-                actions: [
-                  {
-                    type: 'assignCurrentId',
-                  },
-                ],
-              },
-            },
+            on: {},
           },
           restorePatches: {
             invoke: {
@@ -181,8 +160,7 @@ export const patchesMachine = createMachine(
       },
     },
     schema: {
-      events:
-        /** @type {import('./remote-resources.machine.types').RemoteResourcesBroadcastEvents | import('../types').PatchesEvents} */ ({}),
+      events: /** @type {import('../types').PatchesEvents} */ ({}),
     },
     predictableActionArguments: true,
     preserveActionOrder: true,
@@ -224,44 +202,6 @@ export const patchesMachine = createMachine(
           return ctx.patches
         },
       }),
-      assignBefore: assign({
-        before: (ctx, evt) => {
-          if (evt.type === 'broadcastPreResourceUpdated') {
-            return {
-              ...ctx.before,
-              [evt.payload.resource.id]: evt.payload.resource.current.contents,
-            }
-          }
-          throw new Error('unreachable')
-        },
-      }),
-      assignCurrentId: assign({
-        currentId: (ctx, evt) => {
-          invariant(evt.type === 'broadcastResourceSelected', 'incorrect evt ' + evt.type)
-          return evt.payload.currentResource.id
-        },
-      }),
-      assignAfter: assign({
-        after: (ctx, evt) => {
-          if (evt.type === 'broadcastPostResourceUpdated') {
-            return {
-              ...ctx.after,
-              [evt.payload.resource.id]: evt.payload.resource.current.contents,
-            }
-          }
-          throw new Error('unreachable')
-        },
-        currentId: (ctx, evt) => {
-          if (evt.type === 'broadcastPostResourceUpdated') {
-            return evt.payload.resource.id
-          }
-          throw new Error('unreachable')
-        },
-      }),
-      showError: (_ctx, evt) => {
-        console.log('TODO: handle showError', evt)
-        alert('TODO: handle showError')
-      },
       storePatches: (ctx) => {
         const parsed = ResourcePatches.safeParse(ctx.patches)
         if (parsed.success) {

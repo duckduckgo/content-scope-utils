@@ -25,8 +25,6 @@ export type RemoteResourcesEvents =
   | { type: 'clearErrors' }
   | { type: 'hide url editor' }
   | { type: 'show url editor' }
-  | { type: 'REGISTER_CHILD' }
-  | { type: 'REMOVE_CHILD' }
   | RemoteResourceMethods
 
   // content
@@ -56,12 +54,6 @@ export interface RemoteResourcesCtx {
   // children?: ActorRef<any>[]
   children?: string[]
 }
-
-export type RemoteResourcesBroadcastEvents =
-  | { type: 'broadcastCurrentDomain'; payload: { domain: string | undefined } }
-  | { type: 'broadcastResourceSelected'; payload: { currentResource: CurrentResource } }
-  | { type: 'broadcastPostResourceUpdated'; payload: { currentResource: CurrentResource; resource: RemoteResource } }
-  | { type: 'broadcastPreResourceUpdated'; payload: { currentResource: CurrentResource; resource: RemoteResource } }
 
 // prettier-ignore
 export type TransformCommands =
