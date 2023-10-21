@@ -2,6 +2,7 @@ import * as monaco from 'monaco-editor'
 import { useEffect, useRef, useState } from 'react'
 import invariant from 'tiny-invariant'
 import { useMonacoContentChanged, useMonacoErrors, useMonacoLastValue } from '../models/monaco-opt-in'
+import { Uri } from 'monaco-editor'
 
 /**
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -25,16 +26,11 @@ export function MonacoEditor(props) {
   const ref = useRef(null)
   /** @type {import("react").MutableRefObject<IStandaloneCodeEditor | null>} */
   const editorRef = useRef(null)
-  const [model] = useState(() => monaco.editor.createModel(props.lastValue, 'application/json'))
-
-  // propagate errors
-  useMonacoErrors(props.onErrors)
-  useMonacoContentChanged(props.onContentChanged, model)
-  useMonacoLastValue(props.lastValue, model)
+  const uri = Uri.file('inline/' + props.id)
 
   useEffect(() => {
     invariant(ref.current, 'ref must exist here')
-
+    const model = monaco.editor.createModel(props.lastValue, 'application/json', uri)
     const editor = monaco.editor.create(ref.current, {
       model: model,
       automaticLayout: false,
@@ -54,9 +50,14 @@ export function MonacoEditor(props) {
 
     return () => {
       clearInterval(int)
+      model.dispose()
       editor?.dispose()
     }
-  }, [model])
+  }, [uri])
+
+  useMonacoErrors(props.onErrors)
+  useMonacoContentChanged(props.onContentChanged, uri)
+  useMonacoLastValue(props.lastValue, uri)
 
   return <div ref={ref} style={{ height: '100%', width: '100%' }}></div>
 }

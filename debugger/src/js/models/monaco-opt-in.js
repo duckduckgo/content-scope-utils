@@ -1,5 +1,6 @@
 import * as monaco from 'monaco-editor'
 import { useEffect } from 'react'
+import invariant from 'tiny-invariant'
 
 /**
  * @typedef {import('../remote-resources/remote-resources.machine.types').ContentError} ContentError
@@ -51,36 +52,50 @@ export function useMonacoErrors(onErrors) {
 
 /**
  * @param {(content: string) => void} onContentChanged
- * @param {ITextModel} model
+ * @param {monaco.Uri} uri
  */
-export function useMonacoContentChanged(onContentChanged, model) {
+export function useMonacoContentChanged(onContentChanged, uri) {
   // listen to local model changes and propagate
   useEffect(() => {
+    const model = monaco.editor.getModel(uri)
+    invariant(model, 'must find by uri: ' + uri.path)
+    if ('__playwright_01' in window) {
+      window.__playwright_01['models'] ??= {}
+      window.__playwright_01['models'][uri.path] = model
+    }
     let t
     const sub = model.onDidChangeContent(() => {
       clearTimeout(t)
-      t = setTimeout(() => {
-        onContentChanged(model.getValue())
-      }, 500)
+      t = setTimeout(
+        () => {
+          onContentChanged(model.getValue())
+        },
+        '__playwright_01' in window ? 0 : 500,
+      )
     })
 
     return () => {
       sub.dispose()
       clearTimeout(t)
+      if (model.uri.path in window.__playwright_01['models']) {
+        Reflect.deleteProperty(window.__playwright_01['models'], model.uri.path)
+      }
     }
-  }, [model])
+  }, [uri])
 }
 
 /**
  * @param {string} lastValue
- * @param {ITextModel} model
+ * @param {monaco.Uri} uri
  */
-export function useMonacoLastValue(lastValue, model) {
+export function useMonacoLastValue(lastValue, uri) {
   useEffect(() => {
+    const model = monaco.editor.getModel(uri)
+    invariant(model, 'must find by uri: ' + uri.path)
     if (lastValue === model.getValue()) {
       // do nothing
     } else {
       model.setValue(lastValue)
     }
-  }, [lastValue])
+  }, [lastValue, uri])
 }

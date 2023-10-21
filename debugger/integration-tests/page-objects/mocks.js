@@ -1,4 +1,5 @@
 import {
+  mockResponses,
   mockWebkitMessaging,
   mockWindowsMessaging,
   readOutgoingMessages,
@@ -24,6 +25,16 @@ export class Mocks {
     this.build = build
     this.platform = platform
     this.messagingContext = messagingContext
+  }
+
+  /**
+   * @param {Record<string, any>} responses
+   * @return {Promise<void>}
+   */
+  async withResponses(responses) {
+    await this.page.evaluate(mockResponses, {
+      responses: responses,
+    })
   }
 
   /**
@@ -59,7 +70,10 @@ export class Mocks {
    * @param {Record<string, any>} responses
    */
   defaultResponses(responses) {
-    this._defaultResponses = responses
+    this._defaultResponses = {
+      ...this._defaultResponses,
+      ...responses,
+    }
   }
 
   /**

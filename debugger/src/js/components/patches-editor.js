@@ -6,6 +6,7 @@ import { MicroButton } from './buttons'
 import { useEffect } from 'react'
 import { MonacoEditorRaw } from './monaco-editor'
 import styles from './patches-editor.module.css'
+import { Uri } from 'monaco-editor'
 
 /**
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -38,7 +39,7 @@ export function PatchesEditor(props) {
    * @type {monaco.editor.ITextModel}
    */
   const patchModel = useConstant(() => {
-    const model = monaco.editor.createModel('[]', 'json')
+    const model = monaco.editor.createModel('[]', 'json', Uri.file('patches'))
 
     // @ts-expect-error - runtime testing
     window._patch_editor_value = () => model.getValue()

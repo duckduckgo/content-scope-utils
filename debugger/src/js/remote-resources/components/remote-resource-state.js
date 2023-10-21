@@ -86,7 +86,7 @@ export function RemoteResourceState(props) {
         {!hasOverride && formatted ? (
           <>
             <DT>Last fetched:</DT>
-            <DD>
+            <DD data-testid="last-fetched-date">
               {formatted}{' '}
               <MicroButton className="ml-3.5" onClick={() => setUrl(props.resource.url)}>
                 {savingRemote ? 'Updating...' : 'Refresh 🔄'}

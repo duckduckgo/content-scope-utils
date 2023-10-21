@@ -36,7 +36,6 @@ const _remoteResourcesMachine = createMachine({
             actions: [
               'assignResources',
               'assignCurrentResource',
-              'broadcastResourceSelected',
               'assignEditorKind',
               'assignCurrentDomain',
               'raiseUpdated',
@@ -70,10 +69,10 @@ const _remoteResourcesMachine = createMachine({
       ],
       on: {
         nav_resource: {
-          actions: ['assignCurrentResource', 'broadcastResourceSelected', 'assignEditorKind', 'assignCurrentDomain'],
+          actions: ['assignCurrentResource', 'assignEditorKind', 'assignCurrentDomain'],
         },
         nav_other: {
-          actions: ['assignCurrentResource', 'broadcastResourceSelected', 'assignEditorKind', 'assignCurrentDomain'],
+          actions: ['assignCurrentResource', 'assignEditorKind', 'assignCurrentDomain'],
         },
         tabs_received: {
           actions: ['assignTabs'],
@@ -221,14 +220,7 @@ const _remoteResourcesMachine = createMachine({
                 onDone: [
                   {
                     target: 'editor has original content',
-                    actions: [
-                      'broadcastPreUpdate',
-                      'updateCurrentResource',
-                      'assignCurrentResource',
-                      'clearErrors',
-                      'raiseUpdated',
-                      'broadcastPostUpdate',
-                    ],
+                    actions: ['updateCurrentResource', 'assignCurrentResource', 'clearErrors', 'raiseUpdated'],
                   },
                 ],
                 onError: [

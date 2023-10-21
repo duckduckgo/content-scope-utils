@@ -1,5 +1,6 @@
 import { test } from '@playwright/test'
 import { DebugToolsPage } from './page-objects/debug-tools'
+import { Resources } from './page-objects/resources'
 
 test.describe('domains', () => {
   test('shows an empty state when no domain is selected', async ({ page, baseURL }, workerInfo) => {
@@ -11,6 +12,8 @@ test.describe('domains', () => {
   })
   test('handles adding a first domain exception', async ({ page, baseURL }, workerInfo) => {
     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
+    const resource = dt.resources.remoteResources.privacyConfig()
+
     await dt.enabled()
     await dt.openRemoteResourceEditor()
     await dt.features.canToggle()
@@ -23,7 +26,7 @@ test.describe('domains', () => {
       await dt.features.toggles({ feature: 'autofill', forDomain: 'example.com' })
 
       // save it
-      await dt.editor.clicksSave()
+      await dt.editor.clicksSave(resource, resource.current.contents)
 
       // ensure we saved the correctly modified JSON
       const saved = await dt.savedWithValue()

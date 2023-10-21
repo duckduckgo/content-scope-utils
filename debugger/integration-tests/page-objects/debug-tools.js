@@ -21,6 +21,7 @@ import { Patches } from './patches'
 
 export const DEFAULT_BASE_VALUE = '{ "foo": "bar" }'
 export const DEFAULT_EDIT_VALUE = '{ "foo": "baz" }'
+export const DEFAULT_UPDATE_VALUE = '{ "updated": true }'
 
 /**
  * @typedef {import('../../src/js/remote-resources/remote-resources.machine').EditorKind} EditorKind
@@ -79,7 +80,7 @@ export class DebugToolsPage {
     /** @type {RemoteResource} */
     const resource = this.resources.remoteResources.privacyConfig()
     /** @type {RemoteResource} */
-    const updatedResource = Resources.updatedResource(resource)
+    const updatedResource = Resources.updatedResource(resource, resource.current.contents)
 
     /** @type {GetFeaturesResponse} */
     const getFeatures = {
@@ -300,14 +301,9 @@ export class DebugToolsPage {
   }
 
   /**
-   * @param {Record<string, any>} params
+   * @param {RemoteResource} resource
    */
-  async withPrivacyConfig(params) {
-    const jsonString = JSON.stringify(params, null, 2)
-
-    /** @type {RemoteResource} */
-    const resource = this.resources.remoteResources.privacyConfig(jsonString)
-
+  async withPrivacyConfig(resource) {
     /** @type {GetFeaturesResponse} */
     const getFeatures = {
       features: {
@@ -325,7 +321,10 @@ export class DebugToolsPage {
     })
   }
 
-  async withTestResources(resource = this.resources.remoteResources.testResource()) {
+  /**
+   * @param {RemoteResource} resource
+   */
+  async withTestResources(resource) {
     /** @type {GetFeaturesResponse} */
     const getFeatures = {
       features: {
@@ -360,5 +359,10 @@ export class DebugToolsPage {
       ...this.globalConfig,
       ...globalConfig,
     }
+  }
+
+  async waitForMemorySave() {
+    const { page } = this
+    await page.waitForTimeout(500)
   }
 }

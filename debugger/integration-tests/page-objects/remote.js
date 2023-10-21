@@ -24,17 +24,21 @@ export class Remote {
     await this.$.remoteFormOverride().click()
   }
 
-  async overrideRemoteUrl() {
+  async overrideRemoteUrl(url = 'https://example.com/override.json') {
     await this.clickToOverride()
     await this.$.remoteFormCopy().click()
-    await this.$.remoteFormInput().fill('https://example.com/override.json')
+    await this.$.remoteFormInput().fill(url)
   }
 
   async submitRemoteUrlForm() {
     await this.$.remoteFormSave().click()
   }
 
-  async refreshedRemote() {
+  /**
+   * @param {string} minutesSeconds
+   * @return {Promise<void>}
+   */
+  async refreshedRemote(minutesSeconds) {
     const calls = await this.mocks.waitForCallCount({ method: 'updateResource', count: 1 })
     expect(calls[0].payload.params).toMatchObject({
       id: 'privacy-configuration',
@@ -44,22 +48,19 @@ export class Remote {
         },
       },
     })
-    const expected = '{\n    "updated": true\n}'
-    await this.editor.waitForEditorToHaveValue(expected)
+    await this.page.getByTestId('last-fetched-date').getByText(minutesSeconds).waitFor()
   }
 
-  async savedNewRemoteUrl() {
+  async savedNewRemoteUrl(override) {
     const calls = await this.mocks.waitForCallCount({ method: 'updateResource', count: 1 })
     expect(calls[0].payload.params).toMatchObject({
       id: 'privacy-configuration',
       source: {
         remote: {
-          url: 'https://example.com/override.json',
+          url: override,
         },
       },
     })
-    const expected = '{\n    "updated": true\n}'
-    await this.editor.waitForEditorToHaveValue(expected)
   }
 
   async refreshesCurrentResource() {

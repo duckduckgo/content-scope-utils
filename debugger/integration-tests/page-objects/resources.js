@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs'
-import { DEFAULT_BASE_VALUE } from './debug-tools'
+import { DEFAULT_BASE_VALUE, DEFAULT_EDIT_VALUE, DEFAULT_UPDATE_VALUE } from './debug-tools'
 
 export class Resources {
   /**
@@ -15,7 +15,7 @@ export class Resources {
        * @param {string} content
        * @return {import('../../schema/__generated__/schema.types').RemoteResource}
        */
-      testResource: (content = DEFAULT_BASE_VALUE) => {
+      testResource: (content) => {
         /** @type {import('../../schema/__generated__/schema.types').RemoteResource} */
         const resource = {
           id: 'test-resource',
@@ -58,7 +58,7 @@ export class Resources {
    * @param {string} contents
    * @return {import('../../schema/__generated__/schema.types').RemoteResource}
    */
-  static updatedResource(resource, contents = '{ "updated": true }') {
+  static updatedResource(resource, contents) {
     /** @type {import('../../schema/__generated__/schema.types').RemoteResource} */
     return {
       ...resource,
@@ -66,6 +66,28 @@ export class Resources {
         source: {
           debugTools: {
             modifiedAt: '2023-07-05T12:34:56Z',
+          },
+        },
+        contents,
+        contentType: 'application/json',
+      },
+    }
+  }
+  /**
+   * @param {import('../../schema/__generated__/schema.types').RemoteResource} resource
+   * @param {string} contents
+   * @param {string} url
+   * @return {import('../../schema/__generated__/schema.types').RemoteResource}
+   */
+  static updatedUrl(resource, url, contents = '{ "updated": true }') {
+    /** @type {import('../../schema/__generated__/schema.types').RemoteResource} */
+    return {
+      ...resource,
+      current: {
+        source: {
+          remote: {
+            url: url,
+            fetchedAt: '2023-07-05T12:34:56Z',
           },
         },
         contents,
