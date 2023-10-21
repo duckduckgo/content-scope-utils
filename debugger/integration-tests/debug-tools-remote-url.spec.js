@@ -35,6 +35,7 @@ test.describe('remote url', () => {
     await dt.remote.overrideRemoteUrl(override)
     await dt.remote.submitRemoteUrlForm()
     await dt.remote.savedNewRemoteUrl(override)
+    await page.pause()
   })
   test('shows an error on updating a resource', async ({ page, baseURL }, workerInfo) => {
     const dt = DebugToolsPage.create(page, baseURL, workerInfo)

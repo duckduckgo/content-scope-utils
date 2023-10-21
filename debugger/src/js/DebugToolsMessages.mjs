@@ -18,9 +18,11 @@
 import {
   getFeaturesResponseSchema,
   getRemoteResourceParamsSchema,
-  getTabsResponseSchema, getTrackersParamsSchema, getTrackersResponseSchema,
+  getTabsResponseSchema,
+  getTrackersParamsSchema,
+  getTrackersResponseSchema,
   remoteResourceSchema,
-  updateResourceParamsSchema
+  updateResourceParamsSchema,
 } from '../../schema/__generated__/schema.parsers.mjs'
 import { createContext } from 'react'
 import { GlobalConfig } from './global-config.mjs'
@@ -67,7 +69,7 @@ export class DebugToolsMessages {
       features: {
         ...parsed.features,
         // add additional features here if the native side isn't ready
-      }
+      },
     }
   }
 
@@ -199,9 +201,9 @@ export class DebugToolsMessages {
    * @param {GetTrackersParams} params
    */
   async getTrackers(params) {
-    const outgoing = getTrackersParamsSchema.parse(params);
+    const outgoing = getTrackersParamsSchema.parse(params)
     const response = await this.messaging.request('getTrackers', outgoing)
-    const parsed = getTrackersResponseSchema.safeParse(response);
+    const parsed = getTrackersResponseSchema.safeParse(response)
 
     if (parsed.success) {
       return parsed.data
@@ -226,9 +228,9 @@ export class DebugToolsMessages {
    * @param {(data: GetTrackersResponse) => void} callback
    */
   createTrackersSubscription(params, callback) {
-    this.subscribeToTrackers(params);
+    this.subscribeToTrackers(params)
     const unsubscribe = this.messaging.subscribe('onTrackersUpdated', (params) => {
-      const parsed = getTrackersResponseSchema.safeParse(params);
+      const parsed = getTrackersResponseSchema.safeParse(params)
       if (parsed.success) {
         callback(parsed.data)
       } else {
@@ -237,7 +239,7 @@ export class DebugToolsMessages {
     })
     return () => {
       unsubscribe()
-      this.unsubscribeToTrackers();
+      this.unsubscribeToTrackers()
     }
   }
 }
@@ -265,5 +267,5 @@ export const GlobalContext = createContext({
   /** @type {import("history").History | null} */
   history: null,
   /** @type {import("./global-config.mjs").GlobalConfig} */
-  globalConfig: GlobalConfig.parse({})
+  globalConfig: GlobalConfig.parse({}),
 })

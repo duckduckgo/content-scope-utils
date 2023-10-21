@@ -15,7 +15,9 @@ declare module '*.css' {
 interface Window {
   _test_editor_value: () => string
   _test_editor_set_value: (value: string) => void
-  __playwright_01: any
+  __playwright_01: {
+    models: Record<string, any>
+  }
 }
 
 /**

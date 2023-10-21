@@ -1,17 +1,17 @@
 .root {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    grid-template-areas: 'header' 'main' 'footer';
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas: 'header' 'main' 'footer';
 }
 .header {
-    grid-area: header;
+  grid-area: header;
 }
 .main {
-    grid-area: main;
-    border: 1px dotted black;
+  grid-area: main;
+  border: 1px dotted black;
 }
 .footer {
-    grid-area: footer;
-    padding: var(--ddg-ui-gutter);
-    box-shadow: 0 0 3px #8e8e8e;
+  grid-area: footer;
+  padding: var(--ddg-ui-gutter);
+  box-shadow: 0 0 3px #8e8e8e;
 }

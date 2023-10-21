@@ -12,15 +12,8 @@
       "settings": {
         "deepExtractionEnabled": true,
         "deepExtractionTimeout": 1500,
-        "linkFormats": [
-          "^https?:\\/\\/(?:w{3}\\.)?google\\.\\S{2,}\\/amp\\/s\\/(\\S+)$"
-        ],
-        "keywords": [
-          "=amp",
-          "amp=",
-          "&amp",
-          "amp&"
-        ]
+        "linkFormats": ["^https?:\\/\\/(?:w{3}\\.)?google\\.\\S{2,}\\/amp\\/s\\/(\\S+)$"],
+        "keywords": ["=amp", "amp=", "&amp", "amp&"]
       },
       "state": "enabled",
       "hash": "15f5da5429e7fd7145c35ed920d28c35"
@@ -33,9 +26,7 @@
             "rules": [
               {
                 "rule": "tlx.3lift.com/header/auction",
-                "domains": [
-                  "aternos.org"
-                ],
+                "domains": ["aternos.org"],
                 "reason": "https://github.com/duckduckgo/privacy-configuration/issues/328"
               }
             ]

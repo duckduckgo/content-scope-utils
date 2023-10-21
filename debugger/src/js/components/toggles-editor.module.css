@@ -6,11 +6,8 @@
 }
 
 .featureList {
-  grid-area: feature-list
+  grid-area: feature-list;
 }
 .trackerFeed {
-  grid-area: tracker-feed
+  grid-area: tracker-feed;
 }
-
-
-

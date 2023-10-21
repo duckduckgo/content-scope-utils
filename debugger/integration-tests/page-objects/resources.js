@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs'
-import { DEFAULT_BASE_VALUE, DEFAULT_EDIT_VALUE, DEFAULT_UPDATE_VALUE } from './debug-tools'
 
 export class Resources {
   /**

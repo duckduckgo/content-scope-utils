@@ -14,4 +14,5 @@ npm start
 ```
 
 Then, in a supported browser like macOS, open the page like
+
 - http://localhost:3210/?platform=apple#/remoteResources

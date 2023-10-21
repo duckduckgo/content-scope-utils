@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import * as monaco from 'monaco-editor'
 import { createPortal } from 'react-dom'
 import { Button } from './buttons'

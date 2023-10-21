@@ -7,7 +7,7 @@ import {
 } from './page-objects/debug-tools'
 import { Resources } from './page-objects/resources'
 
-test.describe.only('editor', () => {
+test.describe('editor', () => {
   test('updates a resource current content', async ({ page, baseURL }, workerInfo) => {
     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
 

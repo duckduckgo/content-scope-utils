@@ -1,6 +1,5 @@
 import { test } from '@playwright/test'
 import { DebugToolsPage } from './page-objects/debug-tools'
-import { Resources } from './page-objects/resources'
 
 test.describe('domains', () => {
   test('shows an empty state when no domain is selected', async ({ page, baseURL }, workerInfo) => {

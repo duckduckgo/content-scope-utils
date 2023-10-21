@@ -48,7 +48,7 @@ test.describe('debug tools privacy config', () => {
       await dt.openRemoteResourceEditor()
       await dt.features.canToggle('abc')
       await dt.switchesTo('inline')
-      const v = await dt.editor.setsEditorValue({ editorKind: 'inline', editorPath: resource.id }, editedString)
+      await dt.editor.setsEditorValue({ editorKind: 'inline', editorPath: resource.id }, editedString)
       await dt.editor.clicksSave(resource, editedString)
 
       const saved = await dt.savedWithValue()

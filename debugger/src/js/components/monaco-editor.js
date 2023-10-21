@@ -1,5 +1,5 @@
 import * as monaco from 'monaco-editor'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import invariant from 'tiny-invariant'
 import { useMonacoContentChanged, useMonacoErrors, useMonacoLastValue } from '../models/monaco-opt-in'
 import { Uri } from 'monaco-editor'

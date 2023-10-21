@@ -51,7 +51,7 @@ if (NODE_ENV === 'production') {
 }
 
 // build schema
-execSync('node schema.mjs', {stdio: 'inherit'});
+execSync('node schema.mjs', { stdio: 'inherit' })
 
 const buildJob = {
   src: join(CWD, 'src/js/index.js'),

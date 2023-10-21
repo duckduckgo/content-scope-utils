@@ -71,8 +71,8 @@ function createDebugProxy(instance) {
   })
 }
 
-// const messages = createDebugProxy(new DebugToolsMessages(messagingInstance))
-const messages = new DebugToolsMessages(messagingInstance)
+const messages = createDebugProxy(new DebugToolsMessages(messagingInstance))
+// const messages = new DebugToolsMessages(messagingInstance)
 
 /**
  * History instance for navigation
