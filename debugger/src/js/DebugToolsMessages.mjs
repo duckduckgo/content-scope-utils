@@ -24,8 +24,6 @@ import {
   remoteResourceSchema,
   updateResourceParamsSchema,
 } from '../../schema/__generated__/schema.parsers.mjs'
-import { createContext } from 'react'
-import { GlobalConfig } from './global-config.mjs'
 
 /**
  * @typedef {import("../../schema/__generated__/schema.types").RemoteResource} RemoteResource
@@ -257,15 +255,3 @@ function formatResource(input) {
     },
   }
 }
-
-/**
- * @internal
- */
-export const GlobalContext = createContext({
-  /** @type {DebugToolsMessages | null} */
-  messages: null,
-  /** @type {import("history").History | null} */
-  history: null,
-  /** @type {import("./global-config.mjs").GlobalConfig} */
-  globalConfig: GlobalConfig.parse({}),
-})

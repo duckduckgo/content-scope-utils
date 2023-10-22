@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="serve.mjs" type="NodeJSConfigurationType" nameIsGenerated="true" path-to-js-file="serve.mjs" working-dir="$PROJECT_DIR$/debugger">
+    <method v="2" />
+  </configuration>
+</component>

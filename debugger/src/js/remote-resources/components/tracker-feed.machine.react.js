@@ -1,9 +1,9 @@
 import { createActorContext } from '@xstate/react'
 import { useContext, useEffect } from 'react'
-import { GlobalContext } from '../../DebugToolsMessages.mjs'
 import invariant from 'tiny-invariant'
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { trackerFeedMachine } from './tracker-feed.machine'
+import { GlobalContext } from '../../global-config.react'
 
 export const TrackerFeedContext = createActorContext(trackerFeedMachine, { devTools: true })
 

@@ -42,14 +42,17 @@ export class DebugToolsPage {
     this.build = build
     this.baseURL = baseURL
     this.platform = platform
-    this.mocks = new Mocks(page, build, platform, {
+    this.resources = new Resources(this.page)
+
+    this.mocks = new Mocks(page, this.resources, build, platform, {
       context: 'specialPages',
       featureName: 'debugToolsPage',
       env: 'development',
     })
 
+    this.mocks.withDefaultResponses()
+
     // sub-testing modules
-    this.resources = new Resources(this.page)
     this.editor = new Editor(this.page, this.mocks, this.resources)
     this.features = new Features(this.page)
     this.remote = new Remote(this.page, this.mocks, this.editor)
@@ -59,6 +62,8 @@ export class DebugToolsPage {
     this.globalConfig = {
       editor: 'monaco',
       platform: this.build.name,
+      editorSaveTimeout: 0,
+      debugMessaging: 'silent',
     }
 
     this.$ = new (class Selectors {
@@ -76,35 +81,20 @@ export class DebugToolsPage {
       patchesScreen = () => page.getByTestId('PatchesEditor')
     })()
 
-    // default mocks - just enough to render the first page without error
-    /** @type {RemoteResource} */
-    const resource = this.resources.remoteResources.privacyConfig()
-    /** @type {RemoteResource} */
-    const updatedResource = Resources.updatedResource(resource, resource.current.contents)
-
-    /** @type {GetFeaturesResponse} */
-    const getFeatures = {
-      features: {
-        remoteResources: {
-          resources: [resource],
-        },
-      },
-    }
-
-    /** @type {GetTabsResponse} */
-    const getTabs = {
-      tabs: [],
-    }
-
-    this.mocks.defaultResponses({
-      getFeatures,
-      getTabs,
-      getRemoteResource: resource,
-      updateResource: updatedResource,
-    })
-
     page.on('console', (msg) => {
-      console.log(msg.type(), msg.text())
+      if (msg.text().includes('Download the React DevTools')) {
+        return
+      }
+      switch (msg.type()) {
+        case 'error':
+          return console.error('🌐❌ console.%s', msg.type(), msg.text())
+        case 'warn':
+          return console.warn('🌐⚠️ console.%s', msg.type(), msg.text())
+        case 'log':
+          return console.log('🌐ℹ️️ console.%s', msg.type(), msg.text())
+        default:
+          return console.log('🌐 console.%s', msg.type(), msg.text())
+      }
     })
   }
 
@@ -114,12 +104,12 @@ export class DebugToolsPage {
    * @param {string} [pathname] optional starting path
    * @return {Promise<void>}
    */
-  async openPage(urlParams, pathname = '/remoteResources') {
+  async openPage(urlParams, pathname) {
     const url = new URL(this.basePath, this.baseURL)
 
     // assign global config elements
     for (let [key, value] of Object.entries(this.globalConfig)) {
-      url.searchParams.append(key, value)
+      url.searchParams.append(key, String(value))
     }
     url.hash = pathname + '?' + urlParams.toString()
     await this.page.goto(url.href)
@@ -164,7 +154,7 @@ export class DebugToolsPage {
    */
   async openRemoteResourceEditor() {
     const params = new URLSearchParams({})
-    await this.openPage(params)
+    await this.openPage(params, '/remoteResources')
   }
 
   /**
@@ -176,7 +166,7 @@ export class DebugToolsPage {
       editorKind: 'toggles',
       ...params,
     })
-    await this.openPage(hashParams)
+    await this.openPage(hashParams, '/remoteResources')
   }
 
   async savedWithValue() {

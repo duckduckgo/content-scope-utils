@@ -10,19 +10,17 @@
  * - {@link "Debug Tools Messaging"}
  *
  */
-import { DebugToolsMessages, GlobalContext } from './DebugToolsMessages.mjs'
-import { createSpecialPagesMessaging } from './create-messaging'
 import { createRoot } from 'react-dom/client'
 import { inspect } from '@xstate/inspect'
 import { appMachine } from './app/app.machine'
-import { MockImpl } from './mock-transport'
 import { App, AppMachineContext } from './app/components/app'
 import { createHashHistory } from 'history'
 import { TextModelContext } from './models/text-model'
 import { configAwareFactory, GlobalConfig } from './global-config.mjs'
-import { HttpImpl } from './http-transport'
+import { GlobalContext } from './global-config.react'
 
 const params = new URLSearchParams(window.location.search)
+const globalConfig = GlobalConfig.parse(Object.fromEntries(params))
 
 /**
  * xstate debugging - add the `?inspect` param
@@ -33,46 +31,8 @@ if (params.has('inspect')) {
   })
 }
 
-if (!params.has('platform')) {
-  console.warn('platform missing from URL Search Params', 'defaulting to apple')
-}
-
-const injectName = /** @type {any} */ (params.get('platform') || 'apple')
-
-/**
- * Communications
- */
-const messagingInstance = createSpecialPagesMessaging({
-  injectName: injectName,
-  env: import.meta.env,
-  featureName: 'debugToolsPage',
-  mockImpl: () => new MockImpl(),
-  httpImpl: (ctx) => new HttpImpl(ctx),
-})
-
-function createDebugProxy(instance) {
-  return new Proxy(instance, {
-    get(target, propKey, receiver) {
-      if (typeof propKey !== 'string') return Reflect.get(target, propKey, receiver)
-      const origMethod = target[propKey]
-
-      // Check if it's a function (ignoring properties)
-      if (typeof origMethod === 'function') {
-        return function (...args) {
-          console.log(`Called: ${propKey} with arguments:`, args)
-          // Call the original method using Reflect
-          return Reflect.apply(origMethod, target, args)
-        }
-      }
-
-      // Handle properties by simply returning them
-      return Reflect.get(target, propKey, receiver)
-    },
-  })
-}
-
-const messages = createDebugProxy(new DebugToolsMessages(messagingInstance))
-// const messages = new DebugToolsMessages(messagingInstance)
+const factory = configAwareFactory(globalConfig)
+const messages = factory.createDebugMessages()
 
 /**
  * History instance for navigation
@@ -141,9 +101,6 @@ const withContext = appMachine.withContext({
 })
 
 ;(async () => {
-  const globalConfig = GlobalConfig.parse(Object.fromEntries(params))
-  const factory = configAwareFactory(globalConfig)
-
   // factory for text models
   const createTextModelFactory = await factory.createTextModelFactory()
 

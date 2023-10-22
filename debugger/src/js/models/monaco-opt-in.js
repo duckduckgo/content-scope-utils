@@ -1,6 +1,7 @@
 import * as monaco from 'monaco-editor'
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import invariant from 'tiny-invariant'
+import { GlobalContext } from '../global-config.react'
 
 /**
  * @typedef {import('../remote-resources/remote-resources.machine.types').ContentError} ContentError
@@ -55,33 +56,34 @@ export function useMonacoErrors(onErrors) {
  * @param {monaco.Uri} uri
  */
 export function useMonacoContentChanged(onContentChanged, uri) {
+  const { globalConfig } = useContext(GlobalContext)
+  const { editorSaveTimeout } = globalConfig
   // listen to local model changes and propagate
   useEffect(() => {
     const model = monaco.editor.getModel(uri)
     invariant(model, 'must find by uri: ' + uri.path)
-    if ('__playwright_01' in window) {
+    if (window.__playwright_01) {
       window.__playwright_01['models'] ??= {}
       window.__playwright_01['models'][uri.path] = model
     }
-    let t
+    let timeout
     const sub = model.onDidChangeContent(() => {
-      clearTimeout(t)
-      t = setTimeout(
-        () => {
-          onContentChanged(model.getValue())
-        },
-        '__playwright_01' in window ? 0 : 500,
-      )
+      clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        onContentChanged(model.getValue())
+      }, editorSaveTimeout)
     })
 
     return () => {
       sub.dispose()
-      clearTimeout(t)
-      if (model.uri.path in window.__playwright_01['models']) {
-        Reflect.deleteProperty(window.__playwright_01['models'], model.uri.path)
+      clearTimeout(timeout)
+      if (window.__playwright_01) {
+        if (model.uri.path in window.__playwright_01['models']) {
+          Reflect.deleteProperty(window.__playwright_01['models'], model.uri.path)
+        }
       }
     }
-  }, [uri])
+  }, [uri, editorSaveTimeout])
 }
 
 /**

@@ -9,9 +9,9 @@ import { Button } from '../../components/buttons'
 import { Sidebar } from './sidebar'
 import { DiffViewer } from '../../components/diff-viewer'
 import { TextEditor } from './text-editor'
-import { GlobalContext } from '../../DebugToolsMessages.mjs'
 import { TrackersEditor } from '../../components/trackers-editor'
 import * as monaco from 'monaco-editor'
+import { GlobalContext } from '../../global-config.react'
 
 const MonacoEditor = lazy(() => import('../../components/monaco-editor.js'))
 const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))

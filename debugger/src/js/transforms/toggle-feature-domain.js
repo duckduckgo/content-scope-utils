@@ -56,7 +56,6 @@ export class ToggleFeatureDomain {
    * @internal
    */
   async transform(config) {
-    console.log(this.params.feature, this.params.domain)
     return toggleException(config, this.params.feature, this.params.domain)
   }
 }

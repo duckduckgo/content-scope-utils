@@ -1,12 +1,12 @@
 import { createActorContext } from '@xstate/react'
 import { remoteResourcesMachine } from './remote-resources.machine'
 import { useContext } from 'react'
-import { GlobalContext } from '../DebugToolsMessages.mjs'
 import { AppMachineContext } from '../app/components/app'
 import { RemoteResources } from './components/remote-resources'
 import invariant from 'tiny-invariant'
 import { PatchesProvider } from './patches-machine.react'
 import { TrackerFeedProvider } from './components/tracker-feed.machine.react'
+import { GlobalContext } from '../global-config.react'
 
 export const RemoteResourcesContext = createActorContext(remoteResourcesMachine, { devTools: true })
 

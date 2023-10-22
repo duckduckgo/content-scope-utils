@@ -11,18 +11,20 @@
 export class HttpImpl {
   /**
    * @param {MessagingContext} ctx
+   * @param {{debug: boolean}} opts
    */
-  constructor(ctx) {
+  constructor(ctx, opts) {
     this.ctx = ctx
+    this.opts = opts
   }
   notify(msg) {
     switch (msg.method) {
       case 'subscribeToTrackers': {
-        console.warn('subscribeToTrackers not implemented')
+        this.debug('subscribeToTrackers not implemented')
         break
       }
       case 'unsubscribeToTrackers': {
-        console.warn('unsubscribeToTrackers not implemented')
+        this.debug('unsubscribeToTrackers not implemented')
         break
       }
       default:
@@ -34,7 +36,10 @@ export class HttpImpl {
    * @param {import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").RequestMessage} msg
    */
   async request(msg) {
-    if (msg.method === 'getTabs') return { tabs: [] }
+    if (msg.method === 'getTabs') {
+      this.debug('returning empty for getTabs')
+      return { tabs: [] }
+    }
     let path = `/${this.ctx.context}/${this.ctx.featureName}`
     const url = new URL(path, location.href)
     const res = fetch(url, {
@@ -57,7 +62,7 @@ export class HttpImpl {
   }
 
   subscribe(msg) {
-    console.warn('subscription not implemented', msg.subscriptionName)
+    this.debug('subscription not implemented', msg.subscriptionName)
     // if (msg.subscriptionName === 'onTabsUpdated') {
     //   throw new Error("msg.onTabsUpdated === 'onTrackersUpdated' not implemented")
     // }
@@ -65,5 +70,13 @@ export class HttpImpl {
     //   throw new Error("msg.subscriptionName === 'onTrackersUpdated' not implemented")
     // }
     return () => {}
+  }
+
+  warn() {}
+
+  debug(...args) {
+    if (this.opts.debug) {
+      console.log('http-transport: debug: ', ...args)
+    }
   }
 }

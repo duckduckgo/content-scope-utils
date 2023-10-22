@@ -1,8 +1,5 @@
 {
   "entryPoints": [
-    "lib/index.js",
-    "lib/messaging.js",
-    "lib/messaging/webkit.js",
     "debugger/schema/__generated__/schema.types.ts",
     "debugger/src/js/DebugToolsMessages.mjs",
     "debugger/src/js/index.js",

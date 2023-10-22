@@ -15,11 +15,12 @@ test.describe('remote url', () => {
       getRemoteResource: resource,
       updateResource: updated,
     })
+
     await dt.enabled()
     await dt.openRemoteResourceEditor()
     await dt.features.canToggle()
     await dt.remote.refreshesCurrentResource()
-    await dt.remote.refreshedRemote('35:56')
+    await dt.remote.refreshedRemote('35:56') // this is from the new timestamp above
   })
   test('sets a new remote url', async ({ page, baseURL }, workerInfo) => {
     const override = 'https://example.com/override.json'

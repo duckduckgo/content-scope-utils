@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as monaco from 'monaco-editor'
 import { createPortal } from 'react-dom'
 import { Button } from './buttons'
@@ -26,7 +26,7 @@ import { Uri } from 'monaco-editor'
 export function MonacoDiffEditor(props) {
   const ref = useRef(null)
   const editorRefs = /** @type {import('react').MutableRefObject} */ (useRef({}))
-  const uri = Uri.file('diff/current/' + props.id)
+  const uri = useMemo(() => Uri.file('diff/current/' + props.id), [props.id])
 
   useEffect(() => {
     if (!ref.current) throw new Error('unreachable')

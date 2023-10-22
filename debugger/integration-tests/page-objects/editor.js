@@ -62,6 +62,7 @@ export class Editor {
     const path = '/' + [editorLocator.editorKind, editorLocator.editorPath].join('/')
     await page.evaluate(
       ({ value, path }) => {
+        if (!window.__playwright_01) return
         if (!(path in window.__playwright_01['models'])) {
           throw new Error('missing path model' + path)
         }

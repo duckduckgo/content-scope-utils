@@ -1,12 +1,41 @@
 import z from 'zod'
+import { HttpImpl } from './http-transport'
+import { DebugToolsMessages } from './DebugToolsMessages.mjs'
+import { createSpecialPagesMessaging } from './create-messaging.js'
+import { MockImpl } from './mock-transport.js'
 
 export const GlobalConfig = z.object({
   editor: z.enum(['simple', 'monaco']).default('monaco'),
-  platform: z.string().default('integration'),
+  editorSaveTimeout: z
+    .number({
+      description: 'how long to debounce changes before persisting',
+      required_error: 'editorSaveTimeout was missing',
+      invalid_type_error: 'editorSaveTimeout must be a number',
+      coerce: true,
+    })
+    .default(500),
+  platform: z
+    .enum(['windows', 'apple', 'integration', 'http'])
+    .default('integration')
+    .catch((ctx) => {
+      console.warn('DEFAULT used for `platform`: ', 'integration')
+      console.warn(ctx.error)
+      return 'integration'
+    }),
+  debugMessaging: z
+    .enum(['silent', 'verbose'])
+    .default('silent')
+    .catch((ctx) => {
+      console.warn('DEFAULT used for `debugMessaging`: ', 'silent')
+      console.warn(ctx.error)
+      return 'silent'
+    }),
 })
 
 /**
  * @typedef {import("zod").infer<typeof GlobalConfig>} GlobalConfig
+ * @typedef {import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").Messaging} Messaging
+ * @typedef {import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").MessagingContext} MessagingContext
  */
 
 /**
@@ -23,5 +52,51 @@ export function configAwareFactory(globalConfig) {
       const { createTextModel } = await import(`./models/${model}`)
       return createTextModel
     },
+    /**
+     * @return {DebugToolsMessages}
+     */
+    createDebugMessages() {
+      /**
+       * create the per-platform comms
+       */
+      const messagingInstance = createSpecialPagesMessaging({
+        injectName: globalConfig.platform,
+        env: import.meta.env,
+        featureName: 'debugToolsPage',
+        mockImpl: () => new MockImpl(),
+        httpImpl: (ctx) =>
+          new HttpImpl(ctx, {
+            debug: globalConfig.debugMessaging === 'verbose',
+          }),
+      })
+
+      /**
+       * Optionally wrap it in a proxy
+       */
+      return globalConfig.debugMessaging === 'verbose'
+        ? createDebugProxy(new DebugToolsMessages(messagingInstance))
+        : new DebugToolsMessages(messagingInstance)
+    },
   }
+}
+
+function createDebugProxy(instance) {
+  return new Proxy(instance, {
+    get(target, propKey, receiver) {
+      if (typeof propKey !== 'string') return Reflect.get(target, propKey, receiver)
+      const origMethod = target[propKey]
+
+      // Check if it's a function (ignoring properties)
+      if (typeof origMethod === 'function') {
+        return function (...args) {
+          console.log(`Called: ${propKey} with arguments:`, args)
+          // Call the original method using Reflect
+          return Reflect.apply(origMethod, target, args)
+        }
+      }
+
+      // Handle properties by simply returning them
+      return Reflect.get(target, propKey, receiver)
+    },
+  })
 }

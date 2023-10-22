@@ -1,5 +1,5 @@
 import * as monaco from 'monaco-editor'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import invariant from 'tiny-invariant'
 import { useMonacoContentChanged, useMonacoErrors, useMonacoLastValue } from '../models/monaco-opt-in'
 import { Uri } from 'monaco-editor'
@@ -26,7 +26,7 @@ export function MonacoEditor(props) {
   const ref = useRef(null)
   /** @type {import("react").MutableRefObject<IStandaloneCodeEditor | null>} */
   const editorRef = useRef(null)
-  const uri = Uri.file('inline/' + props.id)
+  const uri = useMemo(() => Uri.file('inline/' + props.id), [props.id])
 
   useEffect(() => {
     invariant(ref.current, 'ref must exist here')
@@ -41,7 +41,7 @@ export function MonacoEditor(props) {
       editor.restoreViewState(JSON.parse(prev))
     }
 
-    // todo(Shane): move this from the component
+    // todo(Shane): move this from the the component
     const int = setInterval(() => {
       localStorage.setItem('viewState_' + props.id, JSON.stringify(editor.saveViewState()))
     }, 1000)
