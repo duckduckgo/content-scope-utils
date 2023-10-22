@@ -200,6 +200,22 @@ function Override(props) {
               Show Diff with Original
             </MicroButton>
           </DD>
+          {/* todo: make reusable */}
+          {edited && (
+            <>
+              <DT>
+                <span>🔵 LOCAL EDITS:</span>
+              </DT>
+              <DD>
+                <MicroButton onClick={revertEdited}>↩️ Revert</MicroButton>
+                {editorKind !== 'diff' && (
+                  <MicroButton className="ml-3.5" onClick={showDiff}>
+                    Show Diff
+                  </MicroButton>
+                )}
+              </DD>
+            </>
+          )}
         </InlineDL>
         <InlineDL>
           <DT>Fetched at:</DT>

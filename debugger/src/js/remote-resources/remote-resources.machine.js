@@ -251,7 +251,8 @@ const _remoteResourcesMachine = createMachine({
 export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
   services: {
     fetchOriginal: async (ctx) => {
-      return ctx.messages.getRemoteResource({ id: 'privacy-configuration', original: true })
+      invariant(ctx.currentResource, 'to fetch original, must have existing ctx.currentResource.id')
+      return ctx.messages.getRemoteResource({ id: ctx.currentResource.id, original: true })
     },
     'nav-listener': (ctx) => (send) => {
       const sub = ctx.parent.subscribe((evt) => {

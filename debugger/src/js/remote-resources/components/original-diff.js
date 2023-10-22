@@ -50,7 +50,7 @@ export function OriginalDiff(props) {
  * @param {object} props
  * @param {RemoteResource} props.resource
  * @param {ReactNode} props.buttons
- * todo: fix this
+ * todo: next up, add meta data to the top of each side
  */
 export function OriginalDiffEditor(props) {
   const [state] = RemoteResourcesContext.useActor()
