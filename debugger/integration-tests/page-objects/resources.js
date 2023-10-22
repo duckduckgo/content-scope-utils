@@ -20,6 +20,7 @@ export class Resources {
           id: 'test-resource',
           url: 'https://example.com/test-resource.json',
           name: 'Test Resource',
+          kind: 'text',
           current: {
             source: {
               remote: {
@@ -33,11 +34,16 @@ export class Resources {
         }
         return resource
       },
+      /**
+       * @return {import('../../schema/__generated__/schema.types').RemoteResource}
+       */
       privacyConfig: (contents = this.remoteResources.macos()) => {
-        return {
+        /** @type {import('../../schema/__generated__/schema.types').RemoteResource} */
+        const resource = {
           id: 'privacy-configuration',
           url: 'https://example.com/macos-config.json',
           name: 'Privacy Config',
+          kind: 'privacy-configuration',
           current: {
             source: {
               remote: {
@@ -49,6 +55,7 @@ export class Resources {
             contentType: 'application/json',
           },
         }
+        return resource
       },
     }
   }

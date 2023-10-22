@@ -33,6 +33,8 @@ export type RemoteResourcesEvents =
   | { type: 'content is invalid'; errors: ContentError[] }
   | { type: 'content is valid' }
   | { type: 'done.invoke.fetchOriginal'; data: RemoteResource }
+  | { type: 'done.invoke.saveEdited'; data: any }
+  | { type: 'done.invoke.saveNewRemote'; data: any }
   | TransformCommands
   | { type: 'transform-proxy'; original: TransformCommands; subject: { contents: string } }
 

@@ -69,7 +69,7 @@ const withContext = appMachine.withContext({
     } catch (e) {
       console.error('could not match a feature name to a module...', featureName)
     }
-    throw new Error('unreachable - should fallback to notFound')
+    throw new Error('unreachable - should fallback to notFound...')
   },
   /**
    * @param segment

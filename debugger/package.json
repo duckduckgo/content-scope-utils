@@ -4,23 +4,105 @@
   "description": "Serve the entire folder found under `build/<PLATFORM>/pages/debug-tools`",
   "main": "index.js",
   "scripts": {
-    "build": "node index.mjs",
-    "build.dev": "node index.mjs --env development",
+    "build": "wireit",
+    "build.dev": "wireit",
     "test": "playwright test --project apple",
-    "test.int": "playwright test --project apple",
+    "test.int": "wireit",
     "test.windows": "npm run test -- --project windows",
     "test.apple": "npm run test -- --project apple",
     "test.headed": "npm run test.int -- --project apple --headed",
     "test.ui": "npm run test -- --project apple --ui",
     "test.unit": "web-test-runner \"unit-tests/**/*.test.js\" --node-resolve --config=../web-test-runner.config.mjs",
     "test.watch": "npm run test.unit -- --watch",
-    "pretest": "npm run build.dev",
-    "pretest.headed": "npm run build.dev",
-    "test-int-x": "npm run test",
-    "test-int": "npm run test",
-    "serve": "http-server -c-1 --port 3210",
-    "watch": "chokidar 'src' 'schema' 'editor' -i schema/__generated__ -c 'NODE_ENV=development npm run build.dev' --initial",
-    "browser-sync": "browser-sync dist"
+    "serve": "wireit",
+    "serve.int": "wireit",
+    "serve.http": "wireit",
+    "start": "wireit",
+    "start.http": "wireit",
+    "watch": "npm run build.dev --watch",
+    "browser-sync": "browser-sync dist",
+    "schema": "wireit"
+  },
+  "wireit": {
+    "start": {
+      "dependencies": [
+        "serve",
+        {
+          "script": "build.dev",
+          "cascade": false
+        }
+      ]
+    },
+    "start.http": {
+      "dependencies": [
+        "serve.http",
+        {
+          "script": "build.dev",
+          "cascade": false
+        }
+      ]
+    },
+    "serve": {
+      "command": "http-server -c-1 --port 3210 dist",
+      "service": true,
+      "readyWhen": {
+        "lineMatches": "Available on"
+      }
+    },
+    "serve.http": {
+      "command": "node serve.mjs",
+      "files": [
+        "serve.mjs",
+        "schema/__generated__"
+      ],
+      "service": true,
+      "readyWhen": {
+        "lineMatches": "Available on"
+      }
+    },
+    "build.dev": {
+      "command": "node index.mjs --env development",
+      "files": [
+        "src"
+      ],
+      "dependencies": [
+        "schema"
+      ],
+      "output": [
+        "dist"
+      ],
+      "clean": false
+    },
+    "build": {
+      "command": "node index.mjs",
+      "files": [
+        "src"
+      ],
+      "dependencies": [
+        "schema"
+      ],
+      "output": [
+        "dist"
+      ],
+      "clean": false
+    },
+    "schema": {
+      "command": "node schema.mjs",
+      "files": [
+        "./schema/*.json",
+        "./schema/__fixtures__/*.json"
+      ],
+      "output": [
+        "./schema/__generated__"
+      ],
+      "clean": false
+    },
+    "test.int": {
+      "command": "playwright test --project apple",
+      "dependencies": [
+        "build.dev"
+      ]
+    }
   },
   "keywords": [],
   "author": "",
@@ -33,6 +115,7 @@
     "chokidar-cli": "^3.0.0",
     "classnames": "^2.3.2",
     "esbuild": "^0.19.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "express": "^4.18.2",
     "fast-json-patch": "^3.1.1",
     "history": "^5.3.0",

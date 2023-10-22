@@ -13,6 +13,7 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
+export type ResourceKind = "privacy-configuration" | "tds" | "text";
 /**
  * This indicates that the request was allowed because either the user or DuckDuckGo disabled protections
  */
@@ -66,6 +67,7 @@ export interface RemoteResourceRef {
    * How this resources is referred to in the UI.
    */
   name: string;
+  kind: ResourceKind;
 }
 export interface UserScript {
   name: string;
@@ -207,6 +209,7 @@ export interface RemoteResource {
    * How this resources is referred to in the UI.
    */
   name: string;
+  kind: ResourceKind;
   current: {
     source: RemoteSource | DebugToolsSource;
     /**

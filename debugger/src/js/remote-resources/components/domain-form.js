@@ -24,7 +24,7 @@ export function DomainForm(props) {
 
   useEffect(() => {
     send({ type: 'DOMAINS', domains: props.domains, current })
-  }, [current, props.domains])
+  }, [current, props.domains, send])
 
   const currenInDomains = props.domains.find((x) => state.context.current === x)
 

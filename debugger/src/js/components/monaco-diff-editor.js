@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import * as monaco from 'monaco-editor'
 import { createPortal } from 'react-dom'
 import { Button } from './buttons'
-import { useMonacoContentChanged, useMonacoErrors, useMonacoLastValue } from '../models/monaco-opt-in'
+import { useMonacoContentChanged, useMonacoErrors, useMonacoModel, useMonacoModelSync } from '../models/monaco-opt-in'
 import { Uri } from 'monaco-editor'
 
 /**
@@ -26,17 +26,16 @@ import { Uri } from 'monaco-editor'
 export function MonacoDiffEditor(props) {
   const ref = useRef(null)
   const editorRefs = /** @type {import('react').MutableRefObject} */ (useRef({}))
-  const uri = useMemo(() => Uri.file('diff/current/' + props.id), [props.id])
+  const currentUri = useMemo(() => Uri.file('diff/current/' + props.id), [props.id])
+  const originalUri = useMemo(() => Uri.file('diff/original/' + props.id), [props.id])
+
+  const currentModel = useMonacoModel(currentUri, props.lastValue)
+  const originalModel = useMonacoModel(originalUri, props.original)
 
   useEffect(() => {
     if (!ref.current) throw new Error('unreachable')
-
-    const currentModel = monaco.editor.createModel(props.lastValue, 'application/json', uri)
-    const originalModel = monaco.editor.createModel(
-      props.original,
-      'application/json',
-      Uri.file('diff/original/' + props.id),
-    )
+    if (!editorRefs.current) throw new Error('unreachable')
+    const localRef = editorRefs.current
 
     const diffEditor = monaco.editor.createDiffEditor(ref.current, {
       originalEditable: false,
@@ -48,7 +47,7 @@ export function MonacoDiffEditor(props) {
       modified: /** @type {ITextModel} */ (currentModel),
     })
 
-    editorRefs.current.navi = monaco.editor.createDiffNavigator(diffEditor, {
+    localRef.navi = monaco.editor.createDiffNavigator(diffEditor, {
       followsCaret: true, // resets the navigator state when the user selects something in the editor
       ignoreCharChanges: true, // jump from line to line
     })
@@ -71,13 +70,14 @@ export function MonacoDiffEditor(props) {
       currentModel.dispose()
       originalModel.dispose()
       diffEditor.dispose()
-      editorRefs.current.navi.dispose()
+      localRef.navi.dispose()
     }
-  }, [uri])
+  }, [currentModel, originalModel, props.id])
 
-  useMonacoContentChanged(props.onContentChanged, uri)
-  useMonacoLastValue(props.lastValue, uri)
   useMonacoErrors(props.onErrors)
+  useMonacoContentChanged(props.onContentChanged, currentUri)
+  useMonacoModelSync(props.lastValue, currentUri)
+  useMonacoModelSync(props.original, originalUri)
 
   function prevDiff() {
     editorRefs.current.navi.previous()

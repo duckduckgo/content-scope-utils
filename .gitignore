@@ -4,3 +4,4 @@ dist
 .idea
 /playwright-report
 /public
+.wireit

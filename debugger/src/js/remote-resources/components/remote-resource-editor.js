@@ -4,7 +4,7 @@ import invariant from 'tiny-invariant'
 import { TogglesEditor } from '../../components/toggles-editor'
 import styles from '../../app/components/app.module.css'
 import { SubNav } from '../../app/components/feature-nav'
-import { lazy, Suspense, useContext, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useContext, useRef, useState } from 'react'
 import { Button } from '../../components/buttons'
 import { Sidebar } from './sidebar'
 import { DiffViewer } from '../../components/diff-viewer'
@@ -163,23 +163,32 @@ function EditorSelection(props) {
   const hasEdits = state.matches(['showing editor', 'editing', 'editor has edited content'])
   const contentIsInvalid = state.matches(['showing editor', 'contentErrors', 'some'])
 
-  /**
-   * @param {ContentError[]} errors
-   */
-  function onErrors(errors) {
-    if (errors.length === 0) {
-      send({ type: 'content is valid' })
-    } else {
-      send({ type: 'content is invalid', errors })
-    }
-  }
+  const onErrors = useCallback(
+    /**
+     * @param {ContentError[]} errors
+     */
+    (errors) => {
+      if (errors.length === 0) {
+        send({ type: 'content is valid' })
+      } else {
+        send({ type: 'content is invalid', errors })
+      }
+    },
+    [send],
+  )
 
   /**
    * @param {string} content
    */
-  function onContentChanged(content) {
-    send({ type: 'set current resource content', payload: content })
-  }
+  const onContentChanged = useCallback(
+    /**
+     * @param {string} content
+     */
+    (content) => {
+      send({ type: 'set current resource content', payload: content })
+    },
+    [send],
+  )
 
   const editors = {
     toggles: () => (
@@ -318,9 +327,9 @@ function FloatingErrors(props) {
       <div className="font-bold">
         {props.errors.length} error{props.errors.length === 1 ? '' : 's'} occurred.{' '}
       </div>
-      {props.errors.slice(0, 3).map((m) => {
+      {props.errors.slice(0, 3).map((m, index) => {
         return (
-          <div key={m.message} className="row">
+          <div key={m.message + index} className="row">
             {m.message}
           </div>
         )

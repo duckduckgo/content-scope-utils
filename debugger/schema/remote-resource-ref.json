@@ -13,8 +13,11 @@
     "name": {
       "type": "string",
       "description": "How this resources is referred to in the UI."
+    },
+    "kind": {
+      "$ref": "resource-kind.json"
     }
   },
-  "required": ["id", "url", "name"],
+  "required": ["id", "url", "name", "kind"],
   "additionalProperties": false
 }

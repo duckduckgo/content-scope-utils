@@ -12,6 +12,7 @@ import invariant from 'tiny-invariant'
  * @typedef {import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").MessagingTransport} MessagingTransport
  * @typedef {import("../../schema/__generated__/schema.types").GetFeaturesResponse} GetFeaturesResponse
  * @typedef {import('../../schema/__generated__/schema.types').GetTrackersResponse} GetTrackersResponse
+ * @typedef {import('../../schema/__generated__/schema.types').RemoteResourceRef} RemoteResourceRef
  */
 
 /** @type {import("../../schema/__generated__/schema.types").GetTabsResponse} */
@@ -27,16 +28,19 @@ const tabData = {
 /** @type {Set<string>} */
 const trackerSubscriptions = new Set([])
 
+/** @type {Record<string, RemoteResourceRef>} */
 const defaults = {
   'privacy-configuration': {
     id: 'privacy-configuration',
     url: 'fixtures/macos-config.json',
     name: 'Privacy Config',
+    kind: 'privacy-configuration',
   },
-  'privacy-configuration-alt': {
-    id: 'privacy-configuration-alt',
+  'text-file-01': {
+    id: 'text-file-01',
     url: 'fixtures/minimal-config.json',
-    name: 'Privacy Config (alt)',
+    name: 'Text file example',
+    kind: 'text',
   },
 }
 
@@ -77,7 +81,7 @@ export class MockImpl {
               scripts: [],
             },
             remoteResources: {
-              resources: [defaults['privacy-configuration'], defaults['privacy-configuration-alt']],
+              resources: [defaults['privacy-configuration'], defaults['text-file-01']],
             },
           },
         }
@@ -89,7 +93,7 @@ export class MockImpl {
         let content
         if (parsed.id === 'privacy-configuration') {
           content = await fetch('fixtures/macos-config.json').then((x) => x.text())
-        } else if (parsed.id === 'privacy-configuration-alt') {
+        } else if (parsed.id === 'text-file-01') {
           content = await fetch('fixtures/minimal-config.json').then((x) => x.text())
         }
         return {
@@ -117,21 +121,27 @@ export class MockImpl {
 
         if ('remote' in parsed.source) {
           const remoteContent = await fetch(parsed.source.remote.url).then((x) => x.text())
-          next.current = {
-            source: {
-              remote: { url: parsed.source.remote.url, fetchedAt: formattedDate },
+          return {
+            ...defaults[parsed.id],
+            current: {
+              source: {
+                remote: { url: parsed.source.remote.url, fetchedAt: formattedDate },
+              },
+              contents: remoteContent,
+              contentType: 'application/json',
             },
-            contents: remoteContent,
-            contentType: 'application/json',
           }
         }
         if ('debugTools' in parsed.source) {
-          next.current = {
-            source: {
-              debugTools: { modifiedAt: formattedDate },
+          return {
+            ...defaults[parsed.id],
+            current: {
+              source: {
+                debugTools: { modifiedAt: formattedDate },
+              },
+              contents: parsed.source.debugTools.content,
+              contentType: 'application/json',
             },
-            contents: parsed.source.debugTools.content,
-            contentType: 'application/json',
           }
         }
         return next

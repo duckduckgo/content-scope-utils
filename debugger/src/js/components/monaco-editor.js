@@ -1,7 +1,7 @@
 import * as monaco from 'monaco-editor'
 import { useEffect, useMemo, useRef } from 'react'
 import invariant from 'tiny-invariant'
-import { useMonacoContentChanged, useMonacoErrors, useMonacoLastValue } from '../models/monaco-opt-in'
+import { useMonacoContentChanged, useMonacoErrors, useMonacoModel, useMonacoModelSync } from '../models/monaco-opt-in'
 import { Uri } from 'monaco-editor'
 
 /**
@@ -27,10 +27,10 @@ export function MonacoEditor(props) {
   /** @type {import("react").MutableRefObject<IStandaloneCodeEditor | null>} */
   const editorRef = useRef(null)
   const uri = useMemo(() => Uri.file('inline/' + props.id), [props.id])
+  const model = useMonacoModel(uri, props.lastValue)
 
   useEffect(() => {
     invariant(ref.current, 'ref must exist here')
-    const model = monaco.editor.createModel(props.lastValue, 'application/json', uri)
     const editor = monaco.editor.create(ref.current, {
       model: model,
       automaticLayout: false,
@@ -50,14 +50,13 @@ export function MonacoEditor(props) {
 
     return () => {
       clearInterval(int)
-      model.dispose()
       editor?.dispose()
     }
-  }, [uri])
+  }, [model, props.id, uri])
 
   useMonacoErrors(props.onErrors)
   useMonacoContentChanged(props.onContentChanged, uri)
-  useMonacoLastValue(props.lastValue, uri)
+  useMonacoModelSync(props.lastValue, uri)
 
   return <div ref={ref} style={{ height: '100%', width: '100%' }}></div>
 }

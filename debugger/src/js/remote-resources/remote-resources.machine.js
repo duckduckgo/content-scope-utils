@@ -7,12 +7,18 @@ import { UpdateVersion } from '../transforms/update-version'
 import { UpdateFeatureHash } from '../transforms/feature-hash'
 import { handler2 } from '../transforms'
 
-/** @type {Record<string, {editorKinds: EditorKind[]}>} */
+/** @type {Record<ResourceKind, {editorKinds: EditorKind[]}>} */
 const resourceCapabilities = {
   'privacy-configuration': {
-    editorKinds: ['toggles', 'inline', 'diff', 'trackers', 'patches'],
+    /**
+     * todo: re-add 'patches' when fixed
+     */
+    editorKinds: ['toggles', 'inline', 'diff', 'trackers'],
   },
-  default: {
+  tds: {
+    editorKinds: ['inline', 'diff'],
+  },
+  text: {
     editorKinds: ['inline', 'diff'],
   },
 }
@@ -201,7 +207,7 @@ const _remoteResourcesMachine = createMachine({
                 onDone: [
                   {
                     target: 'editor has original content',
-                    actions: ['updateCurrentResource', 'assignCurrentResource', 'clearErrors', 'raiseUpdated'],
+                    actions: ['updateCurrentResource', 'clearErrors', 'raiseUpdated'],
                   },
                 ],
                 onError: [
@@ -220,7 +226,7 @@ const _remoteResourcesMachine = createMachine({
                 onDone: [
                   {
                     target: 'editor has original content',
-                    actions: ['updateCurrentResource', 'assignCurrentResource', 'clearErrors', 'raiseUpdated'],
+                    actions: ['updateCurrentResource', 'clearErrors', 'raiseUpdated'],
                   },
                 ],
                 onError: [
@@ -478,12 +484,14 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         invariant(match)
 
         // matching, or default
-        const capabilties = resourceCapabilities[matchingId] || resourceCapabilities.default
+        const capabilties = resourceCapabilities[matchingId] || resourceCapabilities.text
+        const lastValue =
+          ctx.currentResource?.id === matchingId ? ctx.currentResource?.lastValue : match.current.contents
 
         return {
           id: matchingId,
           editorKinds: capabilties.editorKinds,
-          lastValue: ctx.currentResource?.id === matchingId ? ctx.currentResource?.lastValue : match.current.contents,
+          lastValue,
         }
       },
     }),
@@ -516,26 +524,36 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         return tryCreateDomain(domain)
       },
     }),
-    updateCurrentResource: assign({
-      resources: (ctx, evt) => {
-        // verify incoming payload
-        const incomingResourceUpdate = remoteResourceSchema.parse(/** @type {any} */ (evt).data)
+    updateCurrentResource: assign((ctx, evt) => {
+      invariant(evt.type === 'done.invoke.saveEdited' || evt.type === 'done.invoke.saveNewRemote')
+      invariant(ctx.currentResource)
+      // verify incoming payload
 
-        // ensure our local resources are in good condition
-        const existingResources = z.array(remoteResourceSchema).parse(ctx.resources)
+      const incomingResourceUpdate = remoteResourceSchema.parse(evt.data)
 
-        // access the currently selected resource, so that we can update the correct item
-        const current = CurrentResource.parse(ctx.currentResource)
+      // ensure our local resources are in good condition
+      const existingResources = z.array(remoteResourceSchema).parse(ctx.resources)
 
-        // now return a new list, replacing an ID match with the updated content
-        return existingResources.map((res) => {
-          if (current.id === res.id) {
-            return incomingResourceUpdate
-          } else {
-            return res
-          }
-        })
-      },
+      // access the currently selected resource, so that we can update the correct item
+      const current = CurrentResource.parse(ctx.currentResource)
+
+      // now return a new list, replacing an ID match with the updated content
+      const resources = existingResources.map((res) => {
+        if (current.id === res.id) {
+          return incomingResourceUpdate
+        } else {
+          return res
+        }
+      })
+
+      return {
+        ...ctx,
+        resources,
+        currentResource: {
+          ...ctx.currentResource,
+          lastValue: incomingResourceUpdate.current.contents,
+        },
+      }
     }),
     raiseUpdated: pure(() => {
       return [
@@ -636,6 +654,7 @@ export const AllowlistedTrackers = z.record(
 )
 
 /** @typedef {import("zod").infer<typeof EditorKind>} EditorKind */
+/** @typedef {import("zod").infer<typeof import("../../../schema/__generated__/schema.parsers.mjs").resourceKindSchema>} ResourceKind */
 /** @typedef {import("zod").infer<typeof CurrentResource>} CurrentResource */
 /** @typedef {import("zod").infer<typeof PrivacyConfig>} PrivacyConfig */
 /** @typedef {import("zod").infer<typeof AllowlistedTrackers>} AllowlistedTrackers */

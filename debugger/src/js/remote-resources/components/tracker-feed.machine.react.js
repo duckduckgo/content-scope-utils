@@ -39,7 +39,7 @@ function Inner() {
   })
   useEffect(() => {
     ref.send({ type: 'domain changed', payload: { domain } })
-  }, [domain])
+  }, [domain, ref])
   return null
 }
 

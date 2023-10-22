@@ -21,18 +21,6 @@ import invariant from 'tiny-invariant'
 export function TextEditor(props) {
   const domRef = /** @type {import("react").MutableRefObject<HTMLElement | any>} */ (useRef(null))
 
-  useEffect(() => {
-    if (props.lastValue === domRef.current.value) {
-      // do nothing
-    } else {
-      domRef.current.value = props.lastValue
-      send({
-        type: 'TextEditor.content-changed',
-        payload: { content: /** @type {any} */ props.lastValue },
-      })
-    }
-  }, [props.lastValue])
-
   const [, send] = useMachine(textEditorMachine, {
     context: {
       id: props.id,
@@ -63,6 +51,18 @@ export function TextEditor(props) {
     },
     devTools: true,
   })
+
+  useEffect(() => {
+    if (props.lastValue === domRef.current.value) {
+      // do nothing
+    } else {
+      domRef.current.value = props.lastValue
+      send({
+        type: 'TextEditor.content-changed',
+        payload: { content: /** @type {any} */ props.lastValue },
+      })
+    }
+  }, [props.lastValue, send])
 
   return (
     <div className={styles.wrap}>

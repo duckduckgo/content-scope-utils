@@ -3,3 +3,4 @@ dist
 playwright-report
 .github
 debugger/schema/__generated__
+.wireit

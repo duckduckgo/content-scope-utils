@@ -214,8 +214,8 @@ export class DebugToolsPage {
    */
   get basePath() {
     return this.build.switch({
-      windows: () => 'dist/index.html',
-      apple: () => 'dist/index.html',
+      windows: () => 'index.html',
+      apple: () => 'index.html',
     })
   }
 

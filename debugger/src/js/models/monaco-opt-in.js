@@ -2,6 +2,7 @@ import * as monaco from 'monaco-editor'
 import { useContext, useEffect } from 'react'
 import invariant from 'tiny-invariant'
 import { GlobalContext } from '../global-config.react'
+import useConstant from '@xstate/react/es/useConstant'
 
 /**
  * @typedef {import('../remote-resources/remote-resources.machine.types').ContentError} ContentError
@@ -83,14 +84,14 @@ export function useMonacoContentChanged(onContentChanged, uri) {
         }
       }
     }
-  }, [uri, editorSaveTimeout])
+  }, [uri, editorSaveTimeout, onContentChanged])
 }
 
 /**
  * @param {string} lastValue
  * @param {monaco.Uri} uri
  */
-export function useMonacoLastValue(lastValue, uri) {
+export function useMonacoModelSync(lastValue, uri) {
   useEffect(() => {
     const model = monaco.editor.getModel(uri)
     invariant(model, 'must find by uri: ' + uri.path)
@@ -100,4 +101,24 @@ export function useMonacoLastValue(lastValue, uri) {
       model.setValue(lastValue)
     }
   }, [lastValue, uri])
+}
+
+/**
+ * @param {monaco.Uri} uri - monaco compatible identifier
+ * @param {string} value - initial model value
+ * @param {string} language - default is application/json
+ * @return {monaco.editor.ITextModel}
+ */
+export function useMonacoModel(uri, value, language = 'application/json') {
+  const model = useConstant(() => {
+    return monaco.editor.createModel(value, language, uri)
+  })
+
+  useEffect(() => {
+    return () => {
+      model.dispose()
+    }
+  }, [model])
+
+  return model
 }

@@ -14,6 +14,9 @@
       "type": "string",
       "description": "How this resources is referred to in the UI."
     },
+    "kind": {
+      "$ref": "resource-kind.json"
+    },
     "current": {
       "type": "object",
       "additionalProperties": false,
@@ -41,7 +44,7 @@
       "required": ["source", "contents", "contentType"]
     }
   },
-  "required": ["id", "url", "current", "name"],
+  "required": ["id", "url", "current", "name", "kind"],
   "definitions": {
     "remoteSource": {
       "type": "object",

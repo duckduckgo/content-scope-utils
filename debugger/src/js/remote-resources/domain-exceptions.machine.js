@@ -120,6 +120,7 @@ export const domainMachine = createMachine({
   },
   predictableActionArguments: true,
   preserveActionOrder: true,
+  strict: true,
 })
 
 /**

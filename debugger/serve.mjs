@@ -188,13 +188,21 @@ const http = new HttpBackend({
   remoteResourceRefs: {
     'privacy-configuration': {
       id: 'privacy-configuration',
+      kind: 'privacy-configuration',
       url: 'https://staticcdn.duckduckgo.com/trackerblocking/config/v3/android-config.json',
       name: 'Privacy Config',
     },
     tds: {
       id: 'tds',
+      kind: 'tds',
       url: 'https://staticcdn.duckduckgo.com/trackerblocking/v4/tds.json',
       name: 'Tracker Data Set',
+    },
+    'tds-next': {
+      id: 'tds-next',
+      kind: 'tds',
+      url: 'https://staticcdn.duckduckgo.com/trackerblocking/v4/tds-next.json',
+      name: 'Tracker Data Set (NEXT)',
     },
   },
 })
@@ -235,9 +243,14 @@ app.use(express.json({ limit: '200mb' }))
 app.use(express.urlencoded({ extended: true, limit: '200mb' }))
 app.use(router)
 
-bs.init({
-  server: 'dist',
-  watch: false,
-  open: false,
-  middleware: [app],
-})
+bs.init(
+  {
+    server: 'dist',
+    watch: false,
+    open: false,
+    middleware: [app],
+  },
+  (e, bs) => {
+    console.log('Available on ' + bs.options.getIn(['urls', 'local']))
+  },
+)

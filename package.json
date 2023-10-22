@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "start": "npm run build && npm run serve.debugger",
+    "start": "npm start --workspace debugger",
     "docs": "typedoc",
     "docs.watch": "npm run docs -- --watch",
     "eslint": "eslint .",
@@ -51,10 +51,12 @@
     "@typescript-eslint/parser": "^6.4.1",
     "@web/test-runner": "^0.17.0",
     "eslint": "^8.28.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "prettier": "^3.0.2",
     "serve": "^14.2.1",
     "typedoc": "^0.24.8",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "wireit": "^0.14.1"
   },
   "prettier": {
     "printWidth": 120,

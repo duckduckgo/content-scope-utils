@@ -32,6 +32,8 @@ import { Uri } from 'monaco-editor'
  * @param {boolean} props.invalid
  * @param {(errors: ContentError[]) => void} props.onErrors
  * @param {RemoteResource} props.resource
+ *
+ * todo: fix this implementation
  */
 export function PatchesEditor(props) {
   /**
