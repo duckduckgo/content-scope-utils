@@ -180,7 +180,7 @@ class HttpBackend {
       }
       return this.getRemoteResource({ id: params.id })
     }
-    return { error: { message: 'todo: updateResource not implemented' } }
+    return { error: { message: 'unreachable' } }
   }
 }
 

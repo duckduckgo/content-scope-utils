@@ -15,11 +15,13 @@
     "start": "npm run build && npm run serve.debugger",
     "docs": "typedoc",
     "docs.watch": "npm run docs -- --watch",
-    "lint": "eslint .",
-    "lint.fix": "npm run lint -- --fix",
+    "eslint": "eslint .",
+    "eslint.fix": "eslint . --fix",
     "prettier": "prettier .",
     "prettier.check": "npm run prettier -- --check",
-    "prettier.write": "npm run prettier -- --write",
+    "prettier.fix": "npm run prettier -- --write",
+    "lint": "npm run eslint && npm run prettier.check",
+    "lint.fix": "npm run eslint.fix && npm run prettier.fix",
     "serve.debugger": "http-server -c-1 --port 3210 debugger/dist",
     "serve.docs": "http-server -c-1 --port 3210 docs",
     "test": "npm run test.unit",
@@ -27,8 +29,7 @@
     "test.int": "npm run test.int --workspaces --if-present",
     "tsc": "tsc",
     "tsc.watch": "tsc --watch",
-    "verify.local.temp": "npm run build && npm run lint.fix && npm run prettier.write && npm run tsc && npm run test.unit && npm run test.int",
-    "verify.local": "npm run docs && npm run build && npm run lint.fix && npm run prettier.write && npm run tsc && npm run test.unit && npm run test.int"
+    "verify.local": "npm run docs && npm run build && npm run lint.fix && npm run tsc && npm run test.unit && npm run test.int"
   },
   "type": "module",
   "repository": {

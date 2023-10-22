@@ -113,7 +113,12 @@ export function PatchesEditor(props) {
         </div>
       </div>
       <div className={styles.patchesGridBody}>
-        <MonacoEditorRaw model={patchModel} onErrors={(errors) => console.log('todo: handle these errors', errors)} />
+        <MonacoEditorRaw
+          model={patchModel}
+          onErrors={(errors) => {
+            console.log('todo: handle these errors', errors)
+          }}
+        />
       </div>
     </div>
   )

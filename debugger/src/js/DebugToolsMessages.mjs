@@ -91,8 +91,8 @@ export class DebugToolsMessages {
       const formatted = formatResource(remoteResourceResponse.data)
       return formatted
     }
-    console.log(remoteResourceResponse.error)
-    throw new Error('todo: error handling')
+    console.error(remoteResourceResponse.error)
+    throw new Error(remoteResourceResponse.error.message)
   }
 
   /**
@@ -137,13 +137,13 @@ export class DebugToolsMessages {
   async updateResource(params) {
     const outgoing = updateResourceParamsSchema.parse(params)
     const response = await this.messaging.request('updateResource', outgoing)
-    const featuresResponse = remoteResourceSchema.safeParse(response)
-    if (featuresResponse.success) {
-      const formatted = formatResource(featuresResponse.data)
+    const updateResourcesResponse = remoteResourceSchema.safeParse(response)
+    if (updateResourcesResponse.success) {
+      const formatted = formatResource(updateResourcesResponse.data)
       return formatted
     }
-    console.log(featuresResponse.error)
-    throw new Error('todo: error handling')
+    console.error(updateResourcesResponse.error)
+    throw new Error(updateResourcesResponse.error.message)
   }
 
   /**
@@ -159,12 +159,12 @@ export class DebugToolsMessages {
    */
   async getTabs() {
     const response = await this.messaging.request('getTabs', {})
-    const featuresResponse = getTabsResponseSchema.safeParse(response)
-    if (featuresResponse.success) {
-      return featuresResponse.data
+    const getTabsResponse = getTabsResponseSchema.safeParse(response)
+    if (getTabsResponse.success) {
+      return getTabsResponse.data
     }
-    console.log(featuresResponse.error)
-    throw new Error('todo: error handling')
+    console.error(getTabsResponse.error)
+    throw new Error(getTabsResponse.error.message)
   }
 
   /**
@@ -206,8 +206,8 @@ export class DebugToolsMessages {
     if (parsed.success) {
       return parsed.data
     }
-    console.log(parsed.error)
-    throw new Error('todo: error handling for getTrackers')
+    console.error(parsed.error)
+    throw new Error(parsed.error.message)
   }
 
   /**

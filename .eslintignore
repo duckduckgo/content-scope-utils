@@ -1,4 +1,5 @@
 docs
 dist
 debugger/dist
+debugger/schema/__generated__
 

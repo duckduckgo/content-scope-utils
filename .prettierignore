@@ -2,3 +2,4 @@ docs
 dist
 playwright-report
 .github
+debugger/schema/__generated__
