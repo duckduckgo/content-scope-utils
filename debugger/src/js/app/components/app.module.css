@@ -84,3 +84,8 @@
 .inner {
   position: sticky;
 }
+
+.empty {
+  padding-left: var(--ddg-ui-gutter);
+  padding-right: var(--ddg-ui-gutter);
+}

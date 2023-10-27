@@ -1,8 +1,10 @@
+import styles from '../app/components/app.module.css'
+
 export function UserScripts() {
   const scripts = []
   return (
-    <div>
-      <div className="subheading">
+    <div className={styles.empty}>
+      <div className="row">
         <ul className="subnav">
           {scripts.map((res) => {
             return (
@@ -15,7 +17,7 @@ export function UserScripts() {
           })}
         </ul>
       </div>
-      <div className="main">
+      <div>
         <pre>
           <code>{JSON.stringify(scripts, null, 2)}</code>
         </pre>
