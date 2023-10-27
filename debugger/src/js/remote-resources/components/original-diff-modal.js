@@ -17,7 +17,7 @@ import style from './original-diff.module.css'
  * @param {object} props
  * @param {RemoteResource} props.resource
  */
-export function OriginalDiff(props) {
+export function OriginalDiffModal(props) {
   const [state, send] = RemoteResourcesContext.useActor()
 
   // state
@@ -31,7 +31,8 @@ export function OriginalDiff(props) {
     <dialog open={showingRemote || fetchingRemote} onClose={closeDiff}>
       <div className={style.root}>
         <div className={style.header}>
-          <button onClick={closeDiff}>Close plx</button>
+          {showingRemote && <Header close={<button onClick={closeDiff}>Close plx</button>} resource={props.resource} />}
+          {!showingRemote && <p>just a sec...</p>}
         </div>
         <div className={style.main}>
           {showingRemote && <OriginalDiffEditor buttons={buttons.current} resource={props.resource} />}
@@ -48,9 +49,47 @@ export function OriginalDiff(props) {
 
 /**
  * @param {object} props
+ * @param {import("react").ReactNode} props.close
+ * @param {RemoteResource} props.resource
+ */
+function Header(props) {
+  const [state] = RemoteResourcesContext.useActor()
+  // todo: remove this coupling. Diffing should/could work with any resource, not just those in the editor
+  invariant(state.context.currentResource?.id, 'must have currentResource?.id')
+
+  const left = state.context.originalResources[state.context.currentResource.id]
+  const right = props.resource
+
+  return (
+    <div>
+      <div>{props.close}</div>
+      <div className={style.files}>
+        <FileLabel resource={left} />
+        <FileLabel resource={right} />
+      </div>
+    </div>
+  )
+}
+
+/**
+ * @param {object} props
+ * @param {RemoteResource} props.resource
+ */
+function FileLabel(props) {
+  const { id, kind, name, url, current } = props.resource
+  const { source } = current
+  return (
+    <pre>
+      <code>{JSON.stringify({ id, kind, name, url, source }, null, 2)}</code>
+    </pre>
+  )
+}
+
+/**
+ * @param {object} props
  * @param {RemoteResource} props.resource
  * @param {ReactNode} props.buttons
- * todo: next up, add meta data to the top of each side
+ * todo: next up, add basic meta data to the top of each side
  */
 export function OriginalDiffEditor(props) {
   const [state] = RemoteResourcesContext.useActor()

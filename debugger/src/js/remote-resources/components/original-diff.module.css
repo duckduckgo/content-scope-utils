@@ -15,3 +15,15 @@
   padding: var(--ddg-ui-gutter);
   box-shadow: 0 0 3px #8e8e8e;
 }
+.files {
+  display: flex;
+  width: 100%;
+}
+.files > * {
+  outline: 1px dashed red;
+  width: 50%;
+  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: hidden;
+  flex-grow: 0;
+}

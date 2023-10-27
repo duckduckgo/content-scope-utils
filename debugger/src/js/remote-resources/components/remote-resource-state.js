@@ -5,7 +5,7 @@ import { URLEditor } from '../../components/url-editor'
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { useEditorKinds } from './remote-resource-editor'
 import { usePatches } from '../patches-machine.react'
-import { OriginalDiff } from './original-diff'
+import { OriginalDiffModal } from './original-diff-modal'
 
 /**
  * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -79,68 +79,72 @@ export function RemoteResourceState(props) {
   const formatted = date(updatedAt)
 
   return (
-    <div className="row card">
-      <InlineDL>
-        <DT>ID:</DT>
-        <DD>{props.resource.id}</DD>
-        {!hasOverride && formatted ? (
-          <>
-            <DT>Last fetched:</DT>
-            <DD data-testid="last-fetched-date">
-              {formatted}{' '}
-              <MicroButton className="ml-3.5" onClick={() => setUrl(props.resource.url)}>
-                {savingRemote ? 'Updating...' : 'Refresh 🔄'}
-              </MicroButton>
-            </DD>
-            {edited && (
-              <>
-                <DT>
-                  <span>🔵 LOCAL EDITS:</span>
-                </DT>
-                <DD>
-                  <MicroButton onClick={revertEdited}>↩️ Revert</MicroButton>
-                  {editorKind !== 'diff' && (
-                    <MicroButton className="ml-3.5" onClick={showDiff}>
-                      Show Diff
-                    </MicroButton>
-                  )}
-                </DD>
-              </>
-            )}
-          </>
-        ) : null}
-      </InlineDL>
-      <InlineDL>
-        <DT>
-          <span className={hasOverride ? 'strikethrough' : undefined}>URL:</span>
-        </DT>
-        <DD>
-          <span className={hasOverride ? 'strikethrough' : undefined}>{props.resource.url} </span>
-          <MicroButton className="ml-3.5" onClick={(e) => copy(e, props.resource.url)}>
-            Copy 📄
-          </MicroButton>
-          {!hasOverride && !showingUrlEditor && (
-            <MicroButton className="ml-3.5" onClick={showOverrideForm}>
-              Override ✏️
+    <>
+      <OriginalDiffModal resource={props.resource} />
+      <div className="row card">
+        <InlineDL>
+          <DT>ID:</DT>
+          <DD>{props.resource.id}</DD>
+          {!hasOverride && formatted ? (
+            <>
+              <DT>Last fetched:</DT>
+              <DD data-testid="last-fetched-date">
+                {formatted}{' '}
+                <MicroButton className="ml-3.5" onClick={() => setUrl(props.resource.url)}>
+                  {savingRemote ? 'Updating...' : 'Refresh 🔄'}
+                </MicroButton>
+              </DD>
+              {edited && (
+                <>
+                  <DT>
+                    <span>🔵 LOCAL EDITS:</span>
+                  </DT>
+                  <DD>
+                    <MicroButton onClick={revertEdited}>↩️ Revert</MicroButton>
+                    {editorKind !== 'diff' && (
+                      <MicroButton className="ml-3.5" onClick={showDiff}>
+                        Show Diff
+                      </MicroButton>
+                    )}
+                  </DD>
+                </>
+              )}
+            </>
+          ) : null}
+        </InlineDL>
+        <InlineDL>
+          <DT>
+            <span className={hasOverride ? 'strikethrough' : undefined}>URL:</span>
+          </DT>
+          <DD>
+            <span className={hasOverride ? 'strikethrough' : undefined}>{props.resource.url} </span>
+            <MicroButton className="ml-3.5" onClick={(e) => copy(e, props.resource.url)}>
+              Copy 📄
             </MicroButton>
-          )}
-        </DD>
-      </InlineDL>
-      {showingUrlEditor && (
-        <div className="row">
-          <URLEditor
-            pending={savingRemote}
-            save={saveNewRemote}
-            cancel={() => send({ type: 'hide url editor' })}
-            input={({ className }) => {
-              return <input autoFocus className={className} type="text" name="resource-url" placeholder="enter a url" />
-            }}
-          />
-        </div>
-      )}
-      <OriginalDiff resource={props.resource} />
-      <Override resource={props.resource} />
-    </div>
+            {!hasOverride && !showingUrlEditor && (
+              <MicroButton className="ml-3.5" onClick={showOverrideForm}>
+                Override ✏️
+              </MicroButton>
+            )}
+          </DD>
+        </InlineDL>
+        {showingUrlEditor && (
+          <div className="row">
+            <URLEditor
+              pending={savingRemote}
+              save={saveNewRemote}
+              cancel={() => send({ type: 'hide url editor' })}
+              input={({ className }) => {
+                return (
+                  <input autoFocus className={className} type="text" name="resource-url" placeholder="enter a url" />
+                )
+              }}
+            />
+          </div>
+        )}
+        <Override resource={props.resource} />
+      </div>
+    </>
   )
 }
 
