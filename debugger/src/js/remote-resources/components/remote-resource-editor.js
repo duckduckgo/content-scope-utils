@@ -212,6 +212,7 @@ function EditorSelection(props) {
             onErrors={onErrors}
             onContentChanged={onContentChanged}
             lastValue={lastValue}
+            contentType={props.resource.current.contentType}
           />
         </Suspense>
       )
@@ -239,6 +240,7 @@ function EditorSelection(props) {
             onErrors={onErrors}
             onContentChanged={onContentChanged}
             lastValue={lastValue}
+            contentType={props.resource.current.contentType}
           />
         </Suspense>
       )

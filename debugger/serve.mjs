@@ -131,11 +131,25 @@ class HttpBackend {
         source: {
           remote: { url: url, fetchedAt: formattedDate },
         },
-        contentType: 'application/json',
+        contentType: this._contentType(ref),
         contents: content,
       },
     }
     return { value: resource }
+  }
+
+  /**
+   * @param {RemoteResourceRef} resourceRef
+   * @return {string}
+   */
+  _contentType(resourceRef) {
+    switch (resourceRef.kind) {
+      case "privacy-configuration":
+      case "tds":
+        return "application/json"
+      case "text":
+        return "text/plain"
+    }
   }
 
   /**
@@ -150,6 +164,7 @@ class HttpBackend {
     const formattedDate = now.toISOString()
 
     const ref = this.remoteResourceRefs[params.id]
+    const contentType = this._contentType(ref);
 
     if ('debugTools' in params.source) {
       this.remoteResources[params.id] = {
@@ -159,7 +174,7 @@ class HttpBackend {
             debugTools: { modifiedAt: formattedDate },
           },
           contents: params.source.debugTools.content,
-          contentType: 'application/json',
+          contentType,
         },
       }
 
@@ -175,7 +190,7 @@ class HttpBackend {
             remote: { url: params.source.remote.url, fetchedAt: formattedDate },
           },
           contents: content,
-          contentType: 'application/json',
+          contentType,
         },
       }
       return this.getRemoteResource({ id: params.id })
@@ -204,6 +219,18 @@ const http = new HttpBackend({
       url: 'https://staticcdn.duckduckgo.com/trackerblocking/v4/tds-next.json',
       name: 'Tracker Data Set (NEXT)',
     },
+    'android-tds': {
+      id: 'android-tds',
+      kind: 'tds',
+      url: 'https://staticcdn.duckduckgo.com/trackerblocking/appTP/2.1/android-tds.json',
+      name: 'Android TDS'
+    },
+    'android-surrogates': {
+      id: 'android-surrogates',
+      kind: 'text',
+      url: 'https://staticcdn.duckduckgo.com/surrogates.txt',
+      name: 'Android Surrogates'
+    }
   },
 })
 
@@ -231,8 +258,16 @@ router.get('/rr/:id', async function (req, res) {
   console.log(`FETCH [get] /rr/${req.params.id}`)
   const v = await http.getRemoteResource({ id: req.params.id })
   if ('value' in v) {
-    const parsed = JSON.parse(v.value.current.contents)
-    return res.header('content-type', 'application/json').send(JSON.stringify(parsed, null, 4))
+    // todo: support all content types here
+    const resource = v.value;
+    switch (resource.kind) {
+      case "privacy-configuration":
+      case "tds":
+        const parsed = JSON.parse(v.value.current.contents)
+        return res.header('content-type', 'application/json').send(JSON.stringify(parsed, null, 4))
+      case "text":
+        return res.header('content-type', 'text/plain').send(v.value.current.contents)
+    }
   } else {
     return res.status(500).send(v.error.message)
   }

@@ -247,11 +247,17 @@ export class DebugToolsMessages {
  * @return {RemoteResource}
  */
 function formatResource(input) {
-  return {
-    ...input,
-    current: {
-      ...input.current,
-      contents: JSON.stringify(JSON.parse(input.current.contents), null, 4),
-    },
+  switch (input.kind) {
+    case "privacy-configuration":
+    case "tds":
+      return {
+        ...input,
+        current: {
+          ...input.current,
+          contents: JSON.stringify(JSON.parse(input.current.contents), null, 4),
+        },
+      }
+    case "text":
+      return input;
   }
 }

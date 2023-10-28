@@ -34,12 +34,16 @@ export function createTextModel({ content, contentType }) {
 
 /**
  * @param {(errors: ContentError[]) => void} onErrors
+ * @param {monaco.Uri} uri
  */
-export function useMonacoErrors(onErrors) {
+export function useMonacoErrors(onErrors, uri) {
   useEffect(() => {
+    const uriString = uri.toString()
     const sub = monaco.editor.onDidChangeMarkers((uriList) => {
       const markers = monaco.editor.getModelMarkers({ resource: uriList[0] })
-      const errors = markers.filter((m) => m.severity === monaco.MarkerSeverity.Error)
+      const errors = markers.filter((m) => {
+        return m.resource.toString() === uriString && m.severity === monaco.MarkerSeverity.Error
+      })
       /** @type {ContentError[]} */
       const contentErrors = errors.map((x) => {
         return {
@@ -49,7 +53,7 @@ export function useMonacoErrors(onErrors) {
       onErrors(contentErrors)
     })
     return () => sub.dispose()
-  }, [onErrors])
+  }, [onErrors, uri])
 }
 
 /**
@@ -109,7 +113,7 @@ export function useMonacoModelSync(lastValue, uri) {
  * @param {string} language - default is application/json
  * @return {monaco.editor.ITextModel}
  */
-export function useMonacoModel(uri, value, language = 'application/json') {
+export function useMonacoModel(uri, value, language) {
   const model = useConstant(() => {
     return monaco.editor.createModel(value, language, uri)
   })

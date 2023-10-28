@@ -18,6 +18,7 @@ import { Uri } from 'monaco-editor'
  * @param {boolean} props.edited
  * @param {boolean} props.invalid
  * @param {string} props.lastValue
+ * @param {string} props.contentType
  * @param {string} props.id
  * @param {any} [props.additionalButtons]
  * @param {(contents: string) => void} props.onContentChanged
@@ -29,8 +30,8 @@ export function MonacoDiffEditor(props) {
   const currentUri = useMemo(() => Uri.file('diff/current/' + props.id), [props.id])
   const originalUri = useMemo(() => Uri.file('diff/original/' + props.id), [props.id])
 
-  const currentModel = useMonacoModel(currentUri, props.lastValue)
-  const originalModel = useMonacoModel(originalUri, props.original)
+  const currentModel = useMonacoModel(currentUri, props.lastValue, props.contentType)
+  const originalModel = useMonacoModel(originalUri, props.original, props.contentType)
 
   useEffect(() => {
     if (!ref.current) throw new Error('unreachable')
@@ -74,7 +75,7 @@ export function MonacoDiffEditor(props) {
     }
   }, [currentModel, originalModel, props.id])
 
-  useMonacoErrors(props.onErrors)
+  useMonacoErrors(props.onErrors, currentUri)
   useMonacoContentChanged(props.onContentChanged, currentUri)
   useMonacoModelSync(props.lastValue, currentUri)
   useMonacoModelSync(props.original, originalUri)

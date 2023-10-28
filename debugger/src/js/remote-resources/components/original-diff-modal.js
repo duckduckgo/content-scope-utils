@@ -100,6 +100,7 @@ export function OriginalDiffEditor(props) {
       original={state.context.originalResources[state.context.currentResource.id].current.contents}
       additionalButtons={props.buttons}
       lastValue={props.resource.current.contents}
+      contentType={props.resource.current.contentType}
       id={props.resource.id + '__original_diff'}
       onErrors={(e) => console.log('todo: onErrors', e)}
       onContentChanged={(e) => console.log('todo: onContentChanged', e)}

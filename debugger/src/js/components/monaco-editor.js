@@ -18,6 +18,7 @@ import { Uri } from 'monaco-editor'
  * @param {boolean} props.edited
  * @param {boolean} props.invalid
  * @param {string} props.lastValue
+ * @param {string} props.contentType
  * @param {(errors: ContentError[]) => void} props.onErrors
  * @param {(contents: string) => void} props.onContentChanged
  * @param {string} props.id
@@ -27,7 +28,7 @@ export function MonacoEditor(props) {
   /** @type {import("react").MutableRefObject<IStandaloneCodeEditor | null>} */
   const editorRef = useRef(null)
   const uri = useMemo(() => Uri.file('inline/' + props.id), [props.id])
-  const model = useMonacoModel(uri, props.lastValue)
+  const model = useMonacoModel(uri, props.lastValue, props.contentType)
 
   useEffect(() => {
     invariant(ref.current, 'ref must exist here')
@@ -54,7 +55,7 @@ export function MonacoEditor(props) {
     }
   }, [model, props.id, uri])
 
-  useMonacoErrors(props.onErrors)
+  useMonacoErrors(props.onErrors, uri)
   useMonacoContentChanged(props.onContentChanged, uri)
   useMonacoModelSync(props.lastValue, uri)
 
@@ -66,12 +67,14 @@ export default MonacoEditor
 /**
  * @param {object} props
  * @param {ITextModel} props.model
+ * @param {string} props.id
  * @param {(errors: ContentError[]) => void} props.onErrors
  */
 export function MonacoEditorRaw(props) {
   const ref = useRef(null)
+  const uri = useMemo(() => Uri.file('raw/' + props.id), [props.id])
 
-  useMonacoErrors(props.onErrors)
+  useMonacoErrors(props.onErrors, uri)
 
   useEffect(() => {
     invariant(ref.current, 'ref must exist here')

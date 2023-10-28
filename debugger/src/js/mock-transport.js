@@ -38,7 +38,7 @@ const defaults = {
   },
   'text-file-01': {
     id: 'text-file-01',
-    url: 'fixtures/minimal-config.json',
+    url: 'fixtures/text-file-01.txt',
     name: 'Text file example',
     kind: 'text',
   },
@@ -90,12 +90,9 @@ export class MockImpl {
       case 'getRemoteResource': {
         const parsed = getRemoteResourceParamsSchema.parse(msg.params)
         invariant(parsed.id in defaults, 'can only update resources we know about')
-        let content
-        if (parsed.id === 'privacy-configuration') {
-          content = await fetch('fixtures/macos-config.json').then((x) => x.text())
-        } else if (parsed.id === 'text-file-01') {
-          content = await fetch('fixtures/minimal-config.json').then((x) => x.text())
-        }
+        const ref = defaults[parsed.id]
+        const fileContent = await fetch(ref.url).then((x) => x.text())
+
         return {
           ...defaults[parsed.id],
           current: {
@@ -105,8 +102,8 @@ export class MockImpl {
                 fetchedAt: formattedDate,
               },
             },
-            contents: content,
-            contentType: 'application/json',
+            contents: fileContent,
+            contentType: contentTypeForRef(ref),
           },
         }
       }
@@ -118,6 +115,7 @@ export class MockImpl {
         const next = {
           ...defaults[parsed.id],
         }
+        const contentType = contentTypeForRef(next)
 
         if ('remote' in parsed.source) {
           const remoteContent = await fetch(parsed.source.remote.url).then((x) => x.text())
@@ -128,7 +126,7 @@ export class MockImpl {
                 remote: { url: parsed.source.remote.url, fetchedAt: formattedDate },
               },
               contents: remoteContent,
-              contentType: 'application/json',
+              contentType,
             },
           }
         }
@@ -140,7 +138,7 @@ export class MockImpl {
                 debugTools: { modifiedAt: formattedDate },
               },
               contents: parsed.source.debugTools.content,
-              contentType: 'application/json',
+              contentType,
             },
           }
         }
@@ -203,5 +201,19 @@ export class MockImpl {
         clearTimeout(this.trackerTimeout)
       }
     }
+  }
+}
+
+/**
+ * @param {RemoteResourceRef} resourceRef
+ * @return {string}
+ */
+function contentTypeForRef(resourceRef) {
+  switch (resourceRef.kind) {
+    case 'privacy-configuration':
+    case 'tds':
+      return 'application/json'
+    case 'text':
+      return 'text/plain'
   }
 }
