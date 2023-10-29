@@ -1,0 +1,16 @@
+{
+  "remoteResourceRefs": {
+    "privacy-configuration": {
+      "id": "privacy-configuration",
+      "kind": "privacy-configuration",
+      "url": "/fixtures/macos-config.json",
+      "name": "Privacy Config"
+    },
+    "test-text": {
+      "id": "test-text",
+      "kind": "text",
+      "url": "/fixtures/text-file-01.txt",
+      "name": "Test Text File"
+    }
+  }
+}

@@ -7,11 +7,17 @@ export default defineConfig({
     //     testMatch: [],
     //     use: { injectName: 'windows', platform: 'windows' }
     // },
+    // {
+    //   name: 'apple',
+    //   testMatch: ['*.spec.js'],
+    //   testDir: 'integration-tests',
+    //   use: { injectName: 'apple', platform: 'macos' },
+    // },
     {
-      name: 'apple',
+      name: 'http',
       testMatch: ['*.spec.js'],
       testDir: 'integration-tests',
-      use: { injectName: 'apple', platform: 'macos' },
+      use: { injectName: 'apple', platform: 'http' },
     },
   ],
   // eslint-disable-next-line no-undef
@@ -25,14 +31,6 @@ export default defineConfig({
 
   // eslint-disable-next-line no-undef
   reporter: process.env.CI ? 'github' : [['html', { open: 'never' }]],
-  // @ts-expect-error - Type 'undefined' is not assignable to type 'string'. process.env
-  webServer: {
-    command: 'npm run serve',
-    port: 3210,
-    reuseExistingServer: true,
-    // eslint-disable-next-line no-undef
-    env: process.env,
-  },
   use: {
     actionTimeout: 1000,
     trace: 'on-first-retry',

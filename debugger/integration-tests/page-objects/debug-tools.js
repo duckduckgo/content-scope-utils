@@ -28,23 +28,23 @@ export const DEFAULT_UPDATE_VALUE = '{ "updated": true }'
  * @typedef {import('../../schema/__generated__/schema.types').GetFeaturesResponse} GetFeaturesResponse
  * @typedef {import('../../schema/__generated__/schema.types').GetTabsResponse} GetTabsResponse
  * @typedef {import('../../schema/__generated__/schema.types').RemoteResource} RemoteResource
+ * @typedef {import('../../src/js/global-config.mjs').GlobalConfig} GlobalConfig
  */
 
 export class DebugToolsPage {
   /**
    * @param {import("@playwright/test").Page} page
    * @param {string} baseURL
-   * @param {Build} build
-   * @param {PlatformInfo} platform
+   * @param {GlobalConfig['platform']} platform
+   * @param {Build | null} build
    */
-  constructor(page, baseURL, build, platform) {
+  constructor(page, baseURL, platform, build) {
     this.page = page
     this.build = build
     this.baseURL = baseURL
-    this.platform = platform
     this.resources = new Resources(this.page)
 
-    this.mocks = new Mocks(page, this.resources, build, platform, {
+    this.mocks = new Mocks(page, this.resources, build, {
       context: 'specialPages',
       featureName: 'debugToolsPage',
       env: 'development',
@@ -61,7 +61,7 @@ export class DebugToolsPage {
     /** @type {import("../../src/js/global-config.mjs").GlobalConfig} */
     this.globalConfig = {
       editor: 'monaco',
-      platform: this.build.name,
+      platform: platform,
       editorSaveTimeout: 0,
       debugMessaging: 'silent',
     }
@@ -150,11 +150,17 @@ export class DebugToolsPage {
   }
 
   /**
+   * @param {object} [params]
+   * @param {string} [params.id]
    * @returns {Promise<void>}
    */
-  async openRemoteResourceEditor() {
+  async openRemoteResourceEditor({ id } = {}) {
     const params = new URLSearchParams({})
-    await this.openPage(params, '/remoteResources')
+    if (id) {
+      await this.openPage(params, '/remoteResources/' + id)
+    } else {
+      await this.openPage(params, '/remoteResources')
+    }
   }
 
   /**
@@ -213,10 +219,7 @@ export class DebugToolsPage {
    * @return {string}
    */
   get basePath() {
-    return this.build.switch({
-      windows: () => 'index.html',
-      apple: () => 'index.html',
-    })
+    return 'index.html'
   }
 
   /**
@@ -225,10 +228,16 @@ export class DebugToolsPage {
    * @param {import("@playwright/test").TestInfo} testInfo
    */
   static create(page, baseURL, testInfo) {
+    invariant(baseURL)
     // Read the configuration object to determine which platform we're testing against
-    const { platformInfo, build } = perPlatform(testInfo.project.use)
-    invariant(baseURL, 'cannot continue without baseURL')
-    return new DebugToolsPage(page, baseURL, build, platformInfo)
+    /** @type {GlobalConfig['platform']} */
+    // @ts-ignore
+    const platform = testInfo.project.use.platform
+    if (platform === 'http') {
+      return new DebugToolsPage(page, baseURL, platform, null)
+    }
+    const { build } = perPlatform(testInfo.project.use)
+    return new DebugToolsPage(page, baseURL, platform, build)
   }
 
   /**

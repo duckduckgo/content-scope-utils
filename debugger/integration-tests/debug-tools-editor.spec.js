@@ -1,35 +1,25 @@
 import { test } from '@playwright/test'
-import {
-  DebugToolsPage,
-  DEFAULT_BASE_VALUE,
-  DEFAULT_EDIT_VALUE,
-  DEFAULT_UPDATE_VALUE,
-} from './page-objects/debug-tools'
+import { DebugToolsPage, DEFAULT_EDIT_VALUE, DEFAULT_UPDATE_VALUE } from './page-objects/debug-tools'
 import { Resources } from './page-objects/resources'
+import { testHttp } from './utils.mjs'
 
 test.describe('editor', () => {
-  test('updates a resource current content', async ({ page, baseURL }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, baseURL, workerInfo)
-
-    const resource = dt.resources.remoteResources.testResource(DEFAULT_BASE_VALUE)
-    const updated = Resources.updatedResource(resource, DEFAULT_UPDATE_VALUE)
+  testHttp.only('updates a resource current content', async ({ page, http }, workerInfo) => {
+    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+    const id = 'test-text'
 
     await test.step('setup mocks', async () => {
-      dt.mocks.defaultResponses({
-        getRemoteResource: resource,
-        updateResource: updated,
-      })
+      await dt.enabled()
     })
 
     await test.step('navigate and edit value', async () => {
-      await dt.enabled()
-      await dt.openRemoteResourceEditor()
+      await dt.openRemoteResourceEditor({ id })
       await dt.switchesTo('inline')
-      await dt.editor.setsEditorValue({ editorKind: 'inline', editorPath: updated.id }, updated.current.contents)
+      await dt.editor.setsEditorValue({ editorKind: 'inline', editorPath: id }, DEFAULT_UPDATE_VALUE)
     })
 
     await test.step('assert messages and editor values are correct', async () => {
-      await dt.editor.saves(resource, { editorPath: resource.id, editorKind: 'inline' }, updated.current.contents)
+      await dt.editor.saves(id, { editorPath: id, editorKind: 'inline' }, DEFAULT_UPDATE_VALUE)
     })
   })
   // test.only('shows editor error and allows it to be reverted (simple)', async ({ page, baseURL }, workerInfo) => {
@@ -106,4 +96,15 @@ test.describe('editor', () => {
       await dt.editor.stillHasEditedValue({ editorKind: 'inline', editorPath: 'privacy-configuration' }, '[]')
     })
   })
+  // testHttp('switches resource during editing', async ({ page, http }, workerInfo) => {
+  //   const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+  //   await dt.httpEnabled()
+  //
+  //   dt.globalConfig.platform = 'http'
+  //
+  //   await dt.openRemoteResourceEditor()
+  //   // await dt.features.canToggle()
+  //   await dt.switchesTo('diff')
+  //   await page.pause()
+  // })
 })

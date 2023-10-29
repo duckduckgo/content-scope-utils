@@ -18,15 +18,14 @@ export class Mocks {
   /**
    * @param {import("@playwright/test").Page} page
    * @param {Resources} resources
-   * @param {import("@duckduckgo/content-scope-scripts/integration-test/playwright/type-helpers.mjs").Build} build
-   * @param {import("@duckduckgo/content-scope-scripts/integration-test/playwright/type-helpers.mjs").PlatformInfo} platform
+   * @param {import("@duckduckgo/content-scope-scripts/integration-test/playwright/type-helpers.mjs").Build | null} build
    * @param {import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").MessagingContext} messagingContext
    */
-  constructor(page, resources, build, platform, messagingContext) {
+  constructor(page, resources, build, messagingContext) {
     this.page = page
     this.resources = resources
+    /** @type {import("@duckduckgo/content-scope-scripts/integration-test/playwright/type-helpers.mjs").Build | null} */
     this.build = build
-    this.platform = platform
     this.messagingContext = messagingContext
   }
 
@@ -48,6 +47,19 @@ export class Mocks {
   }
 
   async installMessagingMocks() {
+    if (!this.build) {
+      return await this.page.addInitScript(() => {
+        window.__playwright_01 = {
+          mockResponses: { models: {} },
+          errorResponses: {},
+          subscriptionEvents: [],
+          mocks: {
+            outgoing: [],
+          },
+          models: {},
+        }
+      })
+    }
     await this.build.switch({
       windows: async () => {
         await this.page.addInitScript(mockWindowsMessaging, {
@@ -74,19 +86,6 @@ export class Mocks {
       ...this._defaultResponses,
       ...responses,
     }
-  }
-
-  /**
-   * @param {string} name
-   * @param {Record<string, any>} payload
-   */
-  async simulateSubscriptionMessage(name, payload) {
-    await this.page.evaluate(simulateSubscriptionMessage, {
-      messagingContext: this.messagingContext,
-      name,
-      payload,
-      injectName: this.build.name,
-    })
   }
 
   /**

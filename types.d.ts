@@ -16,6 +16,12 @@ interface Window {
   _test_editor_value: () => string
   _test_editor_set_value: (value: string) => void
   __playwright_01?: {
+    mockResponses: Record<string, import('../index.js').MessageResponse>
+    errorResponses: Record<string, import('../index.js').MessageError>
+    subscriptionEvents: import('../index.js').SubscriptionEvent[]
+    mocks: {
+      outgoing: UnstableMockCall[]
+    }
     models: Record<string, any>
   }
 }

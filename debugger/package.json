@@ -10,7 +10,7 @@
     "test.int": "wireit",
     "test.windows": "npm run test -- --project windows",
     "test.apple": "npm run test -- --project apple",
-    "test.headed": "npm run test.int -- --project apple --headed",
+    "test.headed": "npm run test.int -- --project http --headed",
     "test.ui": "npm run test -- --project apple --ui",
     "test.unit": "web-test-runner \"unit-tests/**/*.test.js\" --node-resolve --config=../web-test-runner.config.mjs",
     "test.watch": "npm run test.unit -- --watch",
@@ -98,7 +98,7 @@
       "clean": false
     },
     "test.int": {
-      "command": "playwright test --project apple",
+      "command": "playwright test --project http",
       "dependencies": [
         "build.dev"
       ]
@@ -125,6 +125,7 @@
     "monaco-editor": "^0.39.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "strip-ansi": "^7.1.0",
     "text-diff": "^1.0.1",
     "tiny-invariant": "^1.3.1",
     "tldts": "^6.0.14",

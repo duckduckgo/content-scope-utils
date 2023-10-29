@@ -54,7 +54,6 @@ export class Editor {
   async setsEditorValue(editorLocator, value) {
     // this makes sure the JS is compiled/loaded
     const { page } = this
-    await page.pause()
     const editor = this.editorLocator(editorLocator)
     await editor.click()
     await editor.press('Meta+KeyA')
@@ -115,22 +114,42 @@ export class Editor {
   }
 
   /**
-   * @param {import('../../schema/__generated__/schema.types').RemoteResource} resource
+   * @param {string} id
    * @param {EditorLocator} editorLocator
    * @param {string} expectedValue
    * @return {Promise<void>}
    */
-  async saves(resource, editorLocator, expectedValue) {
-    await this.clicksSave(resource, expectedValue)
-    const calls = await this.mocks.waitForCallCount({ method: 'updateResource', count: 1 })
-    expect(calls[0].payload.params).toMatchObject({
-      id: resource.id,
+  async saves(id, editorLocator, expectedValue) {
+    // actually save
+    const [req] = await Promise.all([
+      this.page.waitForRequest((req) => {
+        if (req.url().includes('specialPages/debugToolsPage')) {
+          if (req.postDataJSON().method === 'updateResource') {
+            return true
+          }
+        }
+        return false
+      }),
+      await this.$.editorSave().click(),
+    ])
+
+    expect(req.postDataJSON().params).toMatchObject({
+      id,
       source: {
         debugTools: {
           content: expectedValue,
         },
       },
     })
+
+    const resp = await req.response()
+    const { result } = (await resp?.json()) || {}
+
+    // return value was correct
+    expect(result.id).toEqual(id)
+    expect(result.current.contents).toEqual(expectedValue)
+
+    // reflected to editor
     const currentValue = await this.readCurrentValue(editorLocator)
     expect(currentValue).toEqual(expectedValue)
   }

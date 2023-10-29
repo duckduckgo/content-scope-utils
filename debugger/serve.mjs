@@ -1,7 +1,15 @@
-import { create } from 'browser-sync'
 import express from 'express'
+import { createManifest, HttpBackend, requestSchema } from './serve-post.mjs'
 import z from 'zod'
-import { getRemoteResourceParamsSchema, updateResourceParamsSchema } from './schema/__generated__/schema.parsers.mjs'
+import { fileURLToPath } from 'node:url'
+import { join, dirname } from 'node:path'
+import { readFileSync } from 'node:fs'
+import { parseArgs } from 'node:util'
+import invariant from 'tiny-invariant'
+import { networkInterfaces } from 'node:os'
+import { createInterface } from 'node:readline'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /**
  * @typedef {import('@duckduckgo/content-scope-scripts/packages/messaging/index.js').MessageResponse} MessageResponse
@@ -12,280 +20,147 @@ import { getRemoteResourceParamsSchema, updateResourceParamsSchema } from './sch
  * @typedef {import('./schema/__generated__/schema.types').GetRemoteResourceParams} GetRemoteResourceParams
  * @typedef {import('./schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
  */
-
-const bs = create()
 const router = express.Router()
 const app = express()
 
-const requestSchema = z.discriminatedUnion('method', [
-  z.object({
-    context: z.literal('specialPages'),
-    featureName: z.literal('debugToolsPage'),
-    method: z.literal('getFeatures'),
-    id: z.string(),
-  }),
-  z.object({
-    context: z.literal('specialPages'),
-    featureName: z.literal('debugToolsPage'),
-    method: z.literal('getRemoteResource'),
-    id: z.string(),
-    params: getRemoteResourceParamsSchema,
-  }),
-  z.object({
-    context: z.literal('specialPages'),
-    featureName: z.literal('debugToolsPage'),
-    method: z.literal('updateResource'),
-    id: z.string(),
-    params: updateResourceParamsSchema,
-  }),
-])
-
-class HttpBackend {
-  /**
-   * @param {object} params
-   * @param {Readonly<Record<string, RemoteResourceRef>>} params.remoteResourceRefs
-   */
-  constructor(params) {
-    this.remoteResourceRefs = params.remoteResourceRefs
-    /** @type {Record<string, RemoteResource>} */
-    this.remoteResources = {}
-  }
-
-  /**
-   * @returns {Promise<{ value: GetFeaturesResponse } | { error: { message: string }}>}
-   */
-  async getFeatures() {
-    /** @type {import('./schema/__generated__/schema.types').GetFeaturesResponse} */
-    const response = {
-      features: {
-        remoteResources: {
-          resources: Object.values(this.remoteResourceRefs),
-        },
-      },
-    }
-    return { value: response }
-  }
-
-  /**
-   * @param {import("express").Response} res
-   * @param {MessageEvent} msg
-   * @param {{value: any} | {error: {message: string}}} response
-   * @return {MessageResponse}
-   */
-  responseTo(res, msg, response) {
-    if ('value' in response) {
-      /** @type {MessageResponse} */
-      const messageResponse = {
-        context: msg.context,
-        featureName: msg.featureName,
-        result: response.value,
-        id: msg.id,
-      }
-      return res.json(messageResponse)
-    }
-    return res.status(404).send(response.error.message)
-  }
-
-  /**
-   * @param {GetRemoteResourceParams} params
-   * @return {Promise<{value: RemoteResource} | { error: {message:  string} }>}
-   */
-  async getRemoteResource(params) {
-    if (!(params.id in this.remoteResourceRefs)) return { error: { message: `resource not supported ${params.id}` } }
-
-    // just return the value, don't store it
-    if (params.original) {
-      return await this._fetchRemote(params)
-    }
-
-    // use stored if available...
-    if (this.remoteResources[params.id]) {
-      return { value: this.remoteResources[params.id] }
-    }
-
-    // now fetch the asset
-    const next = await this._fetchRemote(params)
-
-    if ('value' in next) {
-      this.remoteResources[params.id] = next.value
-      return next
-    }
-
-    return { error: { message: next.error.message } }
-  }
-
-  /**
-   * @param {GetRemoteResourceParams} params
-   * @return {Promise<{value: RemoteResource} | { error: {message:  string} }>}
-   */
-  async _fetchRemote(params) {
-    const ref = this.remoteResourceRefs[params.id]
-    const url = ref.url
-    const content = await fetch(url).then((r) => r.text())
-    const now = new Date()
-    const formattedDate = now.toISOString()
-
-    const resource = {
-      ...ref,
-      current: {
-        source: {
-          remote: { url: url, fetchedAt: formattedDate },
-        },
-        contentType: this._contentType(ref),
-        contents: content,
-      },
-    }
-    return { value: resource }
-  }
-
-  /**
-   * @param {RemoteResourceRef} resourceRef
-   * @return {string}
-   */
-  _contentType(resourceRef) {
-    switch (resourceRef.kind) {
-      case "privacy-configuration":
-      case "tds":
-        return "application/json"
-      case "text":
-        return "text/plain"
-    }
-  }
-
-  /**
-   * @param {UpdateResourceParams} params
-   * @return {Promise<{value: RemoteResource} | { error: {message:  string} }>}
-   */
-  async updateResource(params) {
-    if (!(params.id in this.remoteResourceRefs))
-      return { error: { message: 'resource not supported for updateResource' } }
-
-    const now = new Date()
-    const formattedDate = now.toISOString()
-
-    const ref = this.remoteResourceRefs[params.id]
-    const contentType = this._contentType(ref);
-
-    if ('debugTools' in params.source) {
-      this.remoteResources[params.id] = {
-        ...ref,
-        current: {
-          source: {
-            debugTools: { modifiedAt: formattedDate },
-          },
-          contents: params.source.debugTools.content,
-          contentType,
-        },
-      }
-
-      return this.getRemoteResource({ id: params.id })
-    }
-
-    if ('remote' in params.source) {
-      const content = await fetch(params.source.remote.url).then((r) => r.text())
-      this.remoteResources[params.id] = {
-        ...ref,
-        current: {
-          source: {
-            remote: { url: params.source.remote.url, fetchedAt: formattedDate },
-          },
-          contents: content,
-          contentType,
-        },
-      }
-      return this.getRemoteResource({ id: params.id })
-    }
-    return { error: { message: 'unreachable' } }
-  }
-}
-
-const http = new HttpBackend({
-  remoteResourceRefs: {
-    'privacy-configuration': {
-      id: 'privacy-configuration',
-      kind: 'privacy-configuration',
-      url: 'https://staticcdn.duckduckgo.com/trackerblocking/config/v3/android-config.json',
-      name: 'Privacy Config',
-    },
-    tds: {
-      id: 'tds',
-      kind: 'tds',
-      url: 'https://staticcdn.duckduckgo.com/trackerblocking/v4/tds.json',
-      name: 'Tracker Data Set',
-    },
-    'tds-next': {
-      id: 'tds-next',
-      kind: 'tds',
-      url: 'https://staticcdn.duckduckgo.com/trackerblocking/v4/tds-next.json',
-      name: 'Tracker Data Set (NEXT)',
-    },
-    'android-tds': {
-      id: 'android-tds',
-      kind: 'tds',
-      url: 'https://staticcdn.duckduckgo.com/trackerblocking/appTP/2.1/android-tds.json',
-      name: 'Android TDS'
-    },
-    'android-surrogates': {
-      id: 'android-surrogates',
-      kind: 'text',
-      url: 'https://staticcdn.duckduckgo.com/surrogates.txt',
-      name: 'Android Surrogates'
-    }
+// handle CLI input
+const options = {
+  port: {
+    type: 'string',
+    short: 'p',
   },
+  config: {
+    type: 'string',
+    short: 'c',
+    default: 'config/integration.json',
+  },
+}
+// @ts-ignore
+const { values } = parseArgs({ args: process.argv.slice(2), options })
+console.log(values)
+const cliSchema = z.object({
+  port: z.string().optional(),
+  config: z.string(),
 })
-
-router.post('/specialPages/debugToolsPage', async function (req, res) {
-  const parsed = requestSchema.safeParse(req.body)
-  if (parsed.success) {
-    const msg = parsed.data
-    if (msg.method === 'getFeatures') {
-      const response = await http.getFeatures()
-      return http.responseTo(res, msg, response)
-    }
-    if (msg.method === 'getRemoteResource') {
-      const response = await http.getRemoteResource(msg.params)
-      return http.responseTo(res, msg, response)
-    }
-    if (msg.method === 'updateResource') {
-      const response = await http.updateResource(msg.params)
-      return http.responseTo(res, msg, response)
-    }
-  }
-  res.status(500).send(`unhandled request: ${JSON.stringify(req.body)}`)
-})
-
-router.get('/rr/:id', async function (req, res) {
-  console.log(`FETCH [get] /rr/${req.params.id}`)
-  const v = await http.getRemoteResource({ id: req.params.id })
-  if ('value' in v) {
-    // todo: support all content types here
-    const resource = v.value;
-    switch (resource.kind) {
-      case "privacy-configuration":
-      case "tds":
-        const parsed = JSON.parse(v.value.current.contents)
-        return res.header('content-type', 'application/json').send(JSON.stringify(parsed, null, 4))
-      case "text":
-        return res.header('content-type', 'text/plain').send(v.value.current.contents)
-    }
-  } else {
-    return res.status(500).send(v.error.message)
-  }
-  return res.status(404).send(`not found, resource ID: ${req.params.id}`)
-})
+const cli = cliSchema.parse(values)
 
 app.use(express.json({ limit: '200mb' }))
 app.use(express.urlencoded({ extended: true, limit: '200mb' }))
 app.use(router)
+app.use(express.static('dist'))
 
-bs.init(
-  {
-    server: 'dist',
-    watch: false,
-    open: false,
-    middleware: [app],
-  },
-  (e, bs) => {
-    console.log('Available on ' + bs.options.getIn(['urls', 'local']))
-  },
-)
+// @ts-expect-error - TS can't handle that this can be empty or a string or number
+const server = app.listen(cli.port, '0.0.0.0', ready)
+
+function ready() {
+  // read config, try to use it
+  const address = server.address()
+  invariant(address && typeof address !== 'string')
+  const port = address.port
+  const json = JSON.parse(readFileSync(join(__dirname, cli.config), 'utf8'))
+  const manifest = createManifest({ port: address.port, input: json })
+  const http = new HttpBackend({ manifest })
+  const addresses = getAddresses(port).map((x) => x.href)
+  const plainAddresses = addresses.map((x) => {
+    const url = new URL(x)
+    url.pathname = ''
+    url.search = ''
+    url.hash = ''
+    return url.toString()
+  })
+
+  if (process.send) {
+    process.send({
+      kind: 'ready',
+      addresses: plainAddresses,
+      cwd: __dirname,
+    })
+  }
+
+  for (let address of addresses) {
+    console.log('Available on:', address)
+  }
+
+  router.post('/specialPages/debugToolsPage', async function (req, res) {
+    const parsed = requestSchema.safeParse(req.body)
+    if (parsed.success) {
+      const msg = parsed.data
+      if (msg.method === 'getFeatures') {
+        const response = await http.getFeatures()
+        return http.intoResponse(res, msg, response)
+      }
+      if (msg.method === 'getRemoteResource') {
+        const response = await http.getRemoteResource(msg.params)
+        return http.intoResponse(res, msg, response)
+      }
+      if (msg.method === 'updateResource') {
+        const response = await http.updateResource(msg.params)
+        return http.intoResponse(res, msg, response)
+      }
+    }
+    res.status(500).send(`unhandled request: ${JSON.stringify(req.body)}`)
+  })
+
+  router.get('/rr/:id', async function (req, res) {
+    console.log(`FETCH [get] /rr/${req.params.id}`)
+    const v = await http.getRemoteResource({ id: req.params.id })
+    if ('value' in v) {
+      // todo: support all content types here
+      const resource = v.value
+      switch (resource.kind) {
+        case 'privacy-configuration':
+        case 'tds':
+          const parsed = JSON.parse(v.value.current.contents)
+          return res.header('content-type', 'application/json').send(JSON.stringify(parsed, null, 4))
+        case 'text':
+          return res.header('content-type', 'text/plain').send(v.value.current.contents)
+      }
+    } else {
+      return res.status(500).send(v.error.message)
+    }
+    return res.status(404).send(`not found, resource ID: ${req.params.id}`)
+  })
+  console.log(server.address())
+}
+
+function getAddresses(port) {
+  const internal = 'localhost'
+  const external = Object.values(networkInterfaces())
+    .flat()
+    .filter((networkInterfaceInfo) => {
+      invariant(networkInterfaceInfo)
+      return networkInterfaceInfo.family === 'IPv4'
+    })
+    .map((networkInterfaceInfo) => {
+      invariant(networkInterfaceInfo)
+      return networkInterfaceInfo.address
+    })
+
+  return [internal, ...external].map((address) => {
+    invariant(typeof address === 'string')
+    const url = new URL('http://' + address)
+    url.port = port
+    url.searchParams.set('platform', 'http')
+    url.hash = '/remoteResources'
+    return url
+  })
+}
+
+if (process.platform === 'win32') {
+  createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  }).on('SIGINT', function () {
+    process.emit('SIGINT')
+  })
+}
+
+process.on('SIGINT', function () {
+  console.log('serve.mjs stopped.')
+  process.exit()
+})
+
+process.on('SIGTERM', function () {
+  console.log('serve.mjs stopped.')
+  process.exit()
+})

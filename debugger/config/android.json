@@ -1,0 +1,34 @@
+{
+  "remoteResourceRefs": {
+    "privacy-configuration": {
+      "id": "privacy-configuration",
+      "kind": "privacy-configuration",
+      "url": "https://staticcdn.duckduckgo.com/trackerblocking/config/v3/android-config.json",
+      "name": "Privacy Config"
+    },
+    "tds": {
+      "id": "tds",
+      "kind": "tds",
+      "url": "https://staticcdn.duckduckgo.com/trackerblocking/v4/tds.json",
+      "name": "Tracker Data Set"
+    },
+    "tds-next": {
+      "id": "tds-next",
+      "kind": "tds",
+      "url": "https://staticcdn.duckduckgo.com/trackerblocking/v4/tds-next.json",
+      "name": "Tracker Data Set (NEXT)"
+    },
+    "android-tds": {
+      "id": "android-tds",
+      "kind": "tds",
+      "url": "https://staticcdn.duckduckgo.com/trackerblocking/appTP/2.1/android-tds.json",
+      "name": "Android TDS"
+    },
+    "android-surrogates": {
+      "id": "android-surrogates",
+      "kind": "text",
+      "url": "https://staticcdn.duckduckgo.com/surrogates.txt",
+      "name": "Android Surrogates"
+    }
+  }
+}
