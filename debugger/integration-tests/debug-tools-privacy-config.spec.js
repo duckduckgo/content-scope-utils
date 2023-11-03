@@ -1,59 +1,43 @@
-import { test } from '@playwright/test'
+import { testHttp as test } from './utils.mjs'
 import { DebugToolsPage } from './page-objects/debug-tools.js'
+import { remoteResourceSchema } from '../schema/__generated__/schema.parsers.mjs'
 
 test.describe('debug tools privacy config', () => {
   test.describe('transforms', () => {
-    test('updates the hash and version', async ({ page, baseURL, context }, workerInfo) => {
+    test('updates fields on save', async ({ page, http, context }, workerInfo) => {
       await context.grantPermissions(['clipboard-write', 'clipboard-read', 'accessibility-events'])
-      const dt = DebugToolsPage.create(page, baseURL, workerInfo)
-      const initial = {
-        unprotectedTemporary: [],
-        features: {
-          abc: {
-            state: 'enabled',
-            exceptions: [],
-            settings: {
-              a: 'b',
-              c: ['d'],
-            },
-            hash: 'abc',
-          },
-        },
-      }
-      const edited = {
-        unprotectedTemporary: [],
-        features: {
-          abc: {
-            state: 'enabled',
-            exceptions: [],
-            settings: {
-              a: 'b',
-              c: ['d'],
-              d: { e: 'f' },
-            },
-            hash: 'abc',
-          },
-        },
-      }
-      const editedString = JSON.stringify(edited, null, 2)
-
+      const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+      const id = 'single-config'
       await dt.enabled()
+      await dt.openRemoteResourceEditor({ id })
 
-      const jsonString = JSON.stringify(initial, null, 2)
-
-      /** @type {import('../schema/__generated__/schema.types.js').RemoteResource} */
-      const resource = dt.resources.remoteResources.privacyConfig(jsonString)
-
-      await dt.withPrivacyConfig(resource)
-      await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
-      await dt.features.canToggle('abc')
+      await dt.features.canToggle('a')
       await dt.switchesTo('inline')
-      await dt.editor.setsEditorValue({ editorKind: 'inline', editorPath: resource.id }, editedString)
-      await dt.editor.clicksSave(resource, editedString)
+      const original = await dt.editor.readCurrentValue({ editorKind: 'inline', editorPath: id })
+      const json = JSON.parse(original)
+      const originalHash = json.features.a.hash
+      const originalVersion = json.version
 
-      const saved = await dt.savedWithValue()
-      dt.features.featureHasUpdatedHash(saved.source.debugTools.content, 'abc')
-      dt.features.configHasUpdatedVersion(saved.source.debugTools.content)
+      // make the change
+      json.features.a.exceptions.push({
+        domain: 'duckduckgo.com',
+      })
+
+      // set the changes into the editor
+      const asModifiedJson = JSON.stringify(json, null, 2)
+      await dt.editor.setsEditorValue({ editorKind: 'inline', editorPath: id }, asModifiedJson)
+
+      // save and get the response
+      const { responseJson } = await dt.editor.savesWithReqAndRes()
+
+      // parse the response for the types
+      const resource = remoteResourceSchema.parse(responseJson)
+
+      // assert hash updated
+      dt.features.featureHasUpdatedHash(resource.current.contents, 'a', originalHash)
+
+      // assert version updated
+      dt.features.configHasUpdatedVersion(resource.current.contents, originalVersion)
     })
   })
 })

@@ -328,7 +328,7 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
       let content = ctx.currentResource.lastValue // string
 
       // apply privacy-configuration pre-processing
-      if (evt.id === 'privacy-configuration') {
+      if (match.kind === 'privacy-configuration') {
         const original = JSON.parse(match.current.contents)
         const nextJson = JSON.parse(content)
 
@@ -479,13 +479,13 @@ export const remoteResourcesMachine = _remoteResourcesMachine.withConfig({
         const parentState = ctx.parent?.state?.context.history.location.pathname
         const id = parentState.split('/')[2] || resources[0].id // default
         const match = resources.find((x) => x.id === id) || resources[0]
-        const matchingId = match ? match.id : resources[0].id
+        invariant(match, 'unreachable - must have valid match by this point')
 
-        if (!matchingId) throw new Error('unreachable - must have valid resource ID by this point')
-        invariant(match)
+        const matchingId = match ? match.id : resources[0].id
+        invariant(matchingId, 'unreachable - must have valid resource ID by this point')
 
         // matching, or default
-        const capabilties = resourceCapabilities[matchingId] || resourceCapabilities.text
+        const capabilties = resourceCapabilities[match.kind] || resourceCapabilities.text
         const lastValue =
           ctx.currentResource?.id === matchingId ? ctx.currentResource?.lastValue : match.current.contents
 

@@ -1,0 +1,16 @@
+{
+  "readme": "https://github.com/duckduckgo/privacy-configuration",
+  "version": 100,
+  "features": {
+    "a": {
+      "exceptions": [
+        {
+          "domain": "example.com"
+        }
+      ],
+      "state": "enabled",
+      "hash": "abc-original-test-hash"
+    }
+  },
+  "unprotectedTemporary": []
+}

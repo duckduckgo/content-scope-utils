@@ -60,16 +60,25 @@ export class Features {
     expect(json.features[featureName].state).toBe('disabled')
   }
 
-  featureHasUpdatedHash(contents, featureName) {
+  /**
+   * @param {string | Record<string, any>} contents
+   * @param {string} featureName
+   * @param {string} originalHash
+   */
+  featureHasUpdatedHash(contents, featureName, originalHash) {
     const json = typeof contents === 'string' ? JSON.parse(contents) : contents
     expect(typeof json.features[featureName].hash).toBe('string')
     expect(json.features[featureName].hash.length).toBeGreaterThan(3)
-    expect(json.features[featureName].hash).not.toBe('abc')
+    expect(json.features[featureName].hash).not.toBe(originalHash)
   }
 
-  configHasUpdatedVersion(contents) {
+  /**
+   * @param {string} contents
+   * @param {number} originalVersion
+   */
+  configHasUpdatedVersion(contents, originalVersion) {
     const json = typeof contents === 'string' ? JSON.parse(contents) : contents
-    expect(json.version).toBeGreaterThan(0)
+    expect(json.version).not.toBe(originalVersion)
   }
 
   /**

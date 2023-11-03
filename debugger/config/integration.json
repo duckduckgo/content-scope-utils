@@ -6,6 +6,18 @@
       "url": "/fixtures/macos-config.json",
       "name": "Privacy Config"
     },
+    "minimal-privacy-config": {
+      "id": "minimal-privacy-config",
+      "kind": "privacy-configuration",
+      "url": "/fixtures/minimal-config.json",
+      "name": "Minimal Privacy Config"
+    },
+    "single-config": {
+      "id": "single-config",
+      "kind": "privacy-configuration",
+      "url": "/fixtures/single-config.json",
+      "name": "Single Privacy Config"
+    },
     "test-text": {
       "id": "test-text",
       "kind": "text",
