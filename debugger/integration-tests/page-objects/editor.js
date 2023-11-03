@@ -1,7 +1,5 @@
 import { expect } from '@playwright/test'
 import { DEFAULT_EDIT_VALUE } from './debug-tools'
-import { mockResponses } from '@duckduckgo/content-scope-scripts/packages/messaging/lib/test-utils.mjs'
-import { Resources } from './resources'
 
 /**
  * @typedef {import('../../src/js/remote-resources/remote-resources.machine').EditorKind} EditorKind
@@ -91,27 +89,6 @@ export class Editor {
 
     // remove non-breaking spaces from editor output
     return originalString?.replace(/\u00A0/g, ' ') || ''
-  }
-
-  /**
-   * Before we save in the editor, we want to be sure the response is going to be correct
-   * @param {import('../../schema/__generated__/schema.types').RemoteResource} resource
-   * @param {string} expected
-   * @deprecated
-   */
-  async clicksSave(resource, expected) {
-    // ensure the saved result->response is correct
-    const updated = Resources.updatedResource(resource, expected)
-    await this.page.evaluate(mockResponses, {
-      responses: {
-        updateResource: updated,
-      },
-    })
-
-    // actually save
-    await this.$.editorSave().click()
-    await this.page.pause()
-    await this.mocks.waitForCallCount({ method: 'updateResource', count: 1 })
   }
 
   async savesWithReqAndRes() {

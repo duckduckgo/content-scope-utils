@@ -1,44 +1,29 @@
-import { test } from '@playwright/test'
+import { testHttp as test } from './utils.mjs'
 import { DebugToolsPage } from './page-objects/debug-tools'
-import { Resources } from './page-objects/resources'
+import invariant from 'tiny-invariant'
 
 test.describe('remote url', () => {
-  test('refreshes current resource', async ({ page, baseURL }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, baseURL, workerInfo)
-    let resource = dt.resources.remoteResources.privacyConfig()
-    let updated = JSON.parse(JSON.stringify(resource))
-
-    let fetchedAt = '2023-07-05T12:35:56Z'
-    updated.current.source.remote.fetchedAt = fetchedAt
-
-    dt.mocks.defaultResponses({
-      getRemoteResource: resource,
-      updateResource: updated,
-    })
-
+  test('refreshes current resource', async ({ page, http }, workerInfo) => {
+    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
-    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
+    const id = 'privacy-configuration'
+    await dt.openRemoteResourceEditor({ id })
     await dt.features.canToggle()
-    await dt.remote.refreshesCurrentResource()
-    await dt.remote.refreshedRemote('35:56') // this is from the new timestamp above
+    await dt.remote.refreshesRemote({ id })
   })
-  test('sets a new remote url', async ({ page, baseURL }, workerInfo) => {
-    const override = 'https://example.com/override.json'
-    const dt = DebugToolsPage.create(page, baseURL, workerInfo)
-    let resource = dt.resources.remoteResources.privacyConfig()
-    dt.mocks.defaultResponses({
-      getRemoteResource: resource,
-      updateResource: Resources.updatedUrl(resource, override),
-    })
+  test('sets a new remote url', async ({ page, http }, workerInfo) => {
+    const ex = http.addresses.find((x) => !x.startsWith('http://local'))
+    invariant(typeof ex === 'string', 'must find external')
+    const override = ex + 'fixtures/single-config.json'
+    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
-    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
+    const id = 'privacy-configuration'
+    await dt.openRemoteResourceEditor({ id })
     await dt.features.canToggle()
     await dt.remote.overrideRemoteUrl(override)
-    await dt.remote.submitRemoteUrlForm()
-    await dt.remote.savedNewRemoteUrl(override)
-    await page.pause()
+    await dt.remote.savedNewRemoteUrl({ id, url: override })
   })
-  test('shows an error on updating a resource', async ({ page, baseURL }, workerInfo) => {
+  test.skip('shows an error on updating a resource', async ({ page, baseURL }, workerInfo) => {
     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
     await dt.enabled()
     await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })

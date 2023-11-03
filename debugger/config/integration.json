@@ -23,6 +23,12 @@
       "kind": "text",
       "url": "/fixtures/text-file-01.txt",
       "name": "Test Text File"
+    },
+    "tds-current": {
+      "id": "tds-current",
+      "kind": "tds",
+      "url": "/fixtures/tds.json",
+      "name": "TDS Current"
     }
   }
 }

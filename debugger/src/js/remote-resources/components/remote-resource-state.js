@@ -6,6 +6,8 @@ import { RemoteResourcesContext } from '../remote-resources.page'
 import { useEditorKinds } from './remote-resource-editor'
 import { usePatches } from '../patches-machine.react'
 import { OriginalDiffModal } from './original-diff-modal'
+import { date } from '../../lib'
+import invariant from 'tiny-invariant'
 
 /**
  * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -76,6 +78,8 @@ export function RemoteResourceState(props) {
     updatedAt = props.resource.current.source.debugTools.modifiedAt
   }
 
+  invariant(updatedAt, 'updatedAt must be a string by this point')
+
   const formatted = date(updatedAt)
 
   return (
@@ -117,7 +121,9 @@ export function RemoteResourceState(props) {
             <span className={hasOverride ? 'strikethrough' : undefined}>URL:</span>
           </DT>
           <DD>
-            <span className={hasOverride ? 'strikethrough' : undefined}>{props.resource.url} </span>
+            <span className={hasOverride ? 'strikethrough' : undefined} data-testid="remote-resource-state.remote-url">
+              {props.resource.url}{' '}
+            </span>
             <MicroButton className="ml-3.5" onClick={(e) => copy(e, props.resource.url)}>
               Copy 📄
             </MicroButton>
@@ -290,15 +296,4 @@ function PatchCopyButton() {
       {text}
     </MicroButton>
   )
-}
-
-function date(input) {
-  return new Date(input).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour12: true,
-    hour: 'numeric',
-    minute: '2-digit',
-    second: '2-digit',
-  })
 }

@@ -3,7 +3,6 @@ import {
   mockWebkitMessaging,
   mockWindowsMessaging,
   readOutgoingMessages,
-  simulateSubscriptionMessage,
   waitForCallCount,
 } from '@duckduckgo/content-scope-scripts/packages/messaging/lib/test-utils.mjs'
 import { Resources } from './resources'
