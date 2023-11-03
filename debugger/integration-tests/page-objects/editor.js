@@ -97,6 +97,7 @@ export class Editor {
    * Before we save in the editor, we want to be sure the response is going to be correct
    * @param {import('../../schema/__generated__/schema.types').RemoteResource} resource
    * @param {string} expected
+   * @deprecated
    */
   async clicksSave(resource, expected) {
     // ensure the saved result->response is correct

@@ -228,7 +228,7 @@ export class DebugToolsPage {
    * @param {import("@playwright/test").TestInfo} testInfo
    */
   static create(page, baseURL, testInfo) {
-    invariant(baseURL)
+    invariant(typeof baseURL === 'string', 'baseURL must be a string')
     // Read the configuration object to determine which platform we're testing against
     /** @type {GlobalConfig['platform']} */
     // @ts-ignore

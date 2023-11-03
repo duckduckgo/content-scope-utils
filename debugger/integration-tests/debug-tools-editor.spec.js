@@ -2,7 +2,7 @@ import { DebugToolsPage, DEFAULT_EDIT_VALUE, DEFAULT_UPDATE_VALUE } from './page
 import { testHttp as test } from './utils.mjs'
 import { remoteResourceSchema } from '../schema/__generated__/schema.parsers.mjs'
 
-test.describe.only('editor', () => {
+test.describe('editor', () => {
   test('updates a resource current content', async ({ page, http }, workerInfo) => {
     const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
     const id = 'test-text'
