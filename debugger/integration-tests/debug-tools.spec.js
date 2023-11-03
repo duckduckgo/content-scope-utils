@@ -6,7 +6,7 @@ test.describe('debug tools', () => {
     test('loads the application, defaults to remote resource editor', async ({ page, baseURL }, workerInfo) => {
       const dt = DebugToolsPage.create(page, baseURL, workerInfo)
       await dt.enabled()
-      await dt.openRemoteResourceEditor()
+      await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
       await dt.features.canToggle()
     })
   })

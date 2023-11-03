@@ -17,7 +17,7 @@ test.describe('remote url', () => {
     })
 
     await dt.enabled()
-    await dt.openRemoteResourceEditor()
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
     await dt.remote.refreshesCurrentResource()
     await dt.remote.refreshedRemote('35:56') // this is from the new timestamp above
@@ -31,7 +31,7 @@ test.describe('remote url', () => {
       updateResource: Resources.updatedUrl(resource, override),
     })
     await dt.enabled()
-    await dt.openRemoteResourceEditor()
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
     await dt.remote.overrideRemoteUrl(override)
     await dt.remote.submitRemoteUrlForm()
@@ -41,7 +41,7 @@ test.describe('remote url', () => {
   test('shows an error on updating a resource', async ({ page, baseURL }, workerInfo) => {
     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
     await dt.enabled()
-    await dt.openRemoteResourceEditor()
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
 
     const error = 'TEST oops! TEST'

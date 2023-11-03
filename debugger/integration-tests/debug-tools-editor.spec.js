@@ -1,10 +1,9 @@
-import { test } from '@playwright/test'
 import { DebugToolsPage, DEFAULT_EDIT_VALUE, DEFAULT_UPDATE_VALUE } from './page-objects/debug-tools'
-import { Resources } from './page-objects/resources'
-import { testHttp } from './utils.mjs'
+import { testHttp as test } from './utils.mjs'
+import { remoteResourceSchema } from '../schema/__generated__/schema.parsers.mjs'
 
-test.describe('editor', () => {
-  testHttp.only('updates a resource current content', async ({ page, http }, workerInfo) => {
+test.describe.only('editor', () => {
+  test('updates a resource current content', async ({ page, http }, workerInfo) => {
     const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
     const id = 'test-text'
 
@@ -22,42 +21,42 @@ test.describe('editor', () => {
       await dt.editor.saves(id, { editorPath: id, editorKind: 'inline' }, DEFAULT_UPDATE_VALUE)
     })
   })
-  // test.only('shows editor error and allows it to be reverted (simple)', async ({ page, baseURL }, workerInfo) => {
-  //   const dt = DebugToolsPage.create(page, baseURL, workerInfo)
+  // test.only('shows editor error and allows it to be reverted (simple)', async ({ page, http }, workerInfo) => {
+  //   const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
   //   await dt.enabled()
-  //   await dt.withTestResources()
   //   await dt.withGlobalConfig({ editor: 'simple' })
-  //   await dt.openRemoteResourceEditor()
+  //   await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
   //   await dt.switchesTo('inline')
-  //   await dt.editor.setsEditorValueTo('shane')
+  //   await dt.editor.setsEditorValue({ editorKind: 'inline', editorPath: 'privacy-configuration' }, 'shane')
+  //   await page.pause()
   //   await dt.revertsErrorFromPopup()
-  //   await dt.editor.waitForEditorToHaveValue(JSON.stringify(JSON.parse(DEFAULT_BASE_VALUE), null, 4))
+  //   // await dt.editor.waitForEditorToHaveValue(JSON.stringify(JSON.parse(DEFAULT_BASE_VALUE), null, 4))
   // })
   // test('reverts editor content (simple)', async ({ page, baseURL }, workerInfo) => {
   //   const dt = DebugToolsPage.create(page, baseURL, workerInfo)
   //   await dt.enabled()
   //   await dt.withTestResources()
   //   await dt.withGlobalConfig({ editor: 'simple' })
-  //   await dt.openRemoteResourceEditor()
+  //   await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
   //   await dt.switchesTo('inline')
   //   await dt.editor.setsEditorValueTo('[]') // valid json
   //   await dt.editor.revertEditorContent()
   //   await dt.editor.waitForEditorToHaveValue(JSON.stringify(JSON.parse(DEFAULT_BASE_VALUE), null, 4))
   // })
-  test('handles when input cannot be used with toggles (because of edits)', async ({ page, baseURL }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, baseURL, workerInfo)
+  test('handles when input cannot be used with toggles (because of edits)', async ({ page, http }, workerInfo) => {
+    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
-    await dt.openRemoteResourceEditor()
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
     await dt.switchesTo('inline')
     await dt.editor.setsEditorValue({ editorKind: 'inline', editorPath: 'privacy-configuration' }, '[]') // <- completely invalid type for this resource
     await dt.switchesTo('toggles')
     await dt.showsErrorText('Cannot use toggles because the format was invalidated (probably because of edits)')
   })
-  test('handles when a global toggle is clicked', async ({ page, baseURL }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, baseURL, workerInfo)
+  test('handles when a global toggle is clicked', async ({ page, http }, workerInfo) => {
+    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
-    await dt.openRemoteResourceEditor()
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
 
     await test.step('toggles a feature globally', async () => {
@@ -66,22 +65,15 @@ test.describe('editor', () => {
 
     await test.step('switches to diff view + saves', async () => {
       await dt.switchesTo('diff')
-
-      const resource = dt.resources.remoteResources.privacyConfig()
-      const json = JSON.parse(resource.current.contents)
-      json.features['autofill'].state = 'disabled'
-      const as_string = JSON.stringify(json)
-      const expectedUpdate = Resources.updatedResource(resource, as_string)
-      await dt.editor.clicksSave(resource, expectedUpdate.current.contents)
-
-      const saved = await dt.savedWithValue()
-      dt.features.featureWasDisabledGlobally(saved.source.debugTools.content, 'autofill')
+      const { responseJson } = await dt.editor.savesWithReqAndRes()
+      const response = remoteResourceSchema.parse(responseJson)
+      dt.features.featureWasDisabledGlobally(response.current.contents, 'autofill')
     })
   })
-  test('switches editor kind', async ({ page, baseURL }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, baseURL, workerInfo)
+  test('switches editor kind', async ({ page, http }, workerInfo) => {
+    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
-    await dt.openRemoteResourceEditor()
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
     await dt.switchesTo('inline')
     await dt.editor.setsEditorValue({ editorKind: 'inline', editorPath: 'privacy-configuration' }, DEFAULT_EDIT_VALUE)
@@ -96,15 +88,13 @@ test.describe('editor', () => {
       await dt.editor.stillHasEditedValue({ editorKind: 'inline', editorPath: 'privacy-configuration' }, '[]')
     })
   })
-  // testHttp('switches resource during editing', async ({ page, http }, workerInfo) => {
-  //   const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
-  //   await dt.httpEnabled()
-  //
-  //   dt.globalConfig.platform = 'http'
-  //
-  //   await dt.openRemoteResourceEditor()
-  //   // await dt.features.canToggle()
-  //   await dt.switchesTo('diff')
-  //   await page.pause()
-  // })
+  test('switches resource during editing', async ({ page, http }, workerInfo) => {
+    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+    await dt.enabled()
+
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
+    // await dt.features.canToggle()
+    await dt.switchesTo('diff')
+    await page.pause()
+  })
 })

@@ -150,11 +150,11 @@ export class DebugToolsPage {
   }
 
   /**
-   * @param {object} [params]
-   * @param {string} [params.id]
+   * @param {object} params
+   * @param {string} params.id
    * @returns {Promise<void>}
    */
-  async openRemoteResourceEditor({ id } = {}) {
+  async openRemoteResourceEditor({ id }) {
     const params = new URLSearchParams({})
     if (id) {
       await this.openPage(params, '/remoteResources/' + id)

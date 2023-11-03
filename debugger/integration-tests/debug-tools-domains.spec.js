@@ -5,7 +5,7 @@ test.describe('domains', () => {
   test('shows an empty state when no domain is selected', async ({ page, baseURL }, workerInfo) => {
     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
     await dt.enabled()
-    await dt.openRemoteResourceEditor()
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
     await dt.features.showsEmptyDomainsState()
   })
@@ -14,7 +14,7 @@ test.describe('domains', () => {
     const resource = dt.resources.remoteResources.privacyConfig()
 
     await dt.enabled()
-    await dt.openRemoteResourceEditor()
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
 
     await test.step('toggles a feature for example.com', async () => {
@@ -71,7 +71,7 @@ test.describe('domains', () => {
   test('handles tabs arriving after page load', async ({ page, baseURL }, workerInfo) => {
     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
     await dt.enabled()
-    await dt.openRemoteResourceEditor()
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
     await dt.switchesTo('toggles')
     await dt.receivesNewTabs({
@@ -87,7 +87,7 @@ test.describe('domains', () => {
     await dt.withTabsResponse({
       tabs: [{ url: 'https://example.com/123/abc' }, { url: 'https://duckduckgo.com/?q=123' }],
     })
-    await dt.openRemoteResourceEditor()
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
     await dt.switchesTo('toggles')
     await dt.features.selectTab('duckduckgo.com')
@@ -98,7 +98,7 @@ test.describe('domains', () => {
     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
     await dt.enabled()
     await dt.withTabsResponse({ tabs: [{ url: 'https://example.com/123/abc' }] })
-    await dt.openRemoteResourceEditor()
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
     await dt.switchesTo('toggles')
     await dt.features.chooseTheOnlyOpenTab()

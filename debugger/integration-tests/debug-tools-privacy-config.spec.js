@@ -45,7 +45,7 @@ test.describe('debug tools privacy config', () => {
       const resource = dt.resources.remoteResources.privacyConfig(jsonString)
 
       await dt.withPrivacyConfig(resource)
-      await dt.openRemoteResourceEditor()
+      await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
       await dt.features.canToggle('abc')
       await dt.switchesTo('inline')
       await dt.editor.setsEditorValue({ editorKind: 'inline', editorPath: resource.id }, editedString)

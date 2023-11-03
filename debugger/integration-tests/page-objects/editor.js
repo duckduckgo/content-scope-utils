@@ -78,7 +78,7 @@ export class Editor {
    */
   editorLocator(editorLocator) {
     const editorPath = '/' + [editorLocator.editorKind, editorLocator.editorPath].join('/')
-    const editor = this.page.locator(`.monaco-editor[data-uri="file://${editorPath}"]`)
+    const editor = this.page.locator(`[data-uri="file://${editorPath}"]`)
     return editor
   }
 
@@ -113,14 +113,7 @@ export class Editor {
     await this.mocks.waitForCallCount({ method: 'updateResource', count: 1 })
   }
 
-  /**
-   * @param {string} id
-   * @param {EditorLocator} editorLocator
-   * @param {string} expectedValue
-   * @return {Promise<void>}
-   */
-  async saves(id, editorLocator, expectedValue) {
-    // actually save
+  async savesWithReqAndRes() {
     const [req] = await Promise.all([
       this.page.waitForRequest((req) => {
         if (req.url().includes('specialPages/debugToolsPage')) {
@@ -132,8 +125,23 @@ export class Editor {
       }),
       await this.$.editorSave().click(),
     ])
+    const requestJson = req.postDataJSON().params
+    const resp = await req.response()
+    const { result } = (await resp?.json()) || {}
+    return { requestJson, responseJson: result }
+  }
 
-    expect(req.postDataJSON().params).toMatchObject({
+  /**
+   * @param {string} id
+   * @param {EditorLocator} editorLocator
+   * @param {string} expectedValue
+   * @return {Promise<void>}
+   */
+  async saves(id, editorLocator, expectedValue) {
+    // actually save
+    const { requestJson, responseJson } = await this.savesWithReqAndRes()
+
+    expect(requestJson).toMatchObject({
       id,
       source: {
         debugTools: {
@@ -142,12 +150,9 @@ export class Editor {
       },
     })
 
-    const resp = await req.response()
-    const { result } = (await resp?.json()) || {}
-
     // return value was correct
-    expect(result.id).toEqual(id)
-    expect(result.current.contents).toEqual(expectedValue)
+    expect(responseJson.id).toEqual(id)
+    expect(responseJson.current.contents).toEqual(expectedValue)
 
     // reflected to editor
     const currentValue = await this.readCurrentValue(editorLocator)
