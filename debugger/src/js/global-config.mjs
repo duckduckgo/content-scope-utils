@@ -6,6 +6,7 @@ import { MockImpl } from './mock-transport.js'
 
 export const GlobalConfig = z.object({
   editor: z.enum(['simple', 'monaco']).default('monaco'),
+  injectName: z.string().default('apple'),
   editorSaveTimeout: z
     .number({
       description: 'how long to debounce changes before persisting',
@@ -14,13 +15,13 @@ export const GlobalConfig = z.object({
       coerce: true,
     })
     .default(500),
-  platform: z
-    .enum(['windows', 'apple', 'integration', 'http'])
-    .default('integration')
+  transport: z
+    .enum(['http', 'native'])
+    .default('http')
     .catch((ctx) => {
-      console.warn('DEFAULT used for `platform`: ', 'integration')
+      console.warn('DEFAULT used for `transport`: ', 'http')
       console.warn(ctx.error)
-      return 'integration'
+      return 'http'
     }),
   debugMessaging: z
     .enum(['silent', 'verbose'])
@@ -60,8 +61,9 @@ export function configAwareFactory(globalConfig) {
        * create the per-platform comms
        */
       const messagingInstance = createSpecialPagesMessaging({
-        injectName: globalConfig.platform,
+        injectName: /** @type {any} */ (globalConfig.injectName),
         env: import.meta.env,
+        transport: globalConfig.transport,
         featureName: 'debugToolsPage',
         mockImpl: () => new MockImpl(),
         httpImpl: (ctx) =>

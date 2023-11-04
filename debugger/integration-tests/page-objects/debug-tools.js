@@ -35,12 +35,13 @@ export class DebugToolsPage {
   /**
    * @param {import("@playwright/test").Page} page
    * @param {string} baseURL
-   * @param {GlobalConfig['platform']} platform
+   * @param {GlobalConfig['injectName']} injectName
+   * @param {GlobalConfig['transport']} transport
    * @param {Build | null} build
    */
-  constructor(page, baseURL, platform, build) {
+  constructor(page, baseURL, injectName, transport, build) {
     this.page = page
-    this.build = build
+    this.injectName = injectName
     this.baseURL = baseURL
     this.resources = new Resources(this.page)
 
@@ -61,7 +62,8 @@ export class DebugToolsPage {
     /** @type {import("../../src/js/global-config.mjs").GlobalConfig} */
     this.globalConfig = {
       editor: 'monaco',
-      platform: platform,
+      transport: transport,
+      injectName: injectName,
       editorSaveTimeout: 0,
       debugMessaging: 'silent',
     }
@@ -145,7 +147,7 @@ export class DebugToolsPage {
       },
       name: 'onTabsUpdated',
       payload: params,
-      injectName: this.build.name,
+      injectName: this.injectName,
     })
   }
 
@@ -226,18 +228,30 @@ export class DebugToolsPage {
    * @param {import("@playwright/test").Page} page
    * @param {string|undefined} baseURL
    * @param {import("@playwright/test").TestInfo} testInfo
+   * @param {GlobalConfig['transport']} transport
    */
-  static create(page, baseURL, testInfo) {
+  static async create(page, baseURL, testInfo, transport = 'http') {
     invariant(typeof baseURL === 'string', 'baseURL must be a string')
     // Read the configuration object to determine which platform we're testing against
-    /** @type {GlobalConfig['platform']} */
     // @ts-ignore
-    const platform = testInfo.project.use.platform
-    if (platform === 'http') {
-      return new DebugToolsPage(page, baseURL, platform, null)
+    const injectName = testInfo.project.use.injectName
+    let instance
+
+    // http doesn't include a 'build'
+    if (transport === 'http') {
+      instance = new DebugToolsPage(page, baseURL, injectName, transport, null)
+    } else {
+      const { build } = perPlatform(testInfo.project.use)
+      instance = new DebugToolsPage(page, baseURL, injectName, transport, build)
     }
-    const { build } = perPlatform(testInfo.project.use)
-    return new DebugToolsPage(page, baseURL, platform, build)
+
+    // attachments
+    await testInfo.attach('globalConfig', {
+      body: JSON.stringify(instance.globalConfig, null, 2),
+      contentType: 'application/json',
+    })
+
+    return instance
   }
 
   /**

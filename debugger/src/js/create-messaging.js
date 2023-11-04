@@ -9,6 +9,7 @@ import {
 /**
  * @param {object} opts
  * @param {ImportMeta["env"]} opts.env
+ * @param {import('../../integration-tests/page-objects/debug-tools').GlobalConfig["transport"]} opts.transport
  * @param {ImportMeta["injectName"] | 'http'} opts.injectName
  * @param {string} opts.featureName
  * @param {() => import("@duckduckgo/content-scope-scripts/packages/messaging/index.js").MessagingTransport} [opts.mockImpl]
@@ -20,6 +21,10 @@ export function createSpecialPagesMessaging(opts) {
     featureName: opts.featureName,
     env: opts.env,
   })
+  if (opts.transport === 'http' && opts.httpImpl) {
+    const config = new TestTransportConfig(opts.httpImpl(messageContext))
+    return new Messaging(messageContext, config)
+  }
   if (opts.injectName === 'windows') {
     const opts = new WindowsMessagingConfig({
       methods: {
@@ -41,9 +46,6 @@ export function createSpecialPagesMessaging(opts) {
     return new Messaging(messageContext, opts)
   } else if (opts.injectName === 'integration' && opts.mockImpl) {
     const config = new TestTransportConfig(opts.mockImpl())
-    return new Messaging(messageContext, config)
-  } else if (opts.injectName === 'http' && opts.httpImpl) {
-    const config = new TestTransportConfig(opts.httpImpl(messageContext))
     return new Messaging(messageContext, config)
   }
   throw new Error('unreachable - platform not supported')

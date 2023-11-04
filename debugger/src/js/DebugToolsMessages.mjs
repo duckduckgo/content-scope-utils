@@ -248,8 +248,8 @@ export class DebugToolsMessages {
  */
 function formatResource(input) {
   switch (input.kind) {
-    case "privacy-configuration":
-    case "tds":
+    case 'privacy-configuration':
+    case 'tds':
       return {
         ...input,
         current: {
@@ -257,7 +257,7 @@ function formatResource(input) {
           contents: JSON.stringify(JSON.parse(input.current.contents), null, 4),
         },
       }
-    case "text":
-      return input;
+    case 'text':
+      return input
   }
 }

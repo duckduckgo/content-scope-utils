@@ -5,9 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { join, dirname } from 'node:path'
 import { readFileSync } from 'node:fs'
 import { parseArgs } from 'node:util'
-import invariant from 'tiny-invariant'
-import { networkInterfaces } from 'node:os'
-import { createInterface } from 'node:readline'
+import { ready, signals } from './common.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -50,36 +48,15 @@ app.use(router)
 app.use(express.static('dist'))
 
 // @ts-expect-error - TS can't handle that this can be empty or a string or number
-const server = app.listen(cli.port, '0.0.0.0', ready)
+const server = app.listen(cli.port, '0.0.0.0', () => {
+  const address = ready(server)
+  routerSetup(address)
+})
 
-function ready() {
-  // read config, try to use it
-  const address = server.address()
-  invariant(address && typeof address !== 'string')
-  const port = address.port
+function routerSetup(address) {
   const json = JSON.parse(readFileSync(join(__dirname, cli.config), 'utf8'))
   const manifest = createManifest({ port: address.port, input: json })
   const http = new HttpBackend({ manifest })
-  const addresses = getAddresses(port).map((x) => x.href)
-  const plainAddresses = addresses.map((x) => {
-    const url = new URL(x)
-    url.pathname = ''
-    url.search = ''
-    url.hash = ''
-    return url.toString()
-  })
-
-  if (process.send) {
-    process.send({
-      kind: 'ready',
-      addresses: plainAddresses,
-      cwd: __dirname,
-    })
-  }
-
-  for (let address of addresses) {
-    console.log('Available on:', address)
-  }
 
   router.post('/specialPages/debugToolsPage', async function (req, res) {
     const parsed = requestSchema.safeParse(req.body)
@@ -123,44 +100,4 @@ function ready() {
   console.log(server.address())
 }
 
-function getAddresses(port) {
-  const internal = 'localhost'
-  const external = Object.values(networkInterfaces())
-    .flat()
-    .filter((networkInterfaceInfo) => {
-      invariant(networkInterfaceInfo)
-      return networkInterfaceInfo.family === 'IPv4'
-    })
-    .map((networkInterfaceInfo) => {
-      invariant(networkInterfaceInfo)
-      return networkInterfaceInfo.address
-    })
-
-  return [internal, ...external].map((address) => {
-    invariant(typeof address === 'string')
-    const url = new URL('http://' + address)
-    url.port = port
-    url.searchParams.set('platform', 'http')
-    url.hash = '/remoteResources'
-    return url
-  })
-}
-
-if (process.platform === 'win32') {
-  createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  }).on('SIGINT', function () {
-    process.emit('SIGINT')
-  })
-}
-
-process.on('SIGINT', function () {
-  console.log('serve.mjs stopped.')
-  process.exit()
-})
-
-process.on('SIGTERM', function () {
-  console.log('serve.mjs stopped.')
-  process.exit()
-})
+signals()

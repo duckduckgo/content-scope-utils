@@ -4,7 +4,7 @@ import { remoteResourceSchema } from '../schema/__generated__/schema.parsers.mjs
 
 test.describe('editor', () => {
   test('updates a resource current content', async ({ page, http }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+    const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
     const id = 'test-text'
 
     await test.step('setup mocks', async () => {
@@ -22,7 +22,7 @@ test.describe('editor', () => {
     })
   })
   // test.only('shows editor error and allows it to be reverted (simple)', async ({ page, http }, workerInfo) => {
-  //   const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+  //   const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
   //   await dt.enabled()
   //   await dt.withGlobalConfig({ editor: 'simple' })
   //   await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
@@ -33,7 +33,7 @@ test.describe('editor', () => {
   //   // await dt.editor.waitForEditorToHaveValue(JSON.stringify(JSON.parse(DEFAULT_BASE_VALUE), null, 4))
   // })
   // test('reverts editor content (simple)', async ({ page, baseURL }, workerInfo) => {
-  //   const dt = DebugToolsPage.create(page, baseURL, workerInfo)
+  //   const dt = await DebugToolsPage.create(page, baseURL, workerInfo)
   //   await dt.enabled()
   //   await dt.withTestResources()
   //   await dt.withGlobalConfig({ editor: 'simple' })
@@ -44,7 +44,7 @@ test.describe('editor', () => {
   //   await dt.editor.waitForEditorToHaveValue(JSON.stringify(JSON.parse(DEFAULT_BASE_VALUE), null, 4))
   // })
   test('handles when input cannot be used with toggles (because of edits)', async ({ page, http }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+    const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
     await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
@@ -54,7 +54,7 @@ test.describe('editor', () => {
     await dt.showsErrorText('Cannot use toggles because the format was invalidated (probably because of edits)')
   })
   test('handles when a global toggle is clicked', async ({ page, http }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+    const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
     await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
@@ -71,7 +71,7 @@ test.describe('editor', () => {
     })
   })
   test('switches editor kind', async ({ page, http }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+    const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
     await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()
@@ -89,7 +89,7 @@ test.describe('editor', () => {
     })
   })
   test('switches resource during editing', async ({ page, http }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+    const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
 
     await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })

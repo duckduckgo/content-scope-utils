@@ -4,7 +4,7 @@ import invariant from 'tiny-invariant'
 
 test.describe('remote url', () => {
   test('refreshes current resource', async ({ page, http }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+    const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
     const id = 'privacy-configuration'
     await dt.openRemoteResourceEditor({ id })
@@ -15,7 +15,7 @@ test.describe('remote url', () => {
     const ex = http.addresses.find((x) => !x.startsWith('http://local'))
     invariant(typeof ex === 'string', 'must find external')
     const override = ex + 'fixtures/single-config.json'
-    const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+    const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
     const id = 'privacy-configuration'
     await dt.openRemoteResourceEditor({ id })
@@ -24,7 +24,7 @@ test.describe('remote url', () => {
     await dt.remote.savedNewRemoteUrl({ id, url: override })
   })
   test.skip('shows an error on updating a resource', async ({ page, baseURL }, workerInfo) => {
-    const dt = DebugToolsPage.create(page, baseURL, workerInfo)
+    const dt = await DebugToolsPage.create(page, baseURL, workerInfo)
     await dt.enabled()
     await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
     await dt.features.canToggle()

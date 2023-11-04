@@ -6,7 +6,7 @@ test.describe('debug tools privacy config', () => {
   test.describe('transforms', () => {
     test('updates fields on save', async ({ page, http, context }, workerInfo) => {
       await context.grantPermissions(['clipboard-write', 'clipboard-read', 'accessibility-events'])
-      const dt = DebugToolsPage.create(page, http.addresses[0], workerInfo)
+      const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
       const id = 'single-config'
       await dt.enabled()
       await dt.openRemoteResourceEditor({ id })

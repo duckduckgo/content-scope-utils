@@ -50,7 +50,7 @@
       }
     },
     "serve.http": {
-      "command": "node serve.mjs",
+      "command": "node serve.mjs -c config/integration.json",
       "files": [
         "serve.mjs",
         "schema/__generated__"

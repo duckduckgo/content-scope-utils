@@ -25,7 +25,7 @@
 //
 // test.describe.skip('Feature: Patches', () => {
 //   test('Scenario: copying a patch for an override', async ({ page, baseURL }, workerInfo) => {
-//     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
+//     const dt = await DebugToolsPage.create(page, baseURL, workerInfo)
 //     const initial = {
 //       unprotectedTemporary: [],
 //       features: {
@@ -77,7 +77,7 @@
 //     })
 //   })
 //   test('Scenario: restoring a patch', async ({ page, baseURL }, workerInfo) => {
-//     const dt = DebugToolsPage.create(page, baseURL, workerInfo)
+//     const dt = await DebugToolsPage.create(page, baseURL, workerInfo)
 //     const initial = {
 //       unprotectedTemporary: [],
 //       features: {
