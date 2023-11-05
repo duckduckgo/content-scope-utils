@@ -1,11 +1,23 @@
+import { createPortal } from 'react-dom'
 import jsonpatch from 'fast-json-patch'
 import { DD, DT, InlineDL } from './definition-list'
-import { createPortal } from 'react-dom'
 import { Button } from './buttons'
 
+/**
+ * @param {object} props
+ * @param {string} props.original
+ * @param {string} props.lastValue
+ * @param {string} props.contentType
+ * @param {string} props.id
+ * @param {any} [props.additionalButtons]
+ */
 export function DiffViewer(props) {
-  const before = JSON.parse(props.before)
-  const after = JSON.parse(props.after)
+  if (props.contentType !== 'application/json') {
+    return <p>Content type not supported yet. Swap to monaco editor</p>
+  }
+
+  const before = JSON.parse(props.original)
+  const after = JSON.parse(props.lastValue)
   const patches = jsonpatch.compare(before, after)
 
   const portal = (

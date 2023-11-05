@@ -27,7 +27,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   // eslint-disable-next-line no-undef
-  workers: process.env.CI ? 1 : 1,
+  workers: process.env.CI ? 1 : 2,
 
   // eslint-disable-next-line no-undef
   reporter: process.env.CI ? 'github' : [['html', { open: 'never' }]],

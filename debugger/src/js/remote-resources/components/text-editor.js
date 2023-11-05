@@ -15,15 +15,17 @@ import invariant from 'tiny-invariant'
  * @param {string} props.id
  * @param {string} props.defaultValue
  * @param {string} props.lastValue
+ * @param {string} props.contentType
  * @param {(errors: ContentError[]) => void} props.onErrors
  * @param {(content: string) => void} props.onContentChanged
  */
 export function TextEditor(props) {
   const domRef = /** @type {import("react").MutableRefObject<HTMLElement | any>} */ (useRef(null))
-
+  const uri = `file:///inline/${props.id}`
   const [, send] = useMachine(textEditorMachine, {
     context: {
       id: props.id,
+      contentType: props.contentType,
     },
     actions: {
       setInitialScroll: (_, evt) => {
@@ -71,6 +73,7 @@ export function TextEditor(props) {
         className={styles.textArea}
         defaultValue={props.defaultValue}
         ref={domRef}
+        data-uri={uri}
         onChange={(e) => {
           send({
             type: 'TextEditor.content-changed',

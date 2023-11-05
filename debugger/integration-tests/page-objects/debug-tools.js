@@ -49,11 +49,6 @@ export class DebugToolsPage {
 
     this.mocks.withDefaultResponses()
 
-    // sub-testing modules
-    this.editor = new Editor(this.page, this.mocks, this.resources)
-    this.features = new Features(this.page)
-    this.remote = new Remote(this.page, this.mocks, this.editor)
-
     /** @type {import("../../src/js/global-config.mjs").GlobalConfig} */
     this.globalConfig = {
       editor: 'monaco',
@@ -62,6 +57,11 @@ export class DebugToolsPage {
       editorSaveTimeout: 0,
       debugMessaging: 'silent',
     }
+
+    // sub-testing modules
+    this.editor = new Editor(this.page, this)
+    this.features = new Features(this.page)
+    this.remote = new Remote(this.page, this.mocks, this.editor)
 
     this.$ = new (class Selectors {
       revertButton = () => page.getByRole('button', { name: 'Revert' })

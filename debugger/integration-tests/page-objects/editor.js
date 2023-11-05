@@ -9,40 +9,16 @@ import { DEFAULT_EDIT_VALUE } from './debug-tools'
 export class Editor {
   /**
    * @param {import("@playwright/test").Page} page
-   * @param {import("./mocks").Mocks} mocks
+   * @param {import("./debug-tools").DebugToolsPage} debugToolsPage
    */
-  constructor(page, mocks, resources) {
+  constructor(page, debugToolsPage) {
     this.page = page
-    this.mocks = mocks
-    this.resources = resources
+    this.debugToolsPage = debugToolsPage
     this.$ = new (class Selectors {
       editorSave = () => page.getByRole('button', { name: 'Save + Apply' })
       revertButton = () => page.getByRole('button', { name: 'Revert' })
       footer = () => page.getByTestId('Footer')
     })()
-  }
-
-  get values() {
-    const page = this.page
-    return {
-      editorValue: () => page.evaluate(() => window._test_editor_value()),
-    }
-  }
-
-  async waitForEditorToHaveValue(value) {
-    await this.page.waitForFunction(
-      ({ value }) => {
-        // keep trying the editor, value may be set asynchronously
-        // this will timeout after 1000ms
-        const editor = document.querySelector('.monaco-editor')?.querySelector('.lines-content')
-        const match = editor?.textContent === value
-        console.log(editor?.textContent?.length, value.length)
-        // console.log({ match, value, editor: editor?.textContent })
-        return match
-      },
-      { value },
-      { timeout: 5000 },
-    )
   }
 
   /**
@@ -53,20 +29,25 @@ export class Editor {
     // this makes sure the JS is compiled/loaded
     const { page } = this
     const editor = this.editorLocator(editorLocator)
-    await editor.click()
-    await editor.press('Meta+KeyA')
-    await editor.press('Delete')
-    const path = '/' + [editorLocator.editorKind, editorLocator.editorPath].join('/')
-    await page.evaluate(
-      ({ value, path }) => {
-        if (!window.__playwright_01) return
-        if (!(path in window.__playwright_01['models'])) {
-          throw new Error('missing path model' + path)
-        }
-        window.__playwright_01['models'][path].setValue(value)
-      },
-      { value, path },
-    )
+    if (this.debugToolsPage.globalConfig.editor === 'monaco') {
+      await editor.click()
+      await editor.press('Meta+KeyA')
+      await editor.press('Delete')
+      const modelPath = '/' + [editorLocator.editorKind, editorLocator.editorPath].join('/')
+      await page.evaluate(
+        ({ value, modelPath }) => {
+          if (!window.__playwright_01) return
+          if (!(modelPath in window.__playwright_01['models'])) {
+            throw new Error('missing modelPath model' + modelPath)
+          }
+          window.__playwright_01['models'][modelPath].setValue(value)
+        },
+        { value, modelPath },
+      )
+    } else if (this.debugToolsPage.globalConfig.editor === 'simple') {
+      await editor.waitFor()
+      await editor.fill(value)
+    }
     return this.readCurrentValue(editorLocator)
   }
 
@@ -82,13 +63,18 @@ export class Editor {
 
   /**
    * @param {EditorLocator} editorLocator
-   * @return {Promise<*|string>}
+   * @return {Promise<string>}
    */
   async readCurrentValue(editorLocator) {
-    const originalString = await this.editorLocator(editorLocator).locator('.lines-content').textContent()
-
-    // remove non-breaking spaces from editor output
-    return originalString?.replace(/\u00A0/g, ' ') || ''
+    if (this.debugToolsPage.globalConfig.editor === 'monaco') {
+      const originalString = await this.editorLocator(editorLocator).locator('.lines-content').textContent()
+      // remove non-breaking spaces from editor output
+      return originalString?.replace(/\u00A0/g, ' ') || ''
+    } else if (this.debugToolsPage.globalConfig.editor === 'simple') {
+      const originalString = await this.editorLocator(editorLocator).inputValue()
+      return originalString || ''
+    }
+    throw new Error('todo implement readCurrentValue')
   }
 
   async savesWithReqAndRes() {
@@ -142,7 +128,7 @@ export class Editor {
    * @param expected
    * @return {Promise<void>}
    */
-  async stillHasEditedValue(editorLocator, expected = DEFAULT_EDIT_VALUE) {
+  async hasValue(editorLocator, expected = DEFAULT_EDIT_VALUE) {
     const actual = await this.readCurrentValue(editorLocator)
     expect(actual).toBe(expected)
   }

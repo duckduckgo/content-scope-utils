@@ -196,7 +196,15 @@ function EditorSelection(props) {
     ),
     diff: () => {
       if (globalConfig.editor === 'simple') {
-        return <DiffViewer before={originalContents} after={lastValue} additionalButtons={props.additionalButtons} />
+        return (
+          <DiffViewer
+            original={originalContents}
+            id={props.resource.id}
+            additionalButtons={props.additionalButtons}
+            lastValue={lastValue}
+            contentType={props.resource.current.contentType}
+          />
+        )
       }
       return (
         <Suspense>
@@ -225,6 +233,7 @@ function EditorSelection(props) {
             id={props.resource.id}
             onErrors={onErrors}
             onContentChanged={onContentChanged}
+            contentType={props.resource.current.contentType}
           />
         )
       }

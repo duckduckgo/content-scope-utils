@@ -13,6 +13,8 @@ export const textEditorMachine = createMachine(
       id: '',
       /** @type {import('./remote-resources').TextModel} */
       model: /** @type {any} */ (null),
+      /** @type {string | null} */
+      contentType: null,
     },
     schema: {
       events: /** @type {TextEditorEvents} */ ({}),
@@ -78,7 +80,7 @@ export const textEditorMachine = createMachine(
       },
     },
     services: {
-      'change-listener': () => (send, onEvent) => {
+      'change-listener': (ctx) => (send, onEvent) => {
         let debounceTimer
         onEvent((/** @type {TextEditorEvents} */ evt) => {
           invariant(evt.type === 'TextEditor.content-changed', 'should only receive content-changed here')
@@ -87,9 +89,13 @@ export const textEditorMachine = createMachine(
           const value = /** @type {any} */ (evt).payload.content
           debounceTimer = setTimeout(() => {
             send({ type: 'TextEditor.update-content', payload: { content: value } })
-            // todo: make errors derived
-            const next = errorsFor(value)
-            send({ type: 'TextEditor.set-errors', payload: next })
+            if (ctx.contentType === 'application/json') {
+              // todo: make errors derived
+              const next = errorsFor(value)
+              send({ type: 'TextEditor.set-errors', payload: next })
+            } else {
+              send({ type: 'TextEditor.set-errors', payload: [] })
+            }
           }, 500)
         })
         return () => {

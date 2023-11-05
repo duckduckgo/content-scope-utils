@@ -21,28 +21,42 @@ test.describe('editor', () => {
       await dt.editor.saves(id, { editorPath: id, editorKind: 'inline' }, DEFAULT_UPDATE_VALUE)
     })
   })
-  // test.only('shows editor error and allows it to be reverted (simple)', async ({ page, http }, workerInfo) => {
-  //   const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
-  //   await dt.enabled()
-  //   await dt.withGlobalConfig({ editor: 'simple' })
-  //   await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
-  //   await dt.switchesTo('inline')
-  //   await dt.editor.setsEditorValue({ editorKind: 'inline', editorPath: 'privacy-configuration' }, 'shane')
-  //   await page.pause()
-  //   await dt.revertsErrorFromPopup()
-  //   // await dt.editor.waitForEditorToHaveValue(JSON.stringify(JSON.parse(DEFAULT_BASE_VALUE), null, 4))
-  // })
-  // test('reverts editor content (simple)', async ({ page, baseURL }, workerInfo) => {
-  //   const dt = await DebugToolsPage.create(page, baseURL, workerInfo)
-  //   await dt.enabled()
-  //   await dt.withTestResources()
-  //   await dt.withGlobalConfig({ editor: 'simple' })
-  //   await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
-  //   await dt.switchesTo('inline')
-  //   await dt.editor.setsEditorValueTo('[]') // valid json
-  //   await dt.editor.revertEditorContent()
-  //   await dt.editor.waitForEditorToHaveValue(JSON.stringify(JSON.parse(DEFAULT_BASE_VALUE), null, 4))
-  // })
+  test('shows editor error and allows it to be reverted (simple)', async ({ page, http }, workerInfo) => {
+    const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
+    await dt.enabled()
+    await dt.withGlobalConfig({ editor: 'simple' })
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
+    await dt.switchesTo('inline')
+
+    // make an edit that will cause an error
+    /** @satisfies {import('./page-objects/editor').EditorLocator} */
+    const editor = { editorKind: 'inline', editorPath: 'privacy-configuration' }
+    const initial = await dt.editor.readCurrentValue(editor)
+    await dt.editor.setsEditorValue(editor, 'shane')
+
+    // revert and assert it's back
+    await dt.revertsErrorFromPopup()
+    await dt.editor.hasValue(editor, initial)
+  })
+  test('reverts editor content (simple)', async ({ page, http }, workerInfo) => {
+    const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
+    await dt.enabled()
+    await dt.withGlobalConfig({ editor: 'simple' })
+    await dt.openRemoteResourceEditor({ id: 'privacy-configuration' })
+    await dt.switchesTo('inline')
+
+    /** @satisfies {import('./page-objects/editor').EditorLocator} */
+    const editor = { editorKind: 'inline', editorPath: 'privacy-configuration' }
+    const initial = await dt.editor.readCurrentValue(editor)
+
+    // set the value, and re-read it as a control
+    await dt.editor.setsEditorValue(editor, '[]')
+    await dt.editor.hasValue(editor, '[]')
+
+    // revert and verify
+    await dt.editor.revertEditorContent()
+    await dt.editor.hasValue(editor, initial)
+  })
   test('handles when input cannot be used with toggles (because of edits)', async ({ page, http }, workerInfo) => {
     const dt = await DebugToolsPage.create(page, http.addresses[0], workerInfo)
     await dt.enabled()
@@ -85,7 +99,7 @@ test.describe('editor', () => {
 
     await test.step('switches back to inline view, edits should remain', async () => {
       await dt.switchesTo('inline')
-      await dt.editor.stillHasEditedValue({ editorKind: 'inline', editorPath: 'privacy-configuration' }, '[]')
+      await dt.editor.hasValue({ editorKind: 'inline', editorPath: 'privacy-configuration' }, '[]')
     })
   })
   test('switches resource during editing', async ({ page, http }, workerInfo) => {
