@@ -24,15 +24,6 @@ globalThis.MonacoEnvironment = {
 }
 
 /**
- * @param {object} params
- * @param {string} params.content
- * @param {string} params.contentType
- */
-export function createTextModel({ content, contentType }) {
-  return monaco.editor.createModel(content, contentType)
-}
-
-/**
  * @param {(errors: ContentError[]) => void} onErrors
  * @param {monaco.Uri} uri
  */

@@ -11,11 +11,6 @@ import styles from './toggles-editor.module.css'
  */
 
 /**
- * @typedef ToggleComponentProps
- * @property {TextModel} model
- */
-
-/**
  * @param {object} props
  * @param {boolean} props.pending
  * @param {boolean} props.edited

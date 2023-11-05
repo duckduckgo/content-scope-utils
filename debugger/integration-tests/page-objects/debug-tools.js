@@ -9,8 +9,6 @@ import {
   perPlatform,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Build,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  PlatformInfo,
 } from '@duckduckgo/content-scope-scripts/integration-test/playwright/type-helpers.mjs'
 import invariant from 'tiny-invariant'
 import { Features } from './features'
@@ -18,7 +16,6 @@ import { Remote } from './remote'
 import { Editor } from './editor'
 import { Resources } from './resources'
 
-export const DEFAULT_BASE_VALUE = '{ "foo": "bar" }'
 export const DEFAULT_EDIT_VALUE = '{ "foo": "baz" }'
 export const DEFAULT_UPDATE_VALUE = '{ "updated": true }'
 

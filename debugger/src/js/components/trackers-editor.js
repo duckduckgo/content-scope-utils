@@ -11,11 +11,6 @@ import { TrackerFeed } from '../remote-resources/components/tracker-feed'
  */
 
 /**
- * @typedef ToggleComponentProps
- * @property {TextModel} model
- */
-
-/**
  * @param {object} props
  * @param {boolean} props.pending
  * @param {boolean} props.edited

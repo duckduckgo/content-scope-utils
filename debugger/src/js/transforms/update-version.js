@@ -2,7 +2,6 @@
  * @typedef {import("../remote-resources/remote-resources.machine").PrivacyConfig} PrivacyConfig
  * @typedef {import("../transforms.types").PrivacyConfigurationTransform} PrivacyConfigurationTransform
  * @typedef {import('../transforms.types').ApplyTarget} ApplyTarget
- * @typedef {string} FeatureName
  */
 
 /**

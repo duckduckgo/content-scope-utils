@@ -10,7 +10,6 @@ import { ToggleUnprotected } from './transforms/toggle-unprotected'
  * @typedef {import("./remote-resources/remote-resources.machine.types").Serializable} Serializable
  * @typedef {import("./transforms.types").PrivacyConfigurationTransform} PrivacyConfigurationTransform
  * @typedef {import('./transforms.types').ApplyTarget} ApplyTarget
- * @typedef {string} FeatureName
  */
 
 /**
