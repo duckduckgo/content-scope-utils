@@ -12,6 +12,7 @@ import { TextEditor } from './text-editor'
 import { TrackersEditor } from '../../components/trackers-editor'
 import * as monaco from 'monaco-editor'
 import { GlobalContext } from '../../global-config.react'
+import { ErrorBoundary } from './error'
 
 const MonacoEditor = lazy(() => import('../../components/monaco-editor.js'))
 const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))
@@ -66,11 +67,13 @@ export function RemoteResourceEditor(props) {
         </div>
 
         <div className={styles.mainContent}>
-          <EditorSelection
-            resource={props.resource}
-            key={props.resource.id}
-            additionalButtons={additionalButtons.current}
-          />
+          <ErrorBoundary fallback={<p>Couldn't dynamically load</p>}>
+            <EditorSelection
+              resource={props.resource}
+              key={props.resource.id}
+              additionalButtons={additionalButtons.current}
+            />
+          </ErrorBoundary>
         </div>
       </main>
       <footer className={styles.appFooter}>

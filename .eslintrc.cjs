@@ -18,6 +18,6 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/triple-slash-reference': 'off',
     'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-    'react-hooks/exhaustive-deps': 'warn', // Checks effect dependencies
+    'react-hooks/exhaustive-deps': 'error', // Checks effect dependencies
   },
 }
