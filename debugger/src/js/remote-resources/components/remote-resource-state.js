@@ -4,7 +4,6 @@ import { MicroButton } from '../../components/buttons'
 import { URLEditor } from '../../components/url-editor'
 import { RemoteResourcesContext } from '../remote-resources.page'
 import { useEditorKinds } from './remote-resource-editor'
-import { usePatches } from '../patches-machine.react'
 import { OriginalDiffModal } from './original-diff-modal'
 import { date } from '../../lib'
 import invariant from 'tiny-invariant'
@@ -254,7 +253,6 @@ function Override(props) {
           <MicroButton className="ml-3.5" onClick={showDiffWithOriginal}>
             Show Diff with Original
           </MicroButton>
-          <PatchCopyButton />
         </DD>
         {edited && (
           <>
@@ -276,24 +274,4 @@ function Override(props) {
   }
 
   return null
-}
-
-function PatchCopyButton() {
-  const [state, send] = usePatches()
-
-  const key = /** @type {any} */ (state.value).stored
-
-  const text = {
-    patchAvailable: 'Copy as Patch',
-    patchPreSuccess: '⌛️ generating',
-    patchSuccess: '✅ copied',
-  }[key]
-
-  if (state.matches({ stored: 'idle' })) return null
-
-  return (
-    <MicroButton className="ml-3.5" onClick={() => send({ type: 'COPY_TO_CLIPBOARD' })}>
-      {text}
-    </MicroButton>
-  )
 }

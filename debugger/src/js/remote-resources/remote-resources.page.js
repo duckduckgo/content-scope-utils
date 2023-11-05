@@ -4,7 +4,6 @@ import { useContext } from 'react'
 import { AppMachineContext } from '../app/components/app'
 import { RemoteResources } from './components/remote-resources'
 import invariant from 'tiny-invariant'
-import { PatchesProvider } from './patches-machine.react'
 import { TrackerFeedProvider } from './components/tracker-feed.machine.react'
 import { GlobalContext } from '../global-config.react'
 
@@ -21,11 +20,9 @@ export function RemoteResourcesPage() {
     <RemoteResourcesContext.Provider
       machine={() => remoteResourcesMachine.withContext({ messages, parent, tabs: [], originalResources: {} })}
     >
-      <PatchesProvider>
-        <TrackerFeedProvider>
-          <RemoteResourcesLoader />
-        </TrackerFeedProvider>
-      </PatchesProvider>
+      <TrackerFeedProvider>
+        <RemoteResourcesLoader />
+      </TrackerFeedProvider>
     </RemoteResourcesContext.Provider>
   )
 }

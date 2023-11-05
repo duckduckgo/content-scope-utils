@@ -623,7 +623,7 @@ async function minDuration(cb, minTime = 500) {
   throw new Error('unreachable')
 }
 
-export const EditorKind = z.enum(['inline', 'diff', 'toggles', 'patches', 'trackers'])
+export const EditorKind = z.enum(['inline', 'diff', 'toggles', 'trackers'])
 export const CurrentResource = z.object({
   id: z.string(),
   lastValue: z.string(),

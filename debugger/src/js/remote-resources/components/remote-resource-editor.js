@@ -4,19 +4,17 @@ import invariant from 'tiny-invariant'
 import { TogglesEditor } from '../../components/toggles-editor'
 import styles from '../../app/components/app.module.css'
 import { SubNav } from '../../app/components/feature-nav'
-import { lazy, Suspense, useCallback, useContext, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useContext, useRef } from 'react'
 import { Button } from '../../components/buttons'
 import { Sidebar } from './sidebar'
 import { DiffViewer } from '../../components/diff-viewer'
 import { TextEditor } from './text-editor'
 import { TrackersEditor } from '../../components/trackers-editor'
-import * as monaco from 'monaco-editor'
 import { GlobalContext } from '../../global-config.react'
 import { ErrorBoundary } from './error'
 
 const MonacoEditor = lazy(() => import('../../components/monaco-editor.js'))
 const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))
-const PatchesEditor = lazy(() => import('../../components/patches-editor.js'))
 
 /**
  * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -160,7 +158,6 @@ function EditorSelection(props) {
   const { editorKind } = useEditorKinds()
   const originalContents = props.resource.current.contents
   const lastValue = state.context.currentResource?.lastValue || ''
-  const [model] = useState(() => monaco.editor.createModel(lastValue, 'application/json'))
 
   const savingChanges = state.matches(['showing editor', 'editing', 'saving edited'])
   const hasEdits = state.matches(['showing editor', 'editing', 'editor has edited content'])
@@ -199,9 +196,7 @@ function EditorSelection(props) {
     ),
     diff: () => {
       if (globalConfig.editor === 'simple') {
-        return (
-          <DiffViewer before={originalContents} after={model.getValue()} additionalButtons={props.additionalButtons} />
-        )
+        return <DiffViewer before={originalContents} after={lastValue} additionalButtons={props.additionalButtons} />
       }
       return (
         <Suspense>
@@ -256,21 +251,6 @@ function EditorSelection(props) {
             edited={hasEdits}
             pending={savingChanges}
             resource={props.resource}
-          />
-        </Suspense>
-      )
-    },
-    patches: () => {
-      if (globalConfig.editor === 'simple') return <p>Cannot show rich editor</p>
-      return (
-        <Suspense>
-          <PatchesEditor
-            model={model}
-            pending={savingChanges}
-            edited={hasEdits}
-            invalid={contentIsInvalid}
-            resource={props.resource}
-            onErrors={onErrors}
           />
         </Suspense>
       )

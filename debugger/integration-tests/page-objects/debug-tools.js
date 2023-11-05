@@ -17,7 +17,6 @@ import { Features } from './features'
 import { Remote } from './remote'
 import { Editor } from './editor'
 import { Resources } from './resources'
-import { Patches } from './patches'
 
 export const DEFAULT_BASE_VALUE = '{ "foo": "bar" }'
 export const DEFAULT_EDIT_VALUE = '{ "foo": "baz" }'
@@ -57,7 +56,6 @@ export class DebugToolsPage {
     this.editor = new Editor(this.page, this.mocks, this.resources)
     this.features = new Features(this.page)
     this.remote = new Remote(this.page, this.mocks, this.editor)
-    this.patches = new Patches(this.page, this.editor)
 
     /** @type {import("../../src/js/global-config.mjs").GlobalConfig} */
     this.globalConfig = {
@@ -77,10 +75,8 @@ export class DebugToolsPage {
       simpleEditor = () => page.locator('textarea[name="simple-editor"]')
       inlineEditorButton = () => page.getByRole('button', { name: 'Inline' })
       togglesButton = () => page.getByRole('button', { name: 'Toggles' })
-      patchesButton = () => page.getByRole('button', { name: 'Patches' })
       diffEditorButton = () => page.getByRole('button', { name: 'Diff', exact: true })
       togglesEditor = () => page.getByTestId('TogglesEditor')
-      patchesScreen = () => page.getByTestId('PatchesEditor')
     })()
 
     page.on('console', (msg) => {
@@ -273,9 +269,6 @@ export class DebugToolsPage {
     } else if (kind === 'toggles') {
       await this.$.togglesButton().click()
       await this.$.togglesEditor().waitFor()
-    } else if (kind === 'patches') {
-      await this.$.patchesButton().click()
-      await this.$.patchesScreen().waitFor()
     }
   }
 
