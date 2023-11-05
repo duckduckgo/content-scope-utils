@@ -7,6 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /**
  * @param {import("http").Server<typeof import("http").IncomingMessage, typeof import("http").ServerResponse>} server
+ * @return {{address: import("net").AddressInfo, addresses: string[]}}
  */
 export function ready(server) {
   // read config, try to use it
@@ -30,11 +31,10 @@ export function ready(server) {
     })
   }
 
-  for (let address of addresses) {
-    console.log('Available on:', address)
+  return {
+    address,
+    addresses,
   }
-
-  return address
 }
 
 /**
@@ -58,8 +58,6 @@ function getAddresses(port) {
     invariant(typeof address === 'string')
     const url = new URL('http://' + address)
     url.port = port
-    url.searchParams.set('transport', 'native')
-    url.hash = '/remoteResources'
     return url
   })
 }

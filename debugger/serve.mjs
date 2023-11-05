@@ -49,10 +49,20 @@ app.use(express.static('dist'))
 
 // @ts-expect-error - TS can't handle that this can be empty or a string or number
 const server = app.listen(cli.port, '0.0.0.0', () => {
-  const address = ready(server)
+  const { address, addresses } = ready(server)
   routerSetup(address)
+
+  for (let address of addresses) {
+    const url = new URL(address)
+    url.hash = '/remoteResources'
+    url.searchParams.set('transport', 'http')
+    console.log('Available on:', url.href)
+  }
 })
 
+/**
+ * @param {import("net").AddressInfo} address
+ */
 function routerSetup(address) {
   const json = JSON.parse(readFileSync(join(__dirname, cli.config), 'utf8'))
   const manifest = createManifest({ port: address.port, input: json })
