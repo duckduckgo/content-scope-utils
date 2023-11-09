@@ -1,8 +1,9 @@
 import { RemoteResourcesContext } from '../remote-resources.page'
-import { useRef } from 'react'
+import { lazy, Suspense, useRef } from 'react'
 import invariant from 'tiny-invariant'
-import MonacoDiffEditor from '../../components/monaco-diff-editor'
 import style from './original-diff.module.css'
+
+const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))
 
 /**
  * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -94,17 +95,19 @@ export function OriginalDiffEditor(props) {
   invariant(state.context.currentResource?.id, 'must have currentResource?.id')
 
   return (
-    <MonacoDiffEditor
-      original={state.context.originalResources[state.context.currentResource.id].current.contents}
-      additionalButtons={props.buttons}
-      lastValue={props.resource.current.contents}
-      contentType={props.resource.current.contentType}
-      id={props.resource.id + '__original_diff'}
-      onErrors={(e) => console.log('todo: onErrors', e)}
-      onContentChanged={(e) => console.log('todo: onContentChanged', e)}
-      edited={true}
-      invalid={false}
-      pending={false}
-    />
+    <Suspense fallback={null}>
+      <MonacoDiffEditor
+        original={state.context.originalResources[state.context.currentResource.id].current.contents}
+        additionalButtons={props.buttons}
+        lastValue={props.resource.current.contents}
+        contentType={props.resource.current.contentType}
+        id={props.resource.id + '__original_diff'}
+        onErrors={(e) => console.log('todo: onErrors', e)}
+        onContentChanged={(e) => console.log('todo: onContentChanged', e)}
+        edited={true}
+        invalid={false}
+        pending={false}
+      />
+    </Suspense>
   )
 }

@@ -34,3 +34,27 @@
 .button[data-state='not-allowed'] {
   cursor: not-allowed;
 }
+
+.iconButton {
+  color: black;
+  padding: 0;
+  height: 35px;
+  /*width: 35px;*/
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.iconButton:active:not([disabled]) {
+  background: #737a7a;
+}
+
+:global(.w-6) {
+  width: 24px;
+}
+:global(.h-6) {
+  height: 24px;
+}

@@ -12,6 +12,8 @@ import { TextEditor } from './text-editor'
 import { TrackersEditor } from '../../components/trackers-editor'
 import { GlobalContext } from '../../global-config.react'
 import { ErrorBoundary } from './error'
+import { NavRow } from '../../components/nav-row'
+import { ExtrasContent, ExtrasLink } from './Extras'
 
 const MonacoEditor = lazy(() => import('../../components/monaco-editor.js'))
 const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))
@@ -48,11 +50,12 @@ export function RemoteResourceEditor(props) {
 
         <div className={styles.mainHeader}>
           {/** Additional nav when there's more than 1 resource */}
-          {props.nav.length > 1 ? (
-            <div className="row">
+          <div className="row">
+            <NavRow>
               <SubNav items={props.nav} prefix={'/remoteResources/'} />
-            </div>
-          ) : null}
+              <ExtrasContent />
+            </NavRow>
+          </div>
 
           <RemoteResourceState resource={props.resource} />
         </div>

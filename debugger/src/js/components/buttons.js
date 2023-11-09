@@ -19,3 +19,12 @@ export function Button(props) {
     </button>
   )
 }
+
+export function IconButton(props) {
+  const { children, className, ...rest } = props
+  return (
+    <button type="button" className={cn(styles.button, styles.iconButton, className)} {...rest}>
+      {children}
+    </button>
+  )
+}
