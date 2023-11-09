@@ -42,7 +42,7 @@ export function MonacoEditor(props) {
       editor.restoreViewState(JSON.parse(prev))
     }
 
-    // todo(Shane): move this from the the component
+    // todo(Shane): move this outside the component
     const int = setInterval(() => {
       localStorage.setItem('viewState_' + props.id, JSON.stringify(editor.saveViewState()))
     }, 1000)
@@ -63,30 +63,3 @@ export function MonacoEditor(props) {
 }
 
 export default MonacoEditor
-
-/**
- * @param {object} props
- * @param {ITextModel} props.model
- * @param {string} props.id
- * @param {(errors: ContentError[]) => void} props.onErrors
- */
-export function MonacoEditorRaw(props) {
-  const ref = useRef(null)
-  const uri = useMemo(() => Uri.file('raw/' + props.id), [props.id])
-
-  useMonacoErrors(props.onErrors, uri)
-
-  useEffect(() => {
-    invariant(ref.current, 'ref must exist here')
-
-    const editor = monaco.editor.create(ref.current, {
-      model: props.model,
-    })
-
-    return () => {
-      editor?.dispose()
-    }
-  }, [props.model])
-
-  return <div ref={ref} style={{ height: '100%', width: '100%' }}></div>
-}

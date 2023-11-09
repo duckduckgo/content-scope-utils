@@ -7,7 +7,6 @@ import { Uri } from 'monaco-editor'
 
 /**
  * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
- * @typedef {import('../models/text-model').TextModel} TextModel
  * @typedef {import('../remote-resources/remote-resources.machine.types').ContentError} ContentError
  */
 

@@ -8,8 +8,6 @@ import style from './original-diff.module.css'
  * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
  * @typedef {import('./remote-resource-editor.js').EditorKind} EditorKind
  * @typedef {import('../../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
- * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
- * @typedef {import('../../models/text-model').TextModel} TextModel
  * @typedef {import('react').ReactNode} ReactNode
  */
 

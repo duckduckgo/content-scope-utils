@@ -9,7 +9,6 @@ import { CurrentResource } from '../remote-resources.machine'
  * @typedef {import('../../../../schema/__generated__/schema.types').GetFeaturesResponse} GetFeaturesResponse
  * @typedef {import('../../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
  * @typedef {import('../../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
- * @typedef {import('../../models/text-model').TextModel} TextModel
  */
 
 export function RemoteResources() {

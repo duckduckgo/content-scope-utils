@@ -14,7 +14,6 @@ window._parse = parse
  * @typedef {import('../../../../schema/__generated__/schema.types').Tab} Tab
  * @typedef {import('../../types').TabWithHostname} TabWithHostname
  * @typedef {import('monaco-editor').editor.ITextModel} ITextModel
- * @typedef {import('../../models/text-model').TextModel} TextModel
  * @typedef {import('./toggle-list').ToggleListItem} ToggleListItem
  * @typedef {import('../../transforms.types').ApplyTarget} ApplyTarget
  */

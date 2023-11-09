@@ -6,7 +6,6 @@ import { TrackerFeed } from '../remote-resources/components/tracker-feed'
  * @typedef {import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
  * @typedef {import('../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
  * @typedef {import('../types').TabWithHostname} TabWithHostname
- * @typedef {import('../models/text-model').TextModel} TextModel
  * @typedef {import('react').ReactNode} ReactNode
  */
 

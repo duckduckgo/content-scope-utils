@@ -45,15 +45,6 @@ export const GlobalConfig = z.object({
 export function configAwareFactory(globalConfig) {
   return {
     /**
-     * Ret
-     * @return {Promise<(...args: any[]) => import("./models/text-model").TextModel>}
-     */
-    async createTextModelFactory() {
-      const model = globalConfig.editor === 'simple' ? 'text-model.js' : 'monaco-opt-in.js'
-      const { createTextModel } = await import(`./models/${model}`)
-      return createTextModel
-    },
-    /**
      * @return {DebugToolsMessages}
      */
     createDebugMessages() {

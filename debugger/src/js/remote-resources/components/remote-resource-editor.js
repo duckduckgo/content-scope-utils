@@ -21,7 +21,6 @@ const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.
  * @typedef {import('../../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
  * @typedef {import("../remote-resources.machine").EditorKind} EditorKind
  * @typedef {import('../../app/components/feature-nav').SubNavItem} SubNavItem
- * @typedef {import('../../models/text-model').TextModel} TextModel
  * @typedef {import('../remote-resources.machine.types').ContentError} ContentError
  */
 

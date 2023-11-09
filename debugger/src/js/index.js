@@ -15,7 +15,6 @@ import { inspect } from '@xstate/inspect'
 import { appMachine } from './app/app.machine'
 import { App, AppMachineContext } from './app/components/app'
 import { createHashHistory } from 'history'
-import { TextModelContext } from './models/text-model'
 import { configAwareFactory, GlobalConfig } from './global-config.mjs'
 import { GlobalContext } from './global-config.react'
 
@@ -101,9 +100,6 @@ const withContext = appMachine.withContext({
 })
 
 ;(async () => {
-  // factory for text models
-  const createTextModelFactory = await factory.createTextModelFactory()
-
   /**
    * Now try to render
    */
@@ -112,11 +108,9 @@ const withContext = appMachine.withContext({
 
   root.render(
     <GlobalContext.Provider value={{ messages, history, globalConfig }}>
-      <TextModelContext.Provider value={{ createTextModel: createTextModelFactory }}>
-        <AppMachineContext.Provider machine={withContext}>
-          <App />
-        </AppMachineContext.Provider>
-      </TextModelContext.Provider>
+      <AppMachineContext.Provider machine={withContext}>
+        <App />
+      </AppMachineContext.Provider>
     </GlobalContext.Provider>,
   )
 })()

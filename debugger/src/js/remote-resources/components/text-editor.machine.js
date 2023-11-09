@@ -11,8 +11,6 @@ export const textEditorMachine = createMachine(
     context: {
       /** @type {string} */
       id: '',
-      /** @type {import('./remote-resources').TextModel} */
-      model: /** @type {any} */ (null),
       /** @type {string | null} */
       contentType: null,
     },
