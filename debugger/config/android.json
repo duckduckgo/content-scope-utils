@@ -3,7 +3,7 @@
     "privacy-configuration": {
       "id": "privacy-configuration",
       "kind": "privacy-configuration",
-      "url": "https://staticcdn.duckduckgo.com/trackerblocking/config/v3/android-config.json",
+      "url": "https://staticcdn.duckduckgo.com/trackerblocking/config/v4/android-config.json",
       "name": "Privacy Config"
     },
     "tds": {

@@ -27,7 +27,7 @@ export function OriginalDiffModal(props) {
   const closeDiff = () => send({ type: 'close original diff' })
 
   return (
-    <dialog open={showingRemote || fetchingRemote} onClose={closeDiff}>
+    <dialog open={showingRemote || fetchingRemote} onClose={closeDiff} className={style.diffModal}>
       <div className={style.root}>
         <div className={style.header}>
           {showingRemote && <Header close={<button onClick={closeDiff}>Close plx</button>} resource={props.resource} />}

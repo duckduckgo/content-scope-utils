@@ -3,6 +3,9 @@
   grid-template-rows: auto 1fr auto;
   grid-template-areas: 'header' 'main' 'footer';
 }
+dialog[open].diffModal {
+  display: grid;
+}
 .header {
   grid-area: header;
 }

@@ -10,7 +10,7 @@
     "test.int": "playwright test",
     "test.windows": "npm run test -- --project windows",
     "test.apple": "npm run test -- --project apple",
-    "test.headed": "npm run test.int -- --project http --headed",
+    "test.headed": "npm run test.int -- --headed",
     "test.ui": "npm run test -- --project apple --ui",
     "test.unit": "web-test-runner \"unit-tests/**/*.test.js\" --node-resolve --config=../web-test-runner.config.mjs",
     "test.watch": "npm run test.unit -- --watch",

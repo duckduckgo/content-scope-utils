@@ -33,6 +33,10 @@ export const remoteResourceRefSchema = z.object({
     kind: resourceKindSchema
 });
 
+export const resourceServerAddressSchema = z.object({
+    baseURL: z.string()
+});
+
 export const userScriptSchema = z.object({
     name: z.string(),
     id: z.string(),
@@ -83,7 +87,10 @@ export const debugToolsSourceSchema = z.object({
 export const getFeaturesResponseSchema = z.object({
     features: z.record(z.unknown()).and(z.object({
         remoteResources: z.object({
-            resources: z.array(remoteResourceRefSchema)
+            resources: z.array(remoteResourceRefSchema),
+            resourceServer: z.object({
+                addresses: z.array(resourceServerAddressSchema)
+            }).optional()
         }),
         userScripts: z.object({
             scripts: z.array(userScriptSchema)

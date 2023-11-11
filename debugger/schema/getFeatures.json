@@ -17,6 +17,27 @@
               "items": {
                 "$ref": "remote-resource-ref.json"
               }
+            },
+            "resourceServer": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "addresses": {
+                  "type": "array",
+                  "items": {
+                    "title": "ResourceServerAddress",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "baseURL": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["baseURL"]
+                  }
+                }
+              },
+              "required": ["addresses"]
             }
           },
           "required": ["resources"]

@@ -113,4 +113,20 @@ export class Remote {
       return false
     })
   }
+
+  async opensResourceInNewTab({ id }) {
+    await this.page
+      .locator('a')
+      .filter({ hasText: new RegExp('rr/' + id), hasNotText: 'localhost' })
+      .nth(0)
+      .click()
+    const page1Promise = this.page.waitForEvent('popup')
+    await page1Promise
+    const v = (await page1Promise).url()
+    expect(v).toContain(id)
+  }
+
+  async opensExtraInfo() {
+    await this.page.getByRole('button', { name: 'Info' }).click()
+  }
 }

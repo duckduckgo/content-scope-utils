@@ -1,5 +1,5 @@
 import { CurrentResource, EditorKind } from './remote-resources.machine'
-import { GetTabsResponse, RemoteResource } from '../../../schema/__generated__/schema.types'
+import { GetTabsResponse, RemoteResource, ResourceServerAddress } from '../../../schema/__generated__/schema.types'
 import { ActorRefFrom } from 'xstate'
 import { appMachine } from '../app/app.machine'
 import { TabWithHostname } from '../types'
@@ -55,6 +55,7 @@ export interface RemoteResourcesCtx {
   tabs: TabWithHostname[]
   // children?: ActorRef<any>[]
   children?: string[]
+  resourceServerAddresses: ResourceServerAddress[]
 }
 
 // prettier-ignore

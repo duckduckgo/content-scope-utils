@@ -5,6 +5,7 @@ import {
   updateResourceParamsSchema,
 } from './schema/__generated__/schema.parsers.mjs'
 import invariant from 'tiny-invariant'
+import { getPlainAddresses } from './common.mjs'
 
 /**
  * @typedef {import('@duckduckgo/content-scope-scripts/packages/messaging/index.js').MessageResponse} MessageResponse
@@ -43,22 +44,30 @@ export class HttpBackend {
   /**
    * @param {object} params
    * @param {Manifest} params.manifest
+   * @param {string|number} params.port
    */
   constructor(params) {
     this.remoteResourceRefs = params.manifest.remoteResourceRefs
     /** @type {Record<string, RemoteResource>} */
     this.remoteResources = {}
+    this.port = params.port
   }
 
   /**
    * @returns {Promise<{ value: GetFeaturesResponse } | { error: { message: string }}>}
    */
   async getFeatures() {
+    const addresses = getPlainAddresses(this.port)
     /** @type {import('./schema/__generated__/schema.types').GetFeaturesResponse} */
     const response = {
       features: {
         remoteResources: {
           resources: Object.values(this.remoteResourceRefs),
+          resourceServer: {
+            addresses: addresses.map((address) => {
+              return { baseURL: address }
+            }),
+          },
         },
       },
     }

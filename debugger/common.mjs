@@ -15,13 +15,7 @@ export function ready(server) {
   invariant(address && typeof address !== 'string')
   const port = address.port
   const addresses = getAddresses(String(port)).map((x) => x.href)
-  const plainAddresses = addresses.map((x) => {
-    const url = new URL(x)
-    url.pathname = ''
-    url.search = ''
-    url.hash = ''
-    return url.toString()
-  })
+  const plainAddresses = getPlainAddresses(port)
 
   if (process.send) {
     process.send({
@@ -59,6 +53,20 @@ function getAddresses(port) {
     const url = new URL('http://' + address)
     url.port = port
     return url
+  })
+}
+
+/**
+ * @param {string|number} port
+ * @return {string[]}
+ */
+export function getPlainAddresses(port) {
+  return getAddresses(String(port)).map((x) => {
+    const url = new URL(x)
+    url.pathname = ''
+    url.search = ''
+    url.hash = ''
+    return url.toString()
   })
 }
 

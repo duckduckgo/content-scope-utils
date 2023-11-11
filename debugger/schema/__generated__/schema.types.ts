@@ -53,6 +53,9 @@ export interface GetFeaturesResponse {
   features: {
     remoteResources: {
       resources: RemoteResourceRef[];
+      resourceServer?: {
+        addresses: ResourceServerAddress[];
+      };
     };
     userScripts?: {
       scripts: UserScript[];
@@ -68,6 +71,9 @@ export interface RemoteResourceRef {
    */
   name: string;
   kind: ResourceKind;
+}
+export interface ResourceServerAddress {
+  baseURL: string;
 }
 export interface UserScript {
   name: string;

@@ -15,10 +15,19 @@ export function RemoteResourcesPage() {
   invariant(messages, 'must have instantiated messages here')
 
   const parent = AppMachineContext.useActorRef()
+  const [state] = AppMachineContext.useActor()
 
   return (
     <RemoteResourcesContext.Provider
-      machine={() => remoteResourcesMachine.withContext({ messages, parent, tabs: [], originalResources: {} })}
+      machine={() =>
+        remoteResourcesMachine.withContext({
+          messages,
+          parent,
+          tabs: [],
+          originalResources: {},
+          resourceServerAddresses: state.context.features?.remoteResources?.resourceServer?.addresses ?? [],
+        })
+      }
     >
       <TrackerFeedProvider>
         <RemoteResourcesLoader />

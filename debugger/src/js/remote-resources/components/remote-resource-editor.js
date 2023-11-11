@@ -13,7 +13,7 @@ import { TrackersEditor } from '../../components/trackers-editor'
 import { GlobalContext } from '../../global-config.react'
 import { ErrorBoundary } from './error'
 import { NavRow } from '../../components/nav-row'
-import { ExtrasContent, ExtrasLink } from './Extras'
+import { ExtrasContent } from './Extras'
 
 const MonacoEditor = lazy(() => import('../../components/monaco-editor.js'))
 const MonacoDiffEditor = lazy(() => import('../../components/monaco-diff-editor.js'))

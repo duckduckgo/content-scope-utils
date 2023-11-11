@@ -66,7 +66,7 @@ const server = app.listen(cli.port, '0.0.0.0', () => {
 function routerSetup(address) {
   const json = JSON.parse(readFileSync(join(__dirname, cli.config), 'utf8'))
   const manifest = createManifest({ port: address.port, input: json })
-  const http = new HttpBackend({ manifest })
+  const http = new HttpBackend({ manifest, port: address.port })
 
   router.post('/specialPages/debugToolsPage', async function (req, res) {
     const parsed = requestSchema.safeParse(req.body)
